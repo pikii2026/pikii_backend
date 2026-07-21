@@ -1,6 +1,7 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/pickii?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    # Docker MySQL은 호스트 포트 3307로 노출된다 (로컬 설치 MySQL과 충돌 방지)
+    url: jdbc:mysql://localhost:3307/pickii?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     username: root
     password: ${MYSQL_ROOT_PASSWORD:pickii1234}
     driver-class-name: com.mysql.cj.jdbc.Driver

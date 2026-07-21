@@ -3,7 +3,8 @@ services:
     image: mysql:8.0
     container_name: pickii-mysql
     ports:
-      - "3306:3306"
+      # 로컬에 MySQL이 설치된 PC와 충돌하지 않도록 호스트 포트는 3307 사용
+      - "3307:3306"
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-pickii1234}
       MYSQL_DATABASE: pickii
