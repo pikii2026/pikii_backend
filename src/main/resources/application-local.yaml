@@ -1,0 +1,42 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/pickii?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: root
+    password: ${MYSQL_ROOT_PASSWORD:pickii1234}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      # 개발 초반에는 update로 편하게, 스키마 안정화 후 validate로 전환
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+    mongodb:
+      uri: mongodb://localhost:27017/pickii
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+jwt:
+  # 로컬 전용 기본값. 환경변수 JWT_SECRET이 있으면 그 값을 사용
+  secret: ${JWT_SECRET:pickii-local-dev-secret-key-do-not-use-in-production-1234567890}
+
+logging:
+  level:
+    org.hibernate.SQL: debug

@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: Pickii
+  profiles:
+    default: local
+  jackson:
+    # API_SPEC 0.4 Null Policy: null 필드는 응답에서 제외
+    default-property-inclusion: non_null
+    time-zone: Asia/Seoul
+
+server:
+  port: 8080
+  servlet:
+    # API_SPEC 0.1 Base URL: http://localhost:8080/api/v1
+    context-path: /api/v1
+
+jwt:
+  secret: ${JWT_SECRET}
+  # Access Token 유효시간(초) - API_SPEC 0.9: 30분
+  access-token-validity: 1800
+  # Refresh Token 유효시간(초) - REDIS_POLICY: autoLogin=false 1일 / true 30일
+  refresh-token-validity: 86400
+  refresh-token-validity-auto-login: 2592000

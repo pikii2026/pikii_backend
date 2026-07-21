@@ -1,0 +1,80 @@
+package com.pickii.global.security;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.stereotype.Component;
+
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+
+/**
+ * JWT 발급 / 검증 (API_SPEC 0.9, REDIS_POLICY.md)
+ */
+@Component
+public class JwtTokenProvider {
+
+    private static final String CLAIM_TYPE = "type";
+    private static final String TYPE_ACCESS = "ACCESS";
+    private static final String TYPE_REFRESH = "REFRESH";
+
+    private final SecretKey key;
+    private final JwtProperties properties;
+
+    public JwtTokenProvider(JwtProperties properties) {
+        this.properties = properties;
+        this.key = Keys.hmacShaKeyFor(properties.secret().getBytes(StandardCharsets.UTF_8));
+    }
+
+    public String createAccessToken(Long memberId) {
+        return createToken(memberId, TYPE_ACCESS, properties.accessTokenValidity());
+    }
+
+    public String createRefreshToken(Long memberId, boolean autoLogin) {
+        long validity = autoLogin
+                ? properties.refreshTokenValidityAutoLogin()
+                : properties.refreshTokenValidity();
+        return createToken(memberId, TYPE_REFRESH, validity);
+    }
+
+    private String createToken(Long memberId, String type, long validitySeconds) {
+        Date now = new Date();
+        Date expiry = new Date(now.getTime() + validitySeconds * 1000);
+        return Jwts.builder()
+                .subject(String.valueOf(memberId))
+                .claim(CLAIM_TYPE, type)
+                .issuedAt(now)
+                .expiration(expiry)
+                .signWith(key)
+                .compact();
+    }
+
+    /** 서명·만료 검증. 유효하지 않으면 false */
+    public boolean validateToken(String token) {
+        try {
+            parseClaims(token);
+            return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    public Long getMemberId(String token) {
+        return Long.parseLong(parseClaims(token).getSubject());
+    }
+
+    /** 로그아웃 Blacklist TTL 계산용: 남은 만료 시간(밀리초) */
+    public long getRemainingExpiration(String token) {
+        return parseClaims(token).getExpiration().getTime() - System.currentTimeMillis();
+    }
+
+    private Claims parseClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+}
