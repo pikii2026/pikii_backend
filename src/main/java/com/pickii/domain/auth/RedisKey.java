@@ -23,6 +23,11 @@ public final class RedisKey {
         return "auth:code:%s:%s".formatted(purpose.name(), email);
     }
 
+    /** 이메일 인증 요청 IP 제한: auth:code:ip:{IP} — TTL 10분, 최대 5회 */
+    public static String emailCodeIpLimit(String ip) {
+        return "auth:code:ip:" + ip;
+    }
+
     /** Verification Token: auth:verify:{UUID} — TTL 900초 */
     public static String verificationToken(String uuid) {
         return "auth:verify:" + uuid;

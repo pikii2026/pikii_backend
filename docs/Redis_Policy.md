@@ -71,7 +71,9 @@ Redis
     │   └── {AccessToken}
     │
     ├── code
-    │   └── {Purpose}:{Email}
+    │   ├── {Purpose}:{Email}
+    │   └── ip
+    │       └── {IP}
     │
     └── verify
         └── {UUID}
@@ -319,6 +321,35 @@ Redis DEL
 
 Verification Token 발급
 ```
+
+---
+
+## 요청 제한 (Rate Limit)
+
+동일 이메일/IP로부터의 반복 요청을 제한한다.
+
+### 이메일 기준 (재발송 쿨다운)
+
+```text
+auth:code:{Purpose}:{Email}
+```
+
+위 Key가 이미 존재하면(= 이전에 보낸 인증코드가 아직 TTL 180초 이내) 재발송을 거부한다.
+별도의 Key를 추가하지 않고 기존 인증코드 Key의 존재 여부로 판단한다.
+
+### IP 기준
+
+```text
+auth:code:ip:{IP}
+```
+
+| 항목  | 값                |
+|:--- |:----------------- |
+| Value | 요청 횟수 (INCR)     |
+| TTL   | 10분 (첫 요청 시 설정)  |
+| 제한   | 10분 내 5회 초과 시 거부 |
+
+두 조건 중 하나라도 걸리면 `429 TOO_MANY_REQUESTS`를 반환한다.
 
 ---
 
