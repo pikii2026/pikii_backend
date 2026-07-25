@@ -440,6 +440,7 @@ Redis Key Prefix 정의
 | auth:refresh   | Refresh Token          |
 | auth:blacklist | Access Token Blacklist |
 | auth:code      | 이메일 인증 코드              |
+| auth:code:ip   | 이메일 인증 요청 IP당 횟수 제한    |
 | auth:verify    | Verification Token     |
 
 ---

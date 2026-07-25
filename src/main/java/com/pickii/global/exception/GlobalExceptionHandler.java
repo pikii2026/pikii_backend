@@ -2,6 +2,7 @@ package com.pickii.global.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -35,6 +36,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(ErrorCode.VALIDATION_FAILED.getStatus())
                 .body(ErrorResponse.of(ErrorCode.VALIDATION_FAILED, message));
+    }
+
+    /** JSON 파싱 실패, 잘못된 Enum 값 등 요청 본문이 읽히지 않는 경우 → VALIDATION_FAILED */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+        return ResponseEntity
+                .status(ErrorCode.VALIDATION_FAILED.getStatus())
+                .body(ErrorResponse.of(ErrorCode.VALIDATION_FAILED));
     }
 
     /** 존재하지 않는 경로 → 404 */
