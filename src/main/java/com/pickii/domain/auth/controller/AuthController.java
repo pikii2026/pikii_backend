@@ -8,11 +8,16 @@ import com.pickii.domain.auth.dto.LoginResponse;
 import com.pickii.domain.auth.dto.NicknameCheckResponse;
 import com.pickii.domain.auth.dto.SignupRequest;
 import com.pickii.domain.auth.dto.SignupResponse;
+import com.pickii.domain.auth.dto.TokenRefreshRequest;
+import com.pickii.domain.auth.dto.TokenRefreshResponse;
 import com.pickii.domain.auth.service.AuthService;
 import com.pickii.domain.auth.service.EmailVerificationService;
 import com.pickii.domain.auth.service.NicknameVerificationService;
 import com.pickii.global.common.response.ApiResponse;
+import com.pickii.global.common.util.BearerTokenUtils;
 import com.pickii.global.common.util.IpUtils;
+import com.pickii.global.exception.BusinessException;
+import com.pickii.global.exception.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -71,6 +76,18 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
         LoginResponse response = authService.login(request);
+        return ResponseEntity.ok(ApiResponse.of(response));
+    }
+
+    /** 1-6 토큰 갱신 (Silent Refresh) */
+    @PostMapping("/token/refresh")
+    public ResponseEntity<ApiResponse<TokenRefreshResponse>> refreshToken(@Valid @RequestBody TokenRefreshRequest request,
+                                                                           HttpServletRequest httpRequest) {
+        String accessToken = BearerTokenUtils.resolve(httpRequest);
+        if (accessToken == null) {
+            throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
+        }
+        TokenRefreshResponse response = authService.refreshToken(accessToken, request);
         return ResponseEntity.ok(ApiResponse.of(response));
     }
 }

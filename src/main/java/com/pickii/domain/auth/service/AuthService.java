@@ -13,6 +13,8 @@ import com.pickii.domain.auth.dto.LoginResponse;
 import com.pickii.domain.auth.dto.SignupRequest;
 import com.pickii.domain.auth.dto.SignupResponse;
 import com.pickii.domain.auth.dto.SignupTerms;
+import com.pickii.domain.auth.dto.TokenRefreshRequest;
+import com.pickii.domain.auth.dto.TokenRefreshResponse;
 import com.pickii.domain.member.entity.Member;
 import com.pickii.domain.member.repository.MemberRepository;
 import com.pickii.domain.notification.entity.NotificationSetting;
@@ -21,6 +23,7 @@ import com.pickii.global.exception.BusinessException;
 import com.pickii.global.exception.ErrorCode;
 import com.pickii.global.security.JwtProperties;
 import com.pickii.global.security.JwtTokenProvider;
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -31,7 +34,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 
 /**
- * 회원가입/로그인 등 핵심 인증 처리 (API_SPEC 1-4~)
+ * 회원가입/로그인/토큰 갱신 등 핵심 인증 처리 (API_SPEC 1-4~1-6)
  */
 @Service
 @RequiredArgsConstructor
@@ -104,6 +107,60 @@ public class AuthService {
         saveRefreshToken(member.getId(), request.deviceId(), refreshToken, request.autoLogin());
 
         return new LoginResponse(member.getId(), member.getNickname(), accessToken, refreshToken);
+    }
+
+    /** 1-6 토큰 갱신 (Silent Refresh) */
+    @Transactional
+    public TokenRefreshResponse refreshToken(String accessToken, TokenRefreshRequest request) {
+        Long memberId = extractMemberId(accessToken);
+        validateRefreshTokenClaims(request.refreshToken());
+
+        String key = RedisKey.refreshToken(memberId, request.deviceId());
+        String json = redisTemplate.opsForValue().get(key);
+        if (json == null) {
+            throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
+        }
+
+        RefreshTokenPayload stored = readRefreshTokenPayload(json);
+        if (!stored.refreshToken().equals(request.refreshToken())) {
+            throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
+        }
+
+        boolean autoLogin = jwtTokenProvider.isAutoLoginRefreshToken(request.refreshToken());
+
+        String newAccessToken = jwtTokenProvider.createAccessToken(memberId);
+        String newRefreshToken = jwtTokenProvider.createRefreshToken(memberId, autoLogin);
+
+        // Redis SET은 같은 Key를 덮어쓰므로 이 저장 자체가 RTR(기존 토큰 삭제 + 신규 저장)이다.
+        saveRefreshToken(memberId, request.deviceId(), newRefreshToken, autoLogin);
+
+        return new TokenRefreshResponse(newAccessToken, newRefreshToken);
+    }
+
+    /** Silent Refresh 요청 시점엔 Access Token이 만료되어 있는 것이 정상이므로 만료는 허용하고 서명/타입만 검증한다. */
+    private Long extractMemberId(String accessToken) {
+        try {
+            if (!jwtTokenProvider.isAccessTokenAllowExpired(accessToken)) {
+                throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
+            }
+            return jwtTokenProvider.getMemberIdAllowExpired(accessToken);
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
+        }
+    }
+
+    private void validateRefreshTokenClaims(String refreshToken) {
+        if (!jwtTokenProvider.validateToken(refreshToken) || !jwtTokenProvider.isRefreshToken(refreshToken)) {
+            throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
+        }
+    }
+
+    private RefreshTokenPayload readRefreshTokenPayload(String json) {
+        try {
+            return objectMapper.readValue(json, RefreshTokenPayload.class);
+        } catch (JsonProcessingException e) {
+            throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
+        }
     }
 
     private void saveRefreshToken(Long memberId, String deviceId, String refreshToken, boolean autoLogin) {

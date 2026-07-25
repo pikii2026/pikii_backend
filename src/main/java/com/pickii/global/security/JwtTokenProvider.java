@@ -1,6 +1,7 @@
 package com.pickii.global.security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -70,11 +71,43 @@ public class JwtTokenProvider {
         return parseClaims(token).getExpiration().getTime() - System.currentTimeMillis();
     }
 
+    public boolean isRefreshToken(String token) {
+        return TYPE_REFRESH.equals(parseClaims(token).get(CLAIM_TYPE, String.class));
+    }
+
+    /**
+     * Silent Refresh(1-6) 전용: Access Token은 만료된 상태로 들어오는 것이 정상이므로
+     * 서명은 검증하되 만료(exp)는 허용하고 memberId를 꺼낸다.
+     * 서명이 잘못됐거나 형식이 다르면 JwtException을 그대로 던진다.
+     */
+    public Long getMemberIdAllowExpired(String token) {
+        return Long.parseLong(parseClaimsAllowExpired(token).getSubject());
+    }
+
+    public boolean isAccessTokenAllowExpired(String token) {
+        return TYPE_ACCESS.equals(parseClaimsAllowExpired(token).get(CLAIM_TYPE, String.class));
+    }
+
+    /** Refresh Token 발급 당시 autoLogin 여부를 유효기간(exp-iat)으로 역산한다 (RTR 시 동일 TTL 정책 유지용) */
+    public boolean isAutoLoginRefreshToken(String token) {
+        Claims claims = parseClaims(token);
+        long validitySeconds = (claims.getExpiration().getTime() - claims.getIssuedAt().getTime()) / 1000;
+        return validitySeconds > properties.refreshTokenValidity();
+    }
+
     private Claims parseClaims(String token) {
         return Jwts.parser()
                 .verifyWith(key)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
+    }
+
+    private Claims parseClaimsAllowExpired(String token) {
+        try {
+            return parseClaims(token);
+        } catch (ExpiredJwtException e) {
+            return e.getClaims();
+        }
     }
 }
