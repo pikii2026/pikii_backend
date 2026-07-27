@@ -7,6 +7,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /**
@@ -41,6 +42,14 @@ public class GlobalExceptionHandler {
     /** JSON 파싱 실패, 잘못된 Enum 값 등 요청 본문이 읽히지 않는 경우 → VALIDATION_FAILED */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+        return ResponseEntity
+                .status(ErrorCode.VALIDATION_FAILED.getStatus())
+                .body(ErrorResponse.of(ErrorCode.VALIDATION_FAILED));
+    }
+
+    /** PathVariable/RequestParam 타입 불일치 (예: provider=INVALID) → VALIDATION_FAILED */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleTypeMismatchException(MethodArgumentTypeMismatchException e) {
         return ResponseEntity
                 .status(ErrorCode.VALIDATION_FAILED.getStatus())
                 .body(ErrorResponse.of(ErrorCode.VALIDATION_FAILED));
