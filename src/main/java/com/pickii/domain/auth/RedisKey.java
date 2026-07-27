@@ -13,6 +13,11 @@ public final class RedisKey {
         return "auth:refresh:%d:%s".formatted(memberId, deviceId);
     }
 
+    /** 특정 회원의 모든 기기 Refresh Token 조회용 패턴 (전체 로그아웃 시 사용) */
+    public static String refreshTokenPattern(Long memberId) {
+        return "auth:refresh:%d:*".formatted(memberId);
+    }
+
     /** Access Token Blacklist: auth:blacklist:{AccessToken} — TTL 남은 만료시간 */
     public static String blacklist(String accessToken) {
         return "auth:blacklist:" + accessToken;
