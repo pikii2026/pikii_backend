@@ -12,4 +12,7 @@ public interface MeetingPollRepository extends JpaRepository<MeetingPoll, Long> 
     Optional<MeetingPoll> findByProjectIdAndStatus(Long projectId, MeetingPollStatus status);
 
     boolean existsByProjectIdAndStatus(Long projectId, MeetingPollStatus status);
+
+    /** 7-18 팀 일정 삭제 시, 조율로 확정된 일정이면 연결을 해제하기 위해 조회 */
+    Optional<MeetingPoll> findByScheduleId(Long scheduleId);
 }

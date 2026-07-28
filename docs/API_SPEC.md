@@ -4817,11 +4817,12 @@ Bearer Access Token
 
 ## Error
 
-| HTTP | Error Code         | 설명        |
-|:---- |:------------------ |:--------- |
-| 400  | VALIDATION_FAILED  | 입력값 검증 실패 |
-| 403  | FORBIDDEN          | 본인 일정이 아님 |
-| 404  | SCHEDULE_NOT_FOUND | 일정 없음     |
+| HTTP | Error Code                  | 설명        |
+|:---- |:--------------------------- |:--------- |
+| 400  | VALIDATION_FAILED           | 입력값 검증 실패 |
+| 403  | FORBIDDEN                   | 본인 일정이 아님 |
+| 404  | SCHEDULE_NOT_FOUND          | 일정 없음     |
+| 404  | SCHEDULE_CATEGORY_NOT_FOUND | 카테고리 없음   |
 
 ---
 
@@ -5347,7 +5348,7 @@ Bearer Access Token
 
 ## Request Body
 
-단발이면 7-11, 반복이면 7-12와 동일
+개인 일정 수정(7-8)과 동일한 구조 (단발이면 date, 반복이면 startDate/endDate/rrule)이되 categoryId는 없다 (색상은 7-19로 팀원별 지정)
 
 ---
 
