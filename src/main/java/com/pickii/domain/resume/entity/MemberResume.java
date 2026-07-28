@@ -49,4 +49,16 @@ public class MemberResume extends BaseTimeEntity {
         this.strength = strength;
         this.aboutMe = aboutMe;
     }
+
+    /** aboutMe/contactEmail은 요청에 없으면(null) 기존 값을 유지한다. */
+    public void update(String hope, String strength, String aboutMe, String contactEmail) {
+        this.hope = hope;
+        this.strength = strength;
+        if (aboutMe != null) {
+            this.aboutMe = aboutMe;
+        }
+        if (contactEmail != null) {
+            this.contactEmail = contactEmail;
+        }
+    }
 }

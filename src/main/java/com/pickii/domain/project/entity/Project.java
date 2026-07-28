@@ -46,6 +46,9 @@ public class Project extends BaseTimeEntity {
     /** 종료 확인 알림 발송 시각 (3일 무응답 시 자동 종료 기산점) */
     private LocalDateTime endCheckedAt;
 
+    /** 실제 종료(Status=END) 처리된 시각. 상호평가 3일 기간의 기산점. */
+    private LocalDateTime endedAt;
+
     @Builder
     public Project(Recruit recruit, String name, LocalDate startDate, LocalDate endDate) {
         this.recruit = recruit;
@@ -57,6 +60,7 @@ public class Project extends BaseTimeEntity {
 
     public void end() {
         this.status = ProjectStatus.END;
+        this.endedAt = LocalDateTime.now();
     }
 
     /** 연장: EndDate 갱신 + 종료 확인 기산점 초기화 */

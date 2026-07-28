@@ -108,4 +108,12 @@ public class Recruit extends BaseTimeEntity {
     public void softDelete() {
         this.deletedAt = LocalDateTime.now();
     }
+
+    public void increaseCurrentCount() {
+        this.currentCount++;
+    }
+
+    public void decreaseCurrentCount() {
+        this.currentCount--;
+    }
 }
