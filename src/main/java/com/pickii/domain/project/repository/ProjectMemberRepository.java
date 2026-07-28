@@ -19,6 +19,9 @@ public interface ProjectMemberRepository extends JpaRepository<ProjectMember, Lo
 
     boolean existsByProjectIdAndMemberIdAndLeftAtIsNull(Long projectId, Long memberId);
 
+    /** 6-3 프로젝트 팀원 조회 (Pagination) */
+    Page<ProjectMember> findByProjectIdAndLeftAtIsNull(Long projectId, Pageable pageable);
+
     /** 4-11 내가 참여했던 종료(END)된 프로젝트 목록 */
     @Query("SELECT pm FROM ProjectMember pm JOIN FETCH pm.project p "
             + "WHERE pm.member.id = :memberId AND pm.leftAt IS NULL AND p.status = 'END'")

@@ -114,6 +114,6 @@ public class Recruit extends BaseTimeEntity {
     }
 
     public void decreaseCurrentCount() {
-        this.currentCount--;
+        this.currentCount = Math.max(0, this.currentCount - 1);
     }
 }
