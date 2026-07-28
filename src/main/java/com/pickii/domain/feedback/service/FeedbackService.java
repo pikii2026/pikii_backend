@@ -6,10 +6,12 @@ import com.pickii.domain.feedback.dto.FeedbackCreateRequest;
 import com.pickii.domain.feedback.dto.FeedbackListResponse;
 import com.pickii.domain.feedback.dto.FeedbackTargetResponse;
 import com.pickii.domain.feedback.dto.TargetMemberResponse;
+import com.pickii.domain.feedback.dto.KeywordResponse;
 import com.pickii.domain.feedback.entity.AIFeedback;
 import com.pickii.domain.feedback.entity.Feedback;
 import com.pickii.domain.feedback.repository.AIFeedbackRepository;
 import com.pickii.domain.feedback.repository.FeedbackRepository;
+import com.pickii.domain.feedback.repository.KeywordRepository;
 import com.pickii.domain.member.entity.Member;
 import com.pickii.domain.member.repository.MemberRepository;
 import com.pickii.domain.project.entity.Project;
@@ -48,6 +50,14 @@ public class FeedbackService {
     private final ProjectRepository projectRepository;
     private final ProjectMemberRepository projectMemberRepository;
     private final MemberRepository memberRepository;
+    private final KeywordRepository keywordRepository;
+
+    /** 5-6 피드백 키워드 조회 */
+    public List<KeywordResponse> getKeywords() {
+        return keywordRepository.findAll().stream()
+                .map(KeywordResponse::from)
+                .toList();
+    }
 
     /** 4-9 평가 대상 팀원 조회 */
     public FeedbackTargetResponse getEvaluationTargets(Long memberId, Long projectId) {

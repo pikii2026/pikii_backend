@@ -44,6 +44,11 @@ public class SecurityConfig {
                                 "/auth/social/*/login"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/recruits", "/recruits/*", "/recruits/*/comments").permitAll()
+                        // Master Data (API_SPEC 5-1~5-8) — 인증 불필요
+                        .requestMatchers(HttpMethod.GET,
+                                "/categories", "/topics", "/tech-stacks", "/licenses",
+                                "/link-categories", "/keywords", "/apply-keywords", "/universities"
+                        ).permitAll()
                         // Swagger
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         // 그 외 전부 인증 필요 (1-7, 1-9, 1-11~1-13 등)
