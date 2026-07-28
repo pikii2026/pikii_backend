@@ -42,4 +42,10 @@ public class MemberUniv {
         this.major = major;
         this.status = status;
     }
+
+    public void update(Univ univ, String major, AcademicStatus status) {
+        this.univ = univ;
+        this.major = major;
+        this.status = status;
+    }
 }
