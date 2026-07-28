@@ -2113,6 +2113,7 @@ Bearer Access Token
 |:---- |:----------------- |
 | 400  | VALIDATION_FAILED |
 | 400  | RECRUIT_CLOSED    |
+| 404  | RECRUIT_NOT_FOUND |
 | 409  | ALREADY_APPLIED   |
 
 ---
