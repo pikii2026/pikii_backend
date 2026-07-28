@@ -52,6 +52,7 @@ public enum ErrorCode {
     APPLY_NOT_WAITING(HttpStatus.CONFLICT, "대기 상태가 아니어서 취소할 수 없습니다."),
     ALREADY_SCRAPPED(HttpStatus.CONFLICT, "이미 스크랩한 공고입니다."),
     SCRAP_NOT_FOUND(HttpStatus.NOT_FOUND, "스크랩하지 않은 공고입니다."),
+    RECRUIT_FULL(HttpStatus.CONFLICT, "모집 정원이 마감되었습니다."),
 
     // ===== Project =====
     PROJECT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 프로젝트입니다."),

@@ -9,6 +9,7 @@ import com.pickii.domain.recruit.dto.CommentCreateResponse;
 import com.pickii.domain.recruit.dto.CommentListResponse;
 import com.pickii.domain.recruit.dto.CommentReplyResponse;
 import com.pickii.domain.recruit.dto.CommentResponse;
+import com.pickii.domain.recruit.dto.MyCommentResponse;
 import com.pickii.domain.recruit.dto.RecruitCreateRequest;
 import com.pickii.domain.recruit.dto.RecruitCreateResponse;
 import com.pickii.domain.recruit.dto.RecruitDetailResponse;
@@ -202,6 +203,30 @@ public class RecruitService {
             throw new BusinessException(ErrorCode.SCRAP_NOT_FOUND);
         }
         recruitScrapRepository.deleteByMemberIdAndRecruitId(memberId, recruitId);
+    }
+
+    /** 4-5 작성한 공고 조회 */
+    public PageResponse<RecruitSummaryResponse> getMyRecruits(Long memberId, Pageable pageable) {
+        Page<Recruit> page = recruitRepository.findByMemberIdAndDeletedAtIsNull(memberId, pageable);
+        return PageResponse.from(page, this::toSummary);
+    }
+
+    /** 4-6 작성한 댓글 조회 */
+    public PageResponse<MyCommentResponse> getMyComments(Long memberId, Pageable pageable) {
+        Page<Comment> page = commentRepository.findMyComments(memberId, pageable);
+        return PageResponse.from(page, this::toMyCommentResponse);
+    }
+
+    private MyCommentResponse toMyCommentResponse(Comment comment) {
+        Recruit recruit = comment.getRecruit();
+        return new MyCommentResponse(
+                comment.getId(),
+                recruit.getId(),
+                recruit.getTitle(),
+                recruit.getStatus(),
+                comment.getContent(),
+                comment.getCreatedAt().atOffset(ZoneOffset.ofHours(9))
+        );
     }
 
     /** 3-16 스크랩한 공고 목록 조회 */

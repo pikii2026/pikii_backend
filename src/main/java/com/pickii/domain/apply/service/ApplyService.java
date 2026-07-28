@@ -1,13 +1,21 @@
 package com.pickii.domain.apply.service;
 
+import com.pickii.domain.apply.dto.ApplicantResponse;
 import com.pickii.domain.apply.dto.ApplyAiDraftRequest;
 import com.pickii.domain.apply.dto.ApplyAiDraftResponse;
 import com.pickii.domain.apply.dto.ApplyCreateRequest;
+import com.pickii.domain.apply.dto.ApplyStatusUpdateRequest;
+import com.pickii.domain.apply.dto.MyApplyResponse;
 import com.pickii.domain.apply.entity.Apply;
 import com.pickii.domain.apply.entity.ApplyKeywordMap;
+import com.pickii.domain.apply.entity.ApplyStatus;
 import com.pickii.domain.apply.repository.ApplyKeywordMapRepository;
 import com.pickii.domain.apply.repository.ApplyKeywordRepository;
 import com.pickii.domain.apply.repository.ApplyRepository;
+import com.pickii.domain.chat.entity.ChatRoom;
+import com.pickii.domain.chat.entity.ChatRoomMember;
+import com.pickii.domain.chat.repository.ChatRoomMemberRepository;
+import com.pickii.domain.chat.repository.ChatRoomRepository;
 import com.pickii.domain.member.entity.Member;
 import com.pickii.domain.member.repository.MemberRepository;
 import com.pickii.domain.notification.entity.NotificationHistory;
@@ -16,19 +24,28 @@ import com.pickii.domain.notification.entity.NotificationSetting;
 import com.pickii.domain.notification.entity.NotificationType;
 import com.pickii.domain.notification.repository.NotificationHistoryRepository;
 import com.pickii.domain.notification.repository.NotificationSettingRepository;
+import com.pickii.domain.project.entity.Project;
+import com.pickii.domain.project.entity.ProjectMember;
+import com.pickii.domain.project.repository.ProjectMemberRepository;
+import com.pickii.domain.project.repository.ProjectRepository;
 import com.pickii.domain.recruit.entity.Recruit;
 import com.pickii.domain.recruit.repository.RecruitRepository;
+import com.pickii.global.common.response.PageResponse;
 import com.pickii.global.exception.BusinessException;
 import com.pickii.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZoneOffset;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
- * AI 지원서 초안 생성 (API_SPEC 3-10), 공고 지원하기 (API_SPEC 3-11), 지원 취소 (API_SPEC 3-13)
+ * AI 지원서 초안 생성 (API_SPEC 3-10), 공고 지원하기 (API_SPEC 3-11), 지원 취소 (API_SPEC 3-13),
+ * 지원 현황 조회 (API_SPEC 4-4), 지원자 목록 조회 (API_SPEC 4-7), 지원자 수락/거절 (API_SPEC 4-8)
  */
 @Service
 @RequiredArgsConstructor
@@ -42,6 +59,10 @@ public class ApplyService {
     private final MemberRepository memberRepository;
     private final NotificationSettingRepository notificationSettingRepository;
     private final NotificationHistoryRepository notificationHistoryRepository;
+    private final ProjectRepository projectRepository;
+    private final ProjectMemberRepository projectMemberRepository;
+    private final ChatRoomRepository chatRoomRepository;
+    private final ChatRoomMemberRepository chatRoomMemberRepository;
 
     /**
      * 3-10 AI 지원서 초안 생성
@@ -99,6 +120,103 @@ public class ApplyService {
 
         applyKeywordMapRepository.deleteAllByApplyId(applyId);
         applyRepository.delete(apply);
+    }
+
+    /** 4-4 지원 현황 조회 */
+    public PageResponse<MyApplyResponse> getMyApplies(Long memberId, Pageable pageable) {
+        Page<Apply> applies = applyRepository.findByMemberId(memberId, pageable);
+        return PageResponse.from(applies, this::toMyApplyResponse);
+    }
+
+    private MyApplyResponse toMyApplyResponse(Apply apply) {
+        Recruit recruit = apply.getRecruit();
+        return new MyApplyResponse(
+                apply.getId(),
+                recruit.getId(),
+                recruit.getTitle(),
+                recruit.getStatus(),
+                apply.getStatus(),
+                apply.getCreatedAt().atOffset(ZoneOffset.ofHours(9))
+        );
+    }
+
+    /** 4-7 지원자 목록 조회 */
+    public PageResponse<ApplicantResponse> getApplicants(Long memberId, Long recruitId, Pageable pageable) {
+        Recruit recruit = recruitRepository.findById(recruitId)
+                .filter(r -> !r.isDeleted())
+                .orElseThrow(() -> new BusinessException(ErrorCode.RECRUIT_NOT_FOUND));
+        if (recruit.getMember() == null || !recruit.getMember().getId().equals(memberId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
+        Page<Apply> applies = applyRepository.findByRecruitId(recruitId, pageable);
+        return PageResponse.from(applies, this::toApplicantResponse);
+    }
+
+    private ApplicantResponse toApplicantResponse(Apply apply) {
+        Member applicant = apply.getMember();
+        return new ApplicantResponse(
+                apply.getId(),
+                applicant == null ? null : applicant.getId(),
+                applicant == null ? "알 수 없음" : applicant.getNickname(),
+                apply.getMessage(),
+                apply.getStatus(),
+                apply.getCreatedAt().atOffset(ZoneOffset.ofHours(9))
+        );
+    }
+
+    /** 4-8 지원자 수락/거절 */
+    @Transactional
+    public void updateStatus(Long memberId, Long applyId, ApplyStatusUpdateRequest request) {
+        Apply apply = applyRepository.findById(applyId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.APPLY_NOT_FOUND));
+        Recruit recruit = apply.getRecruit();
+        if (recruit.getMember() == null || !recruit.getMember().getId().equals(memberId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
+
+        if (request.status() == ApplyStatus.ACCEPTED) {
+            if (recruit.getAvailableSlots() <= 0) {
+                throw new BusinessException(ErrorCode.RECRUIT_FULL);
+            }
+            apply.accept();
+            recruit.increaseCurrentCount();
+            joinExistingProjectIfPresent(recruit, apply.getMember());
+            notifyApplicant(apply.getMember(), recruit, true);
+        } else {
+            apply.reject();
+            notifyApplicant(apply.getMember(), recruit, false);
+        }
+    }
+
+    /** 이미 그룹 채팅(Project)이 생성된 공고라면, 수락 즉시 팀원으로 등록하고 그룹 채팅방에 자동 초대한다. */
+    private void joinExistingProjectIfPresent(Recruit recruit, Member acceptedMember) {
+        if (acceptedMember == null) {
+            return;
+        }
+        projectRepository.findByRecruitId(recruit.getId()).ifPresent(project -> {
+            projectMemberRepository.save(new ProjectMember(project, acceptedMember, false));
+            ChatRoom groupChatRoom = chatRoomRepository.findByProjectId(project.getId())
+                    .orElseThrow(() -> new IllegalStateException("GROUP 채팅방이 없는 프로젝트입니다."));
+            chatRoomMemberRepository.save(new ChatRoomMember(groupChatRoom, acceptedMember));
+        });
+    }
+
+    private void notifyApplicant(Member applicant, Recruit recruit, boolean accepted) {
+        if (applicant == null) {
+            return;
+        }
+        NotificationSetting setting = notificationSettingRepository.findById(applicant.getId()).orElse(null);
+        if (setting == null || !setting.isMatchNoti()) {
+            return;
+        }
+        notificationHistoryRepository.save(NotificationHistory.builder()
+                .member(applicant)
+                .title(accepted ? "지원이 수락되었습니다." : "지원이 거절되었습니다.")
+                .content("'" + recruit.getTitle() + "' 공고에 대한 지원이 " + (accepted ? "수락" : "거절") + "되었습니다.")
+                .type(accepted ? NotificationType.ACCEPT : NotificationType.REJECT)
+                .referenceType(NotificationReferenceType.RECRUIT)
+                .referenceId(recruit.getId())
+                .build());
     }
 
     private void notifyRecruitAuthor(Recruit recruit, Member applicant) {
