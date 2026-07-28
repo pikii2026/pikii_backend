@@ -3064,6 +3064,7 @@ Bearer Access Token
 
 | HTTP | Error Code                | 설명              |
 |:---- |:------------------------- |:--------------- |
+| 400  | VALIDATION_FAILED         | 입력값 검증 실패       |
 | 400  | ALREADY_EVALUATED         | 이미 평가 완료        |
 | 403  | FORBIDDEN                 | 평가 권한 없음        |
 | 404  | PROJECT_NOT_FOUND         | 프로젝트 없음         |

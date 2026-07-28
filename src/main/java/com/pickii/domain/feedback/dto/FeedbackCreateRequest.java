@@ -1,6 +1,7 @@
 package com.pickii.domain.feedback.dto;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
@@ -18,9 +19,11 @@ public record FeedbackCreateRequest(
         @Valid
         ScoresRequest scores,
 
+        @NotBlank(message = "장점을 입력해주세요.")
         @Size(min = 30, max = 500, message = "장점은 30~500자여야 합니다.")
         String strength,
 
+        @NotBlank(message = "개선점을 입력해주세요.")
         @Size(min = 30, max = 500, message = "개선점은 30~500자여야 합니다.")
         String weakness
 ) {
