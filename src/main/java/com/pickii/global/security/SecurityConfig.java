@@ -32,12 +32,21 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(auth -> auth
-                        // 인증 불필요 API (API_SPEC 기준)
-                        .requestMatchers("/auth/**").permitAll()
+                        // 인증 불필요 API (API_SPEC 1-1~1-3, 1-4, 1-5, 1-6, 1-8, 1-10)
+                        // 1-6/1-10은 Access Token이 만료된 상태로 들어오는 것이 정상이라
+                        // Spring Security가 아니라 AuthService에서 직접 토큰을 검증한다.
+                        .requestMatchers(
+                                "/auth/email/send", "/auth/email/verify",
+                                "/auth/nickname/check",
+                                "/auth/signup", "/auth/login",
+                                "/auth/token/refresh",
+                                "/auth/password/reset",
+                                "/auth/social/*/login"
+                        ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/recruits", "/recruits/*", "/recruits/*/comments").permitAll()
                         // Swagger
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
-                        // 그 외 전부 인증 필요
+                        // 그 외 전부 인증 필요 (1-7, 1-9, 1-11~1-13 등)
                         .anyRequest().authenticated())
 
                 .exceptionHandling(exception -> exception
