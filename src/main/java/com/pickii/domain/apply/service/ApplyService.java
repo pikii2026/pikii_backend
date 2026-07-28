@@ -4,11 +4,15 @@ import com.pickii.domain.apply.dto.ApplicantResponse;
 import com.pickii.domain.apply.dto.ApplyAiDraftRequest;
 import com.pickii.domain.apply.dto.ApplyAiDraftResponse;
 import com.pickii.domain.apply.dto.ApplyCreateRequest;
+import com.pickii.domain.apply.dto.ApplyKeywordCategoryResponse;
 import com.pickii.domain.apply.dto.ApplyStatusUpdateRequest;
 import com.pickii.domain.apply.dto.MyApplyResponse;
 import com.pickii.domain.apply.entity.Apply;
+import com.pickii.domain.apply.entity.ApplyKeyword;
+import com.pickii.domain.apply.entity.ApplyKeywordCategory;
 import com.pickii.domain.apply.entity.ApplyKeywordMap;
 import com.pickii.domain.apply.entity.ApplyStatus;
+import com.pickii.domain.apply.repository.ApplyKeywordCategoryRepository;
 import com.pickii.domain.apply.repository.ApplyKeywordMapRepository;
 import com.pickii.domain.apply.repository.ApplyKeywordRepository;
 import com.pickii.domain.apply.repository.ApplyRepository;
@@ -41,7 +45,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZoneOffset;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * AI 지원서 초안 생성 (API_SPEC 3-10), 공고 지원하기 (API_SPEC 3-11), 지원 취소 (API_SPEC 3-13),
@@ -54,6 +61,7 @@ public class ApplyService {
 
     private final ApplyRepository applyRepository;
     private final ApplyKeywordRepository applyKeywordRepository;
+    private final ApplyKeywordCategoryRepository applyKeywordCategoryRepository;
     private final ApplyKeywordMapRepository applyKeywordMapRepository;
     private final RecruitRepository recruitRepository;
     private final MemberRepository memberRepository;
@@ -120,6 +128,25 @@ public class ApplyService {
 
         applyKeywordMapRepository.deleteAllByApplyId(applyId);
         applyRepository.delete(apply);
+    }
+
+    /** 5-7 지원 키워드 조회 (카테고리별 Nested) */
+    public List<ApplyKeywordCategoryResponse> getApplyKeywords() {
+        Map<Long, List<ApplyKeyword>> keywordsByCategoryId = applyKeywordRepository.findAll().stream()
+                .collect(Collectors.groupingBy(keyword -> keyword.getCategory().getId()));
+
+        return applyKeywordCategoryRepository.findAll().stream()
+                .map(category -> toApplyKeywordCategoryResponse(category, keywordsByCategoryId))
+                .toList();
+    }
+
+    private ApplyKeywordCategoryResponse toApplyKeywordCategoryResponse(
+            ApplyKeywordCategory category, Map<Long, List<ApplyKeyword>> keywordsByCategoryId) {
+        List<ApplyKeywordCategoryResponse.KeywordItem> items = keywordsByCategoryId
+                .getOrDefault(category.getId(), List.of()).stream()
+                .map(ApplyKeywordCategoryResponse.KeywordItem::from)
+                .toList();
+        return new ApplyKeywordCategoryResponse(category.getId(), category.getName(), items);
     }
 
     /** 4-4 지원 현황 조회 */
