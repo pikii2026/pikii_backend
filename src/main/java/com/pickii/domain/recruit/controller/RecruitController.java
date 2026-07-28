@@ -8,6 +8,7 @@ import com.pickii.domain.recruit.dto.CommentListResponse;
 import com.pickii.domain.recruit.dto.RecruitCreateRequest;
 import com.pickii.domain.recruit.dto.RecruitCreateResponse;
 import com.pickii.domain.recruit.dto.RecruitDetailResponse;
+import com.pickii.domain.recruit.dto.RecruitScrapResponse;
 import com.pickii.domain.recruit.dto.RecruitSummaryResponse;
 import com.pickii.domain.recruit.service.RecruitService;
 import com.pickii.global.common.response.ApiResponse;
@@ -123,5 +124,33 @@ public class RecruitController {
             @Valid @RequestBody CommentCreateRequest request) {
         CommentCreateResponse response = recruitService.createComment(memberId, recruitId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.of(response));
+    }
+
+    /** 3-12 공고 수정 */
+    @PatchMapping("/{recruitId}")
+    public ResponseEntity<Void> updateRecruit(
+            @AuthenticationPrincipal Long memberId,
+            @PathVariable Long recruitId,
+            @Valid @RequestBody RecruitCreateRequest request) {
+        recruitService.updateRecruit(memberId, recruitId, request);
+        return ResponseEntity.noContent().build();
+    }
+
+    /** 3-14 공고 스크랩 */
+    @PostMapping("/{recruitId}/scrap")
+    public ResponseEntity<ApiResponse<RecruitScrapResponse>> scrapRecruit(
+            @AuthenticationPrincipal Long memberId,
+            @PathVariable Long recruitId) {
+        RecruitScrapResponse response = recruitService.scrapRecruit(memberId, recruitId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.of(response));
+    }
+
+    /** 3-15 공고 스크랩 취소 */
+    @DeleteMapping("/{recruitId}/scrap")
+    public ResponseEntity<Void> cancelScrapRecruit(
+            @AuthenticationPrincipal Long memberId,
+            @PathVariable Long recruitId) {
+        recruitService.cancelScrapRecruit(memberId, recruitId);
+        return ResponseEntity.noContent().build();
     }
 }

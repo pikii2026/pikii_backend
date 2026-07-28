@@ -12,10 +12,13 @@ import com.pickii.domain.recruit.dto.CommentResponse;
 import com.pickii.domain.recruit.dto.RecruitCreateRequest;
 import com.pickii.domain.recruit.dto.RecruitCreateResponse;
 import com.pickii.domain.recruit.dto.RecruitDetailResponse;
+import com.pickii.domain.recruit.dto.RecruitScrapResponse;
+import com.pickii.domain.recruit.dto.RecruitScrapSummaryResponse;
 import com.pickii.domain.recruit.dto.RecruitSummaryResponse;
 import com.pickii.domain.recruit.entity.Comment;
 import com.pickii.domain.recruit.entity.Recruit;
 import com.pickii.domain.recruit.entity.RecruitCategory;
+import com.pickii.domain.recruit.entity.RecruitScrap;
 import com.pickii.domain.recruit.entity.RecruitStatus;
 import com.pickii.domain.recruit.entity.RecruitTopic;
 import com.pickii.domain.recruit.repository.CategoryRepository;
@@ -37,6 +40,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -49,7 +53,8 @@ import java.util.Set;
  * 메인(Home) 공고 검색/목록 조회 (API_SPEC 2-1), 공고 상세 조회 (API_SPEC 3-1),
  * 공고 작성 (API_SPEC 3-2), AI 공고 초안 생성 (API_SPEC 3-3), 공고 마감 (API_SPEC 3-4),
  * 공고 추가 모집 (API_SPEC 3-5), 공고 삭제 (API_SPEC 3-6), 댓글 및 답글 목록 조회 (API_SPEC 3-7),
- * 댓글 및 답글 작성 (API_SPEC 3-8)
+ * 댓글 및 답글 작성 (API_SPEC 3-8), 댓글 삭제 (API_SPEC 3-9), 공고 수정 (API_SPEC 3-12),
+ * 공고 스크랩 (API_SPEC 3-14), 공고 스크랩 취소 (API_SPEC 3-15), 스크랩한 공고 목록 조회 (API_SPEC 3-16)
  */
 @Service
 @RequiredArgsConstructor
@@ -121,16 +126,9 @@ public class RecruitService {
     @Transactional
     public RecruitCreateResponse createRecruit(Long memberId, RecruitCreateRequest request) {
         Set<Long> categoryIds = new LinkedHashSet<>(request.categoryIds());
-        if (categoryRepository.countByIdIn(categoryIds) != categoryIds.size()) {
-            throw new BusinessException(ErrorCode.VALIDATION_FAILED, "존재하지 않는 카테고리가 포함되어 있습니다.");
-        }
         Set<Long> topicIds = request.topicIds() == null ? Set.of() : new LinkedHashSet<>(request.topicIds());
-        if (!topicIds.isEmpty() && topicRepository.countByIdIn(topicIds) != topicIds.size()) {
-            throw new BusinessException(ErrorCode.VALIDATION_FAILED, "존재하지 않는 주제가 포함되어 있습니다.");
-        }
-        if (request.startDate().isAfter(request.endDate())) {
-            throw new BusinessException(ErrorCode.VALIDATION_FAILED, "시작일은 종료일보다 이후일 수 없습니다.");
-        }
+        validateCategoryAndTopicIds(categoryIds, topicIds);
+        validateDateOrder(request.startDate(), request.endDate());
 
         Recruit recruit = Recruit.builder()
                 .member(memberRepository.getReferenceById(memberId))
@@ -148,6 +146,99 @@ public class RecruitService {
         topicIds.forEach(topicId -> recruitTopicRepository.save(new RecruitTopic(recruit.getId(), topicId)));
 
         return new RecruitCreateResponse(recruit.getId());
+    }
+
+    /** 3-12 공고 수정 */
+    @Transactional
+    public void updateRecruit(Long memberId, Long recruitId, RecruitCreateRequest request) {
+        Recruit recruit = recruitRepository.findById(recruitId)
+                .filter(r -> !r.isDeleted())
+                .orElseThrow(() -> new BusinessException(ErrorCode.RECRUIT_NOT_FOUND));
+        if (recruit.getMember() == null || !recruit.getMember().getId().equals(memberId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
+
+        Set<Long> categoryIds = new LinkedHashSet<>(request.categoryIds());
+        Set<Long> topicIds = request.topicIds() == null ? Set.of() : new LinkedHashSet<>(request.topicIds());
+        validateCategoryAndTopicIds(categoryIds, topicIds);
+        validateDateOrder(request.startDate(), request.endDate());
+
+        recruit.update(
+                request.title(),
+                request.onCampus(),
+                request.startDate(),
+                request.endDate(),
+                request.simpleDesc(),
+                request.content(),
+                request.maxMembers()
+        );
+
+        recruitCategoryRepository.deleteAllByRecruitId(recruitId);
+        recruitTopicRepository.deleteAllByRecruitId(recruitId);
+        categoryIds.forEach(categoryId -> recruitCategoryRepository.save(new RecruitCategory(recruitId, categoryId)));
+        topicIds.forEach(topicId -> recruitTopicRepository.save(new RecruitTopic(recruitId, topicId)));
+    }
+
+    /** 3-14 공고 스크랩 */
+    @Transactional
+    public RecruitScrapResponse scrapRecruit(Long memberId, Long recruitId) {
+        recruitRepository.findById(recruitId)
+                .filter(r -> !r.isDeleted())
+                .orElseThrow(() -> new BusinessException(ErrorCode.RECRUIT_NOT_FOUND));
+        if (recruitScrapRepository.existsByMemberIdAndRecruitId(memberId, recruitId)) {
+            throw new BusinessException(ErrorCode.ALREADY_SCRAPPED);
+        }
+        recruitScrapRepository.save(new RecruitScrap(memberId, recruitId));
+        return new RecruitScrapResponse(recruitId, true);
+    }
+
+    /** 3-15 공고 스크랩 취소 */
+    @Transactional
+    public void cancelScrapRecruit(Long memberId, Long recruitId) {
+        recruitRepository.findById(recruitId)
+                .filter(r -> !r.isDeleted())
+                .orElseThrow(() -> new BusinessException(ErrorCode.RECRUIT_NOT_FOUND));
+        if (!recruitScrapRepository.existsByMemberIdAndRecruitId(memberId, recruitId)) {
+            throw new BusinessException(ErrorCode.SCRAP_NOT_FOUND);
+        }
+        recruitScrapRepository.deleteByMemberIdAndRecruitId(memberId, recruitId);
+    }
+
+    /** 3-16 스크랩한 공고 목록 조회 */
+    public PageResponse<RecruitScrapSummaryResponse> getScrappedRecruits(Long memberId, Pageable pageable) {
+        Page<RecruitScrap> page = recruitScrapRepository.findAllByMemberIdWithActiveRecruit(memberId, pageable);
+        return PageResponse.from(page, this::toScrapSummary);
+    }
+
+    private RecruitScrapSummaryResponse toScrapSummary(RecruitScrap scrap) {
+        Recruit recruit = recruitRepository.findById(scrap.getRecruitId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.RECRUIT_NOT_FOUND));
+        String authorNickname = recruit.getMember() == null ? "알 수 없음" : recruit.getMember().getNickname();
+        return new RecruitScrapSummaryResponse(
+                recruit.getId(),
+                recruit.getTitle(),
+                authorNickname,
+                recruit.isOnCampus(),
+                recruit.getStatus(),
+                recruit.getTargetCount(),
+                recruit.getAvailableSlots(),
+                scrap.getCreatedAt().atOffset(ZoneOffset.ofHours(9))
+        );
+    }
+
+    private void validateCategoryAndTopicIds(Set<Long> categoryIds, Set<Long> topicIds) {
+        if (categoryRepository.countByIdIn(categoryIds) != categoryIds.size()) {
+            throw new BusinessException(ErrorCode.VALIDATION_FAILED, "존재하지 않는 카테고리가 포함되어 있습니다.");
+        }
+        if (!topicIds.isEmpty() && topicRepository.countByIdIn(topicIds) != topicIds.size()) {
+            throw new BusinessException(ErrorCode.VALIDATION_FAILED, "존재하지 않는 주제가 포함되어 있습니다.");
+        }
+    }
+
+    private void validateDateOrder(LocalDate startDate, LocalDate endDate) {
+        if (startDate.isAfter(endDate)) {
+            throw new BusinessException(ErrorCode.VALIDATION_FAILED, "시작일은 종료일보다 이후일 수 없습니다.");
+        }
     }
 
     /** 3-4 공고 마감 */
@@ -254,6 +345,18 @@ public class RecruitService {
         commentRepository.save(comment);
 
         return new CommentCreateResponse(comment.getId());
+    }
+
+    /** 3-9 댓글 삭제 */
+    @Transactional
+    public void deleteComment(Long memberId, Long commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .filter(c -> !c.isDeleted())
+                .orElseThrow(() -> new BusinessException(ErrorCode.COMMENT_NOT_FOUND));
+        if (comment.getMember() == null || !comment.getMember().getId().equals(memberId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
+        comment.softDelete();
     }
 
     private CommentResponse toCommentResponse(Comment comment, Long recruitAuthorId, List<CommentReplyResponse> replies) {

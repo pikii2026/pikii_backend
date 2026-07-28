@@ -11,4 +11,6 @@ public interface RecruitCategoryRepository extends JpaRepository<RecruitCategory
 
     @Query("select rc.categoryId from RecruitCategory rc where rc.recruitId = :recruitId")
     List<Long> findCategoryIdsByRecruitId(@Param("recruitId") Long recruitId);
+
+    void deleteAllByRecruitId(Long recruitId);
 }

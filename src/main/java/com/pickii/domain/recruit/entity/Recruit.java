@@ -86,6 +86,17 @@ public class Recruit extends BaseTimeEntity {
         return deletedAt != null;
     }
 
+    public void update(String title, boolean onCampus, LocalDate startDate, LocalDate endDate,
+                        String simpleDesc, String content, int targetCount) {
+        this.title = title;
+        this.onCampus = onCampus;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.simpleDesc = simpleDesc;
+        this.content = content;
+        this.targetCount = targetCount;
+    }
+
     public void close() {
         this.status = RecruitStatus.CLOSED;
     }
