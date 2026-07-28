@@ -4817,11 +4817,12 @@ Bearer Access Token
 
 ## Error
 
-| HTTP | Error Code         | 설명        |
-|:---- |:------------------ |:--------- |
-| 400  | VALIDATION_FAILED  | 입력값 검증 실패 |
-| 403  | FORBIDDEN          | 본인 일정이 아님 |
-| 404  | SCHEDULE_NOT_FOUND | 일정 없음     |
+| HTTP | Error Code                  | 설명        |
+|:---- |:--------------------------- |:--------- |
+| 400  | VALIDATION_FAILED           | 입력값 검증 실패 |
+| 403  | FORBIDDEN                   | 본인 일정이 아님 |
+| 404  | SCHEDULE_NOT_FOUND          | 일정 없음     |
+| 404  | SCHEDULE_CATEGORY_NOT_FOUND | 카테고리 없음   |
 
 ---
 

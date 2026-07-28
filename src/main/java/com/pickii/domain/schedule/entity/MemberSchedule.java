@@ -77,4 +77,18 @@ public class MemberSchedule {
     public boolean isRecurring() {
         return rrule != null;
     }
+
+    /** 7-8 일정 수정. 단발/반복 종류(rrule 유무)는 바꾸지 않고 호출부에서 기존 종류에 맞는 값만 전달한다. */
+    public void update(String title, LocalDate startDate, LocalDate endDate,
+                        LocalTime startTime, LocalTime endTime, String rrule,
+                        String content, ScheduleCategory category) {
+        this.title = title;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.rrule = rrule;
+        this.content = content;
+        this.category = category;
+    }
 }
