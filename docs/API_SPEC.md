@@ -2922,6 +2922,7 @@ Bearer Access Token
 
 | HTTP | Error Code        | 설명               |
 |:---- |:------------------ |:----------------- |
+| 400  | VALIDATION_FAILED  | status가 ACCEPTED/REJECTED가 아님 |
 | 403  | FORBIDDEN          | 공고 작성자가 아님        |
 | 409  | RECRUIT_FULL       | 모집 정원 마감          |
 | 409  | APPLY_NOT_WAITING  | 이미 처리된 지원건 (재처리 불가) |
