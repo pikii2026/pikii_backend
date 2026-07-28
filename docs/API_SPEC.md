@@ -2920,10 +2920,12 @@ Bearer Access Token
 
 ## Error
 
-| HTTP | Error Code   |
-|:---- |:------------ |
-| 403  | FORBIDDEN    |
-| 409  | RECRUIT_FULL |
+| HTTP | Error Code        | 설명               |
+|:---- |:------------------ |:----------------- |
+| 400  | VALIDATION_FAILED  | status가 ACCEPTED/REJECTED가 아님 |
+| 403  | FORBIDDEN          | 공고 작성자가 아님        |
+| 409  | RECRUIT_FULL       | 모집 정원 마감          |
+| 409  | APPLY_NOT_WAITING  | 이미 처리된 지원건 (재처리 불가) |
 
 ---
 
@@ -3063,6 +3065,7 @@ Bearer Access Token
 
 | HTTP | Error Code                | 설명              |
 |:---- |:------------------------- |:--------------- |
+| 400  | VALIDATION_FAILED         | 입력값 검증 실패       |
 | 400  | ALREADY_EVALUATED         | 이미 평가 완료        |
 | 403  | FORBIDDEN                 | 평가 권한 없음        |
 | 404  | PROJECT_NOT_FOUND         | 프로젝트 없음         |

@@ -200,6 +200,9 @@ public class ApplyService {
         if (recruit.getMember() == null || !recruit.getMember().getId().equals(memberId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
+        if (!apply.isWaiting()) {
+            throw new BusinessException(ErrorCode.APPLY_NOT_WAITING, "이미 처리된 지원건은 상태를 변경할 수 없습니다.");
+        }
 
         if (request.status() == ApplyStatus.ACCEPTED) {
             if (recruit.getAvailableSlots() <= 0) {
@@ -209,9 +212,11 @@ public class ApplyService {
             recruit.increaseCurrentCount();
             joinExistingProjectIfPresent(recruit, apply.getMember());
             notifyApplicant(apply.getMember(), recruit, true);
-        } else {
+        } else if (request.status() == ApplyStatus.REJECTED) {
             apply.reject();
             notifyApplicant(apply.getMember(), recruit, false);
+        } else {
+            throw new BusinessException(ErrorCode.VALIDATION_FAILED, "ACCEPTED 또는 REJECTED만 입력 가능합니다.");
         }
     }
 
