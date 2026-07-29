@@ -38,3 +38,6 @@ out/
 
 ### Env ###
 .env
+
+### Local file uploads (채팅 이미지 등, S3 연동 전 목업 저장소) ###
+/uploads/
