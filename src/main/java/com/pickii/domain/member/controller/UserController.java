@@ -11,6 +11,7 @@ import com.pickii.domain.recruit.dto.MyCommentResponse;
 import com.pickii.domain.recruit.dto.RecruitScrapSummaryResponse;
 import com.pickii.domain.recruit.dto.RecruitSummaryResponse;
 import com.pickii.domain.recruit.service.RecruitService;
+import com.pickii.domain.resume.dto.MemberProfileResponse;
 import com.pickii.domain.resume.dto.ResumeCreateResponse;
 import com.pickii.domain.resume.dto.ResumeRequest;
 import com.pickii.domain.resume.dto.UserProfileResponse;
@@ -27,6 +28,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,7 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * 회원(User) API (API_SPEC 1-13, 3-16, 4-1~4-6, 9-5, 9-6)
+ * 회원(User) API (API_SPEC 1-13, 3-16, 4-1~4-6, 9-5, 9-6, 10-1)
  */
 @RestController
 @RequestMapping("/users")
@@ -131,5 +133,12 @@ public class UserController {
             @Valid @RequestBody NotificationSettingRequest request) {
         notificationSettingService.updateSetting(memberId, request);
         return ResponseEntity.noContent().build();
+    }
+
+    /** 10-1 회원 프로필 조회 */
+    @GetMapping("/{memberId}")
+    public ResponseEntity<ApiResponse<MemberProfileResponse>> getProfile(@PathVariable Long memberId) {
+        MemberProfileResponse response = resumeService.getProfile(memberId);
+        return ResponseEntity.ok(ApiResponse.of(response));
     }
 }

@@ -13,6 +13,7 @@ import com.pickii.domain.resume.dto.ExperienceItem;
 import com.pickii.domain.resume.dto.ExperienceRequest;
 import com.pickii.domain.resume.dto.LicenseItem;
 import com.pickii.domain.resume.dto.LicenseRequest;
+import com.pickii.domain.resume.dto.MemberProfileResponse;
 import com.pickii.domain.resume.dto.ResumeCreateResponse;
 import com.pickii.domain.resume.dto.ResumeRequest;
 import com.pickii.domain.resume.dto.SkillToolItem;
@@ -52,7 +53,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * 내 프로필 조회 (API_SPEC 4-1), 프로필 생성 (API_SPEC 4-2), 프로필(이력서) 수정 (API_SPEC 4-3)
+ * 내 프로필 조회 (API_SPEC 4-1), 프로필 생성 (API_SPEC 4-2), 프로필(이력서) 수정 (API_SPEC 4-3),
+ * 다른 회원 프로필 조회 (API_SPEC 10-1)
  */
 @Service
 @RequiredArgsConstructor
@@ -103,6 +105,32 @@ public class ResumeService {
                 license,
                 experience,
                 additionalLink
+        );
+    }
+
+    /** 10-1 회원 프로필 조회 (탈퇴 회원/프로필 미작성 회원은 RESUME_NOT_FOUND) */
+    public MemberProfileResponse getProfile(Long targetMemberId) {
+        MemberResume resume = memberResumeRepository.findById(targetMemberId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESUME_NOT_FOUND));
+        Member member = resume.getMember();
+        MemberUniv memberUniv = memberUnivRepository.findById(targetMemberId).orElseThrow();
+
+        return new MemberProfileResponse(
+                member.getNickname(),
+                memberUniv.getUniv().getId(),
+                memberUniv.getUniv().getName(),
+                memberUniv.getMajor(),
+                memberUniv.getStatus(),
+                resume.getContactEmail(),
+                resume.getHope(),
+                resume.getStrength(),
+                resume.getAboutMe(),
+                member.getExp(),
+                detailTopicRepository.findTopicIdsByMemberId(targetMemberId),
+                getSkillTools(targetMemberId),
+                getLicenses(targetMemberId),
+                getExperiences(targetMemberId),
+                getAdditionalLinks(targetMemberId)
         );
     }
 
