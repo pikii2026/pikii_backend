@@ -5553,6 +5553,19 @@ Bearer Access Token
 
 REST API는 채팅방 및 채팅 내역 **조회**, **1:1 채팅방 생성**, **이미지 업로드**에 사용한다.
 
+## WebSocket (STOMP)
+
+| 항목 | 값 |
+|:--- |:--- |
+| Endpoint | `ws(s)://{host}/api/v1/ws` (SockJS) |
+| 인증 | STOMP `CONNECT` 프레임의 `Authorization: Bearer {AccessToken}` 헤더 (Blacklist 포함 REST와 동일 규칙) |
+| 메시지 발행(Publish) | `/pub/chatrooms/{chatRoomId}/messages` — `{ "type":"TEXT\|IMAGE", "message":"...", "imageUrl":"..." }` |
+| 읽음 처리(Publish) | `/pub/chatrooms/{chatRoomId}/read` — `{ "lastReadMessageId":"..." }` (REST 8-6과 동일 로직) |
+| 구독(Subscribe) | `/sub/chatrooms/{chatRoomId}` — 새 메시지 브로드캐스트 |
+| 에러 알림(Subscribe) | `/user/queue/errors` — `{ "code":"FORBIDDEN", "message":"..." }` (채팅방 참여자가 아닌 경우 등) |
+
+`senderId`는 클라이언트가 보내지 않는다. 서버가 STOMP 세션의 인증된 Principal에서만 가져온다(클라이언트가 다른 사용자를 사칭해 보낼 수 없다).
+
 ## 채팅방 종류
 
 | Type   | 설명           | 생성 시점                                   |

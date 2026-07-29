@@ -53,6 +53,8 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         // 채팅 이미지 등 로컬 업로드 파일(8-4)은 URL만 있으면 누구나 접근 가능해야 한다(예: <img> 태그)
                         .requestMatchers(HttpMethod.GET, "/static-uploads/**").permitAll()
+                        // WebSocket(STOMP) 핸드셰이크: 실제 인증은 CONNECT 프레임에서 StompAuthChannelInterceptor가 수행한다
+                        .requestMatchers("/ws/**").permitAll()
                         // 그 외 전부 인증 필요 (1-7, 1-9, 1-11~1-13 등)
                         .anyRequest().authenticated())
 
