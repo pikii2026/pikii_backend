@@ -25,6 +25,7 @@ import com.pickii.domain.project.dto.ProjectMemberResponse;
 import com.pickii.domain.project.dto.ProjectStatusResponse;
 import com.pickii.domain.project.entity.Project;
 import com.pickii.domain.project.entity.ProjectMember;
+import com.pickii.domain.project.entity.ProjectStatus;
 import com.pickii.domain.project.repository.ProjectMemberRepository;
 import com.pickii.domain.project.repository.ProjectRepository;
 import com.pickii.domain.recruit.entity.Recruit;
@@ -39,18 +40,23 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 /**
  * 프로젝트 생성 (API_SPEC 6-1), 상세/팀원 조회 (6-2, 6-3), 종료/연장 (6-4, 6-5),
- * 나가기/퇴출 (6-6, 6-7), 프로젝트장 위임 (6-8), 상태 조회 (6-9)
+ * 나가기/퇴출 (6-6, 6-7), 프로젝트장 위임 (6-8), 상태 조회 (6-9),
+ * 종료 확인/자동 종료 배치 (API_SPEC 6-4 종료 정책)
  */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ProjectService {
+
+    /** 종료 확인 알림 발송 후 자동 종료까지의 유예 기간(일) */
+    private static final int END_CHECK_GRACE_DAYS = 3;
 
     private final ProjectRepository projectRepository;
     private final ProjectMemberRepository projectMemberRepository;
@@ -160,6 +166,36 @@ public class ProjectService {
         return new ProjectExtendResponse(project.getId(), project.getEndDate(), project.getStatus());
     }
 
+    /**
+     * 배치: 진행기간(EndDate)이 지났는데 아직 종료 확인 알림을 보내지 않은 프로젝트에
+     * 프로젝트장에게 종료 확인 알림을 발송하고 EndCheckedAt을 기록한다.
+     */
+    @Transactional
+    public void sendEndCheckNotifications() {
+        projectRepository.findAllByStatusAndEndDateLessThanEqualAndEndCheckedAtIsNull(
+                ProjectStatus.IN_PROGRESS, LocalDate.now()
+        ).forEach(project -> {
+            project.markEndChecked();
+            notifyLeader(project, "프로젝트 진행기간이 종료되었습니다.",
+                    "'" + project.getName() + "' 프로젝트의 진행기간이 끝났습니다. 3일 내 응답이 없으면 자동으로 종료됩니다.");
+        });
+    }
+
+    /**
+     * 배치: 종료 확인 알림 발송 후 3일(EndCheckedAt + 3d) 내 무응답인 프로젝트를 자동 종료한다.
+     */
+    @Transactional
+    public void autoCloseUnrespondedProjects() {
+        LocalDateTime threshold = LocalDateTime.now().minusDays(END_CHECK_GRACE_DAYS);
+        projectRepository.findAllByStatusAndEndCheckedAtIsNotNullAndEndCheckedAtLessThanEqual(
+                ProjectStatus.IN_PROGRESS, threshold
+        ).forEach(project -> {
+            project.end();
+            notifyAllMembers(project, "프로젝트가 자동으로 종료되었습니다.",
+                    "'" + project.getName() + "' 프로젝트가 무응답으로 자동 종료되어 상호평가를 진행할 수 있습니다.");
+        });
+    }
+
     /** 6-6 프로젝트 나가기 */
     @Transactional
     public void leave(Long memberId, Long projectId) {
@@ -260,6 +296,10 @@ public class ProjectService {
     private void notifyAllMembers(Project project, String title, String content) {
         projectMemberRepository.findAllByProjectIdAndLeftAtIsNull(project.getId())
                 .forEach(pm -> notify(pm.getMember(), project, title, content));
+    }
+
+    private void notifyLeader(Project project, String title, String content) {
+        notify(findLeader(project.getId()).getMember(), project, title, content);
     }
 
     private void notify(Member member, Project project, String title, String content) {

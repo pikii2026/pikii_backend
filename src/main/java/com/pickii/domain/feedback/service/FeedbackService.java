@@ -16,6 +16,7 @@ import com.pickii.domain.member.entity.Member;
 import com.pickii.domain.member.repository.MemberRepository;
 import com.pickii.domain.project.entity.Project;
 import com.pickii.domain.project.entity.ProjectMember;
+import com.pickii.domain.project.entity.ProjectStatus;
 import com.pickii.domain.project.repository.ProjectMemberRepository;
 import com.pickii.domain.project.repository.ProjectRepository;
 import com.pickii.global.common.response.PageResponse;
@@ -163,6 +164,30 @@ public class FeedbackService {
                 aiFeedback.getStrength(),
                 aiFeedback.getWeakness()
         );
+    }
+
+    /**
+     * 배치: 평가 기간(3일)이 지난 종료 프로젝트 전체를 대상으로, 아직 AI 피드백이 생성되지 않은
+     * 팀원 중 최소 평가 인원을 충족한 경우 일괄 생성한다. (day-plan: 매일 자정 실행)
+     */
+    @Transactional
+    public void generatePendingAiFeedbackBatch() {
+        LocalDateTime threshold = LocalDateTime.now().minusDays(EVALUATION_PERIOD_DAYS);
+        List<Project> targets = projectRepository.findAllByStatusAndEndedAtLessThanEqual(ProjectStatus.END, threshold);
+        for (Project project : targets) {
+            List<ProjectMember> members = projectMemberRepository.findAllByProjectIdAndLeftAtIsNull(project.getId());
+            int required = requiredEvaluatorCount(members.size());
+            for (ProjectMember pm : members) {
+                Long revieweeId = pm.getMember().getId();
+                if (aiFeedbackRepository.findByProjectIdAndMemberId(project.getId(), revieweeId).isPresent()) {
+                    continue;
+                }
+                long evaluatedCount = feedbackRepository.countByProjectIdAndRevieweeId(project.getId(), revieweeId);
+                if (evaluatedCount >= required) {
+                    generateAiFeedbackMock(project, revieweeId);
+                }
+            }
+        }
     }
 
     /** 평가 기간(3일)이 지났는데도 AI 피드백이 없는 경우, 조회 시점에 배치 생성을 대신 수행한다. */
