@@ -7,6 +7,10 @@ spring:
     # API_SPEC 0.4 Null Policy: null 필드는 응답에서 제외
     default-property-inclusion: non_null
     time-zone: Asia/Seoul
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
 server:
   port: 8080

@@ -5635,7 +5635,8 @@ Bearer Access Token
                 "projectId":null,
                 "lastMessage":"지원서 잘 봤습니다.",
                 "lastMessageAt":"2026-07-06T11:00:00+09:00",
-                "unreadCount":0
+                "unreadCount":0,
+                "notiEnabled":true
             }
         ],
         "pageInfo":{
@@ -5694,11 +5695,18 @@ Bearer Access Token
                 "memberId":10,
                 "nickname":"픽키"
             }
-        ]
+        ],
+        "projectId":1,
+        "startDate":"2026-07-01",
+        "endDate":"2026-08-31",
+        "status":"IN_PROGRESS",
+        "isLeader":true
     },
     "timestamp":"2026-07-06T13:30:00+09:00"
 }
 ```
+
+> `projectId`/`startDate`/`endDate`/`status`/`isLeader`는 GROUP 채팅방일 때만 채워진다. DIRECT 채팅방 응답에는 해당 필드가 없다(null 필드 제외 정책).
 
 ---
 
@@ -5706,7 +5714,7 @@ Bearer Access Token
 
 1. 채팅방 참여 여부 확인
 2. 채팅방 상세 정보 조회
-3. GROUP인 경우 연결된 프로젝트 정보(팀원, 진행 기간, 상태, 프로젝트장 여부)를 함께 반환
+3. GROUP인 경우 연결된 프로젝트 정보(진행 기간, 상태, 프로젝트장 여부)를 함께 반환 — 팀원 목록은 위 `members`로 대체된다.
 
 > **프로젝트 관리의 진입점은 그룹 채팅방이다.**
 > 채팅방 상단 메뉴에서 팀원 조회, 회의 일정 잡기, 팀 일정 보기, 프로젝트 종료/연장, 프로젝트장 위임, 팀원 퇴출에 접근한다.
@@ -6233,7 +6241,7 @@ Bearer Access Token
         "content":[
             {
                 "notificationId":1,
-                "type":"APPLICATION",
+                "type":"APPLY",
                 "title":"새로운 지원자가 있습니다.",
                 "content":"픽키님이 '제일기획 공모전'에 지원했습니다.",
                 "referenceType":"RECRUIT",
