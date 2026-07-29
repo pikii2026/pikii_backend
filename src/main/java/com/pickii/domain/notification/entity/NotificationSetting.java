@@ -65,4 +65,16 @@ public class NotificationSetting {
         this.projectNoti = true;
         this.marketingNoti = marketingNoti;
     }
+
+    /** 9-6 알림 설정 수정 */
+    public void update(boolean chatNoti, boolean applicantNoti, boolean commentNoti, boolean scheduleNoti,
+                        boolean matchNoti, boolean projectNoti, boolean marketingNoti) {
+        this.chatNoti = chatNoti;
+        this.applicantNoti = applicantNoti;
+        this.commentNoti = commentNoti;
+        this.scheduleNoti = scheduleNoti;
+        this.matchNoti = matchNoti;
+        this.projectNoti = projectNoti;
+        this.marketingNoti = marketingNoti;
+    }
 }

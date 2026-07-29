@@ -4,6 +4,9 @@ import com.pickii.domain.apply.dto.MyApplyResponse;
 import com.pickii.domain.apply.service.ApplyService;
 import com.pickii.domain.auth.dto.SocialAccountResponse;
 import com.pickii.domain.auth.service.AuthService;
+import com.pickii.domain.notification.dto.NotificationSettingRequest;
+import com.pickii.domain.notification.dto.NotificationSettingResponse;
+import com.pickii.domain.notification.service.NotificationSettingService;
 import com.pickii.domain.recruit.dto.MyCommentResponse;
 import com.pickii.domain.recruit.dto.RecruitScrapSummaryResponse;
 import com.pickii.domain.recruit.dto.RecruitSummaryResponse;
@@ -32,7 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * 회원(User) API (API_SPEC 1-13, 3-16, 4-1~4-6)
+ * 회원(User) API (API_SPEC 1-13, 3-16, 4-1~4-6, 9-5, 9-6)
  */
 @RestController
 @RequestMapping("/users")
@@ -43,6 +46,7 @@ public class UserController {
     private final RecruitService recruitService;
     private final ResumeService resumeService;
     private final ApplyService applyService;
+    private final NotificationSettingService notificationSettingService;
 
     /** 1-13 소셜 계정 연동 상태 조회 */
     @GetMapping("/me/social-accounts")
@@ -110,5 +114,22 @@ public class UserController {
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         PageResponse<MyCommentResponse> response = recruitService.getMyComments(memberId, pageable);
         return ResponseEntity.ok(ApiResponse.of(response));
+    }
+
+    /** 9-5 알림 설정 조회 */
+    @GetMapping("/me/notification-settings")
+    public ResponseEntity<ApiResponse<NotificationSettingResponse>> getNotificationSettings(
+            @AuthenticationPrincipal Long memberId) {
+        NotificationSettingResponse response = notificationSettingService.getSetting(memberId);
+        return ResponseEntity.ok(ApiResponse.of(response));
+    }
+
+    /** 9-6 알림 설정 수정 */
+    @PatchMapping("/me/notification-settings")
+    public ResponseEntity<Void> updateNotificationSettings(
+            @AuthenticationPrincipal Long memberId,
+            @Valid @RequestBody NotificationSettingRequest request) {
+        notificationSettingService.updateSetting(memberId, request);
+        return ResponseEntity.noContent().build();
     }
 }

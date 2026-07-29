@@ -6241,7 +6241,7 @@ Bearer Access Token
         "content":[
             {
                 "notificationId":1,
-                "type":"APPLICATION",
+                "type":"APPLY",
                 "title":"새로운 지원자가 있습니다.",
                 "content":"픽키님이 '제일기획 공모전'에 지원했습니다.",
                 "referenceType":"RECRUIT",
