@@ -2578,9 +2578,9 @@ Bearer Access Token
 | Name           | Type   | Required | Description                                                   | 저장 위치                |
 |:-------------- |:------ |:-------- |:------------------------------------------------------------- |:-------------------- |
 | univId         | Long   | O        | 대학교 ID (마스터에서 **선택**, `GET /universities`)                    | `MemberUniv.UnivId`  |
-| major          | String | O        | 전공 (2~20자, 사용자 **직접 입력**)                                     | `MemberUniv.Major`   |
+| major          | String | O        | 전공 (2~50자, 사용자 **직접 입력**)                                     | `MemberUniv.Major`   |
 | academicStatus | Enum   | O        | ENROLLED / LEAVE_OF_ABSENCE / GRADUATION_DEFERRED / GRADUATED | `MemberUniv.Status`  |
-| hope           | String | X        | 희망 진로 (20자 이하)                                               | `MemberResume.Hope`  |
+| hope           | String | X        | 희망 진로 (100자 이하)                                              | `MemberResume.Hope`  |
 | strength       | String | X        | 장점 (300자 이하)                                                  | `MemberResume.Strength` |
 | topic          | Array  | X        | 관심 주제 ID 목록                                                   | `DetailTopic`        |
 | skillTool      | Array  | X        | 기술 스택 + 숙련도(1~3)                                              | `MemberTechStack`    |
