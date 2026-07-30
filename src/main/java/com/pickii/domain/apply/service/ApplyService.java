@@ -34,6 +34,7 @@ import com.pickii.domain.project.repository.ProjectMemberRepository;
 import com.pickii.domain.project.repository.ProjectRepository;
 import com.pickii.domain.recruit.entity.Recruit;
 import com.pickii.domain.recruit.repository.RecruitRepository;
+import com.pickii.global.ai.GeminiClient;
 import com.pickii.global.common.response.PageResponse;
 import com.pickii.global.exception.BusinessException;
 import com.pickii.global.exception.ErrorCode;
@@ -71,14 +72,30 @@ public class ApplyService {
     private final ProjectMemberRepository projectMemberRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomMemberRepository chatRoomMemberRepository;
+    private final GeminiClient geminiClient;
 
-    /**
-     * 3-10 AI 지원서 초안 생성
-     *
-     * <p>TODO: 실제 AI 서버 연동 전까지는 입력값을 가공해 돌려주는 목업으로 구현한다.</p>
-     */
-    public ApplyAiDraftResponse generateAiDraft(ApplyAiDraftRequest request) {
-        return new ApplyAiDraftResponse("AI가 다듬은: " + request.message());
+    /** 3-10 AI 지원서 초안 생성 (Gemini) */
+    public ApplyAiDraftResponse generateAiDraft(Long recruitId, ApplyAiDraftRequest request) {
+        Recruit recruit = recruitRepository.findById(recruitId)
+                .filter(r -> !r.isDeleted())
+                .orElseThrow(() -> new BusinessException(ErrorCode.RECRUIT_NOT_FOUND));
+
+        String prompt = """
+                너는 대학생 공모전/스터디/프로젝트 팀원 모집 공고에 지원하는 지원자의 메시지를 다듬어주는 도우미다.
+                아래 공고 내용을 참고하여, 지원자가 작성한 원본 메시지를 공고 맥락에 맞게 더 정중하고 설득력 있게 다듬어라.
+                없는 사실을 지어내지 말고, 결과는 다듬어진 지원 메시지 본문만 출력하라 (설명, 따옴표, 접두사 없이).
+
+                [공고 정보]
+                제목: %s
+                간단소개: %s
+                상세내용: %s
+
+                [지원자 원본 메시지]
+                %s
+                """.formatted(recruit.getTitle(), recruit.getSimpleDesc(), recruit.getContent(), request.message());
+
+        String convertedText = geminiClient.generateText(prompt);
+        return new ApplyAiDraftResponse(convertedText.trim());
     }
 
     /** 3-11 공고 지원하기 */

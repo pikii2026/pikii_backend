@@ -49,8 +49,7 @@ public class Recruit extends BaseTimeEntity {
     @Column(length = 50)
     private String simpleDesc;
 
-    @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
     /** 모집 인원 (1~7) */

@@ -1612,6 +1612,11 @@ Bearer Access Token
 }
 ```
 
+| 필드         | 필수 | 설명                                    |
+|:------------ |:---- |:--------------------------------------- |
+| simpleDesc   | 선택 | 간단 소개 초안 (최대 50자)               |
+| content      | 필수 | 상세 내용 초안 (최대 1000자, 공란 불가)   |
+
 ---
 
 ## Response
@@ -1632,8 +1637,8 @@ Bearer Access Token
 
 ## Business Logic
 
-1. 입력 데이터 검증
-2. AI 서버 호출
+1. 입력 데이터 검증 (content는 필수 — 미입력 시 AI 호출 없이 400 VALIDATION_FAILED)
+2. AI 서버 호출 — 사용자가 입력한 simpleDesc/content 초안을 기반으로 문장을 다듬어 확장 (없는 사실을 임의로 지어내지 않음)
 3. 초안 생성
 4. 결과 반환
 
@@ -2042,6 +2047,7 @@ Bearer Access Token
 | HTTP | Error Code           | 설명       |
 |:---- |:-------------------- |:-------- |
 | 400  | VALIDATION_FAILED    | 원본 메시지 없음 |
+| 404  | RECRUIT_NOT_FOUND    | 존재하지 않는 공고 |
 | 500  | AI_GENERATION_FAILED | AI 생성 실패 |
 
 ---
@@ -2573,9 +2579,9 @@ Bearer Access Token
 | Name           | Type   | Required | Description                                                   | 저장 위치                |
 |:-------------- |:------ |:-------- |:------------------------------------------------------------- |:-------------------- |
 | univId         | Long   | O        | 대학교 ID (마스터에서 **선택**, `GET /universities`)                    | `MemberUniv.UnivId`  |
-| major          | String | O        | 전공 (2~20자, 사용자 **직접 입력**)                                     | `MemberUniv.Major`   |
+| major          | String | O        | 전공 (2~50자, 사용자 **직접 입력**)                                     | `MemberUniv.Major`   |
 | academicStatus | Enum   | O        | ENROLLED / LEAVE_OF_ABSENCE / GRADUATION_DEFERRED / GRADUATED | `MemberUniv.Status`  |
-| hope           | String | X        | 희망 진로 (20자 이하)                                               | `MemberResume.Hope`  |
+| hope           | String | X        | 희망 진로 (100자 이하)                                              | `MemberResume.Hope`  |
 | strength       | String | X        | 장점 (300자 이하)                                                  | `MemberResume.Strength` |
 | topic          | Array  | X        | 관심 주제 ID 목록                                                   | `DetailTopic`        |
 | skillTool      | Array  | X        | 기술 스택 + 숙련도(1~3)                                              | `MemberTechStack`    |

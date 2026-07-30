@@ -25,3 +25,8 @@ jwt:
   # Refresh Token 유효시간(초) - REDIS_POLICY: autoLogin=false 1일 / true 30일
   refresh-token-validity: 86400
   refresh-token-validity-auto-login: 2592000
+
+# AI 연동 (공고초안/지원메시지/자기소개/상호평가요약) - Gemini 3.5 Flash-Lite (무료 티어)
+gemini:
+  api-key: ${GEMINI_API_KEY:}
+  model: gemini-3.5-flash-lite
