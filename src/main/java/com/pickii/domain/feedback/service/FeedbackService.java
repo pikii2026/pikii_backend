@@ -7,8 +7,13 @@ import com.pickii.domain.feedback.dto.FeedbackListResponse;
 import com.pickii.domain.feedback.dto.FeedbackTargetResponse;
 import com.pickii.domain.feedback.dto.TargetMemberResponse;
 import com.pickii.domain.feedback.dto.KeywordResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pickii.domain.feedback.entity.AIFeedback;
+import com.pickii.domain.feedback.entity.AIFeedbackKeyword;
 import com.pickii.domain.feedback.entity.Feedback;
+import com.pickii.domain.feedback.entity.Keyword;
+import com.pickii.domain.feedback.repository.AIFeedbackKeywordRepository;
 import com.pickii.domain.feedback.repository.AIFeedbackRepository;
 import com.pickii.domain.feedback.repository.FeedbackRepository;
 import com.pickii.domain.feedback.repository.KeywordRepository;
@@ -19,6 +24,7 @@ import com.pickii.domain.project.entity.ProjectMember;
 import com.pickii.domain.project.entity.ProjectStatus;
 import com.pickii.domain.project.repository.ProjectMemberRepository;
 import com.pickii.domain.project.repository.ProjectRepository;
+import com.pickii.global.ai.GeminiClient;
 import com.pickii.global.common.response.PageResponse;
 import com.pickii.global.exception.BusinessException;
 import com.pickii.global.exception.ErrorCode;
@@ -33,6 +39,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * 평가 대상 팀원 조회 (API_SPEC 4-9), 상호평가 작성 (API_SPEC 4-10),
@@ -46,12 +55,18 @@ public class FeedbackService {
     /** 평가 기간: 프로젝트 종료(END) 시점으로부터 3일 */
     private static final int EVALUATION_PERIOD_DAYS = 3;
 
+    /** AI 피드백 키워드는 최대 3개까지만 부여한다. */
+    private static final int MAX_AI_FEEDBACK_KEYWORDS = 3;
+
     private final FeedbackRepository feedbackRepository;
     private final AIFeedbackRepository aiFeedbackRepository;
+    private final AIFeedbackKeywordRepository aiFeedbackKeywordRepository;
     private final ProjectRepository projectRepository;
     private final ProjectMemberRepository projectMemberRepository;
     private final MemberRepository memberRepository;
     private final KeywordRepository keywordRepository;
+    private final GeminiClient geminiClient;
+    private final ObjectMapper objectMapper;
 
     /** 5-6 피드백 키워드 조회 */
     public List<KeywordResponse> getKeywords() {
@@ -160,10 +175,19 @@ public class FeedbackService {
 
         return new AiFeedbackDetailResponse(
                 project.getId(),
-                List.of("#꼼꼼한", "#책임감"),
+                getAiFeedbackKeywords(aiFeedback.getId()),
                 aiFeedback.getStrength(),
                 aiFeedback.getWeakness()
         );
+    }
+
+    private List<String> getAiFeedbackKeywords(Long aiFeedbackId) {
+        List<Long> keywordIds = aiFeedbackKeywordRepository.findAllByAiFeedbackId(aiFeedbackId).stream()
+                .map(AIFeedbackKeyword::getKeywordId)
+                .toList();
+        return keywordRepository.findAllById(keywordIds).stream()
+                .map(k -> "#" + k.getName())
+                .toList();
     }
 
     /**
@@ -184,7 +208,7 @@ public class FeedbackService {
                 }
                 long evaluatedCount = feedbackRepository.countByProjectIdAndRevieweeId(project.getId(), revieweeId);
                 if (evaluatedCount >= required) {
-                    generateAiFeedbackMock(project, revieweeId);
+                    generateAiFeedback(project, revieweeId);
                 }
             }
         }
@@ -201,7 +225,7 @@ public class FeedbackService {
         if (evaluatedCount < requiredEvaluatorCount(teamSize)) {
             throw new BusinessException(ErrorCode.INSUFFICIENT_EVALUATION);
         }
-        generateAiFeedbackMock(project, memberId);
+        generateAiFeedback(project, memberId);
         return aiFeedbackRepository.findByProjectIdAndMemberId(project.getId(), memberId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.EVALUATION_NOT_FOUND));
     }
@@ -219,21 +243,91 @@ public class FeedbackService {
         int teamSize = projectMemberRepository.findAllByProjectIdAndLeftAtIsNull(project.getId()).size();
         long evaluatedCount = feedbackRepository.countByProjectIdAndRevieweeId(project.getId(), revieweeId);
         if (teamSize >= 3 && evaluatedCount >= teamSize - 1) {
-            generateAiFeedbackMock(project, revieweeId);
+            generateAiFeedback(project, revieweeId);
         }
     }
 
-    private void generateAiFeedbackMock(Project project, Long revieweeId) {
+    /** 4-11/4-12 AI 종합 피드백 생성 (Gemini). 팀원들의 상호평가를 종합해 강점/개선점 요약과 역량 키워드를 산출한다. */
+    private void generateAiFeedback(Project project, Long revieweeId) {
         if (aiFeedbackRepository.findByProjectIdAndMemberId(project.getId(), revieweeId).isPresent()) {
             return;
         }
         Member reviewee = memberRepository.getReferenceById(revieweeId);
-        aiFeedbackRepository.save(AIFeedback.builder()
+        List<Feedback> feedbacks = feedbackRepository.findAllByProjectIdAndRevieweeId(project.getId(), revieweeId);
+        List<Keyword> keywordPool = keywordRepository.findAll();
+
+        AiFeedbackResult result = requestAiFeedback(feedbacks, keywordPool);
+
+        AIFeedback aiFeedback = aiFeedbackRepository.save(AIFeedback.builder()
                 .project(project)
                 .member(reviewee)
-                .strength("(AI 생성 목업) 팀원들의 평가를 종합하면 책임감과 협업 능력이 뛰어납니다.")
-                .weakness("(AI 생성 목업) 마감 기한 관리에 조금 더 신경쓰면 좋겠습니다.")
+                .strength(result.strengthSummary())
+                .weakness(result.weaknessSummary())
                 .build());
+
+        List<Long> poolIds = keywordPool.stream().map(Keyword::getId).toList();
+        List<Long> chosenKeywordIds = result.keywordIds() == null
+                ? List.of()
+                : result.keywordIds().stream().distinct().filter(poolIds::contains).limit(MAX_AI_FEEDBACK_KEYWORDS).toList();
+        chosenKeywordIds.forEach(keywordId ->
+                aiFeedbackKeywordRepository.save(new AIFeedbackKeyword(keywordId, aiFeedback.getId())));
+    }
+
+    private AiFeedbackResult requestAiFeedback(List<Feedback> feedbacks, List<Keyword> keywordPool) {
+        String reviewsText = IntStream.range(0, feedbacks.size())
+                .mapToObj(i -> {
+                    Feedback f = feedbacks.get(i);
+                    return "평가자 " + (i + 1) + " - 책임감:" + f.getCommitScore()
+                            + ", 소통:" + f.getCommScore()
+                            + ", 기한준수:" + f.getDeadlineScore()
+                            + ", 협업:" + f.getCooperateScore()
+                            + ", 기여도:" + f.getContributeScore()
+                            + " / 강점: " + f.getStrengthText()
+                            + " / 개선점: " + f.getWeaknessText();
+                })
+                .collect(Collectors.joining("\n"));
+
+        String keywordPoolText = keywordPool.isEmpty()
+                ? "(없음)"
+                : keywordPool.stream().map(k -> k.getId() + ":" + k.getName()).collect(Collectors.joining(", "));
+
+        String prompt = """
+                너는 팀 프로젝트 상호평가 결과를 종합 분석하는 도우미다.
+                아래는 한 팀원이 다른 팀원들에게서 익명으로 받은 상호평가 결과다.
+                이를 종합해 강점 요약(strengthSummary)과 개선점 요약(weaknessSummary)을 각각 300자 이내
+                한국어로 작성하라. 없는 사실을 지어내지 말고, 평가자 개인을 특정하거나 인용하지 마라.
+
+                또한 아래 [키워드 후보] 목록에서만 골라 이 팀원을 가장 잘 나타내는 키워드를
+                **최대 3개까지만** 선택하라(keywordIds). 반드시 3개 이하여야 하며, 그중에서도
+                가장 확실하게 드러나는 것만 우선순위를 매겨 골라라. 후보에 없는 키워드는 만들어내지
+                말고, 후보가 비어 있으면 빈 배열을 반환하라.
+
+                [상호평가 결과]
+                %s
+
+                [키워드 후보 (id:이름)]
+                %s
+                """.formatted(reviewsText, keywordPoolText);
+
+        Map<String, Object> responseSchema = Map.of(
+                "type", "object",
+                "properties", Map.of(
+                        "strengthSummary", Map.of("type", "string"),
+                        "weaknessSummary", Map.of("type", "string"),
+                        "keywordIds", Map.of("type", "array", "items", Map.of("type", "integer"))
+                ),
+                "required", List.of("strengthSummary", "weaknessSummary", "keywordIds")
+        );
+
+        String json = geminiClient.generateJson(prompt, responseSchema);
+        try {
+            return objectMapper.readValue(json, AiFeedbackResult.class);
+        } catch (JsonProcessingException e) {
+            throw new BusinessException(ErrorCode.AI_GENERATION_FAILED);
+        }
+    }
+
+    private record AiFeedbackResult(String strengthSummary, String weaknessSummary, List<Long> keywordIds) {
     }
 
     private Project getProject(Long projectId) {
