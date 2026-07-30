@@ -2047,6 +2047,7 @@ Bearer Access Token
 | HTTP | Error Code           | 설명       |
 |:---- |:-------------------- |:-------- |
 | 400  | VALIDATION_FAILED    | 원본 메시지 없음 |
+| 404  | RECRUIT_NOT_FOUND    | 존재하지 않는 공고 |
 | 500  | AI_GENERATION_FAILED | AI 생성 실패 |
 
 ---

@@ -27,8 +27,10 @@ public class ApplyController {
 
     /** 3-10 AI 지원서 초안 생성 */
     @PostMapping("/ai-draft")
-    public ResponseEntity<ApiResponse<ApplyAiDraftResponse>> generateAiDraft(@Valid @RequestBody ApplyAiDraftRequest request) {
-        ApplyAiDraftResponse response = applyService.generateAiDraft(request);
+    public ResponseEntity<ApiResponse<ApplyAiDraftResponse>> generateAiDraft(
+            @PathVariable Long recruitId,
+            @Valid @RequestBody ApplyAiDraftRequest request) {
+        ApplyAiDraftResponse response = applyService.generateAiDraft(recruitId, request);
         return ResponseEntity.ok(ApiResponse.of(response));
     }
 
