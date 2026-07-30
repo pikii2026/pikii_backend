@@ -1612,6 +1612,11 @@ Bearer Access Token
 }
 ```
 
+| 필드         | 필수 | 설명                                    |
+|:------------ |:---- |:--------------------------------------- |
+| simpleDesc   | 선택 | 간단 소개 초안 (최대 50자)               |
+| content      | 필수 | 상세 내용 초안 (최대 1000자, 공란 불가)   |
+
 ---
 
 ## Response
@@ -1632,8 +1637,8 @@ Bearer Access Token
 
 ## Business Logic
 
-1. 입력 데이터 검증
-2. AI 서버 호출
+1. 입력 데이터 검증 (content는 필수 — 미입력 시 AI 호출 없이 400 VALIDATION_FAILED)
+2. AI 서버 호출 — 사용자가 입력한 simpleDesc/content 초안을 기반으로 문장을 다듬어 확장 (없는 사실을 임의로 지어내지 않음)
 3. 초안 생성
 4. 결과 반환
 
