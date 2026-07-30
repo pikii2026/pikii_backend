@@ -1,11 +1,13 @@
 package com.pickii.domain.resume.service;
 
+import com.pickii.domain.member.entity.AcademicStatus;
 import com.pickii.domain.member.entity.Member;
 import com.pickii.domain.member.entity.MemberUniv;
 import com.pickii.domain.member.entity.Univ;
 import com.pickii.domain.member.repository.MemberRepository;
 import com.pickii.domain.member.repository.MemberUnivRepository;
 import com.pickii.domain.member.repository.UnivRepository;
+import com.pickii.domain.recruit.entity.Topic;
 import com.pickii.domain.recruit.repository.TopicRepository;
 import com.pickii.domain.resume.dto.AdditionalLinkItem;
 import com.pickii.domain.resume.dto.AdditionalLinkRequest;
@@ -37,11 +39,13 @@ import com.pickii.domain.resume.repository.MemberLicenseRepository;
 import com.pickii.domain.resume.repository.MemberResumeRepository;
 import com.pickii.domain.resume.repository.MemberTechStackRepository;
 import com.pickii.domain.resume.repository.TechStackRepository;
+import com.pickii.global.ai.GeminiClient;
 import com.pickii.global.exception.BusinessException;
 import com.pickii.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -76,6 +80,7 @@ public class ResumeService {
     private final DetailExperienceRepository detailExperienceRepository;
     private final AdditionalLinkRepository additionalLinkRepository;
     private final LinkCategoryRepository linkCategoryRepository;
+    private final GeminiClient geminiClient;
 
     /** 4-1 내 프로필 조회 */
     public UserProfileResponse getMyProfile(Long memberId) {
@@ -157,7 +162,7 @@ public class ResumeService {
                 .contactEmail(member.getEmail())
                 .hope(request.hope())
                 .strength(request.strength())
-                .aboutMe(generateAboutMe(request))
+                .aboutMe(generateAboutMe(univ, topicIds, request))
                 .build();
         memberResumeRepository.save(resume);
 
@@ -271,16 +276,67 @@ public class ResumeService {
         }
     }
 
-    /** TODO: 실제 AI 서버 연동 전까지는 목업 - 입력값을 조합해 자기소개 초안을 생성한다. */
-    private String generateAboutMe(ResumeRequest request) {
-        StringBuilder sb = new StringBuilder();
-        if (request.hope() != null && !request.hope().isBlank()) {
-            sb.append(request.hope()).append("를 목표로 하는 인재입니다. ");
-        }
-        if (request.strength() != null && !request.strength().isBlank()) {
-            sb.append("강점: ").append(request.strength()).append(".");
-        }
-        return sb.isEmpty() ? "성실하게 프로젝트에 임하는 팀원입니다." : sb.toString().trim();
+    /** 4-2 자기소개(aboutMe) 최초 1회 AI 생성 (Gemini) */
+    private String generateAboutMe(Univ univ, List<Long> topicIds, ResumeRequest request) {
+        String topicNames = topicIds.isEmpty()
+                ? "(없음)"
+                : topicRepository.findAllById(topicIds).stream().map(Topic::getName)
+                        .collect(Collectors.joining(", "));
+
+        String skillToolText = request.skillTool() == null || request.skillTool().isEmpty()
+                ? "(없음)"
+                : request.skillTool().stream()
+                        .map(s -> s.techStackName() + "(숙련도 " + s.level() + ")")
+                        .collect(Collectors.joining(", "));
+
+        String licenseText = request.license() == null || request.license().isEmpty()
+                ? "(없음)"
+                : request.license().stream().map(LicenseRequest::licenseName)
+                        .collect(Collectors.joining(", "));
+
+        String experienceText = request.experience() == null || request.experience().isEmpty()
+                ? "(없음)"
+                : request.experience().stream()
+                        .map(e -> e.title() + (e.organization() == null || e.organization().isBlank() ? "" : " (" + e.organization() + ")"))
+                        .collect(Collectors.joining(", "));
+
+        String prompt = """
+                너는 대학생 이력서의 자기소개(aboutMe)를 대신 작성해주는 도우미다.
+                아래 입력 정보만을 바탕으로 자연스럽고 신뢰가 가는 한국어 자기소개를 300자 이내로 작성하라.
+                입력되지 않은("(없음)") 항목은 언급하지 말고, 없는 사실을 지어내지 마라.
+                결과는 자기소개 본문만 출력하라 (설명, 따옴표 없이).
+
+                대학교: %s
+                전공: %s
+                학적 상태: %s
+                희망 진로: %s
+                장점: %s
+                관심 주제: %s
+                기술 스택: %s
+                자격증: %s
+                수상/경험: %s
+                """.formatted(
+                        univ.getName(),
+                        request.major(),
+                        academicStatusKorean(request.academicStatus()),
+                        StringUtils.hasText(request.hope()) ? request.hope() : "(없음)",
+                        StringUtils.hasText(request.strength()) ? request.strength() : "(없음)",
+                        topicNames,
+                        skillToolText,
+                        licenseText,
+                        experienceText
+                );
+
+        return geminiClient.generateText(prompt).trim();
+    }
+
+    private String academicStatusKorean(AcademicStatus status) {
+        return switch (status) {
+            case ENROLLED -> "재학";
+            case LEAVE_OF_ABSENCE -> "휴학";
+            case GRADUATION_DEFERRED -> "졸업유예";
+            case GRADUATED -> "졸업";
+        };
     }
 
     private List<SkillToolItem> getSkillTools(Long memberId) {
