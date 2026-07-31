@@ -63,6 +63,8 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class MeetingPollService {
 
+    private static final Set<Integer> ALLOWED_DURATION_MINUTES = Set.of(30, 60, 90, 120);
+
     private final MeetingPollRepository meetingPollRepository;
     private final MeetingPollSlotRepository meetingPollSlotRepository;
     private final MeetingPollMemberRepository meetingPollMemberRepository;
@@ -88,6 +90,9 @@ public class MeetingPollService {
         }
         if (!request.dayStart().isBefore(request.dayEnd())) {
             throw new BusinessException(ErrorCode.VALIDATION_FAILED, "탐색 시작 시각은 종료 시각보다 이전이어야 합니다.");
+        }
+        if (!ALLOWED_DURATION_MINUTES.contains(request.durationMin())) {
+            throw new BusinessException(ErrorCode.VALIDATION_FAILED, "소요 시간은 30/60/90/120분 중 하나여야 합니다.");
         }
 
         int deadlineHours = request.deadlineHours() != null ? request.deadlineHours() : 12;
@@ -296,14 +301,19 @@ public class MeetingPollService {
                 "'" + poll.getTitle() + "' 회의 조율이 취소되었습니다."));
     }
 
-    /** 탐색 기간 × 탐색 시간대를 30분 단위로 나누어 후보 슬롯 전체를 생성한다. */
+    /**
+     * 탐색 기간 × 탐색 시간대를 30분 간격 후보 시작 시각으로 나누고, 각 슬롯의 길이는
+     * 회의 소요 시간(durationMin)만큼 잡아 후보 슬롯 전체를 생성한다.
+     * (예: durationMin=60이면 09:00~10:00, 09:30~10:30, 10:00~11:00 ... 30분씩 밀려가며 겹치는 1시간 슬롯이 나온다.)
+     */
     private List<MeetingPollSlot> generateSlots(MeetingPoll poll) {
         List<MeetingPollSlot> slots = new ArrayList<>();
+        int durationMin = poll.getDurationMin();
         for (LocalDate date = poll.getRangeStart(); !date.isAfter(poll.getRangeEnd()); date = date.plusDays(1)) {
             LocalDateTime cursor = LocalDateTime.of(date, poll.getDayStart());
             LocalDateTime dayEnd = LocalDateTime.of(date, poll.getDayEnd());
-            while (!cursor.plusMinutes(30).isAfter(dayEnd)) {
-                slots.add(new MeetingPollSlot(poll, cursor, cursor.plusMinutes(30)));
+            while (!cursor.plusMinutes(durationMin).isAfter(dayEnd)) {
+                slots.add(new MeetingPollSlot(poll, cursor, cursor.plusMinutes(durationMin)));
                 cursor = cursor.plusMinutes(30);
             }
         }
