@@ -8,6 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /**
@@ -53,6 +54,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(ErrorCode.VALIDATION_FAILED.getStatus())
                 .body(ErrorResponse.of(ErrorCode.VALIDATION_FAILED));
+    }
+
+    /** 업로드 파일이 spring.servlet.multipart.max-file-size(10MB)를 초과 → FILE_TOO_LARGE (API_SPEC 8-4) */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorResponse> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException e) {
+        return ResponseEntity
+                .status(ErrorCode.FILE_TOO_LARGE.getStatus())
+                .body(ErrorResponse.of(ErrorCode.FILE_TOO_LARGE));
     }
 
     /** 존재하지 않는 경로 → 404 */
