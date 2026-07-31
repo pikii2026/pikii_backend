@@ -73,6 +73,9 @@ public class MeetingPoll {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    /** 응답 마감 3시간 전 리마인더 발송 여부 (중복 발송 방지) */
+    private LocalDateTime reminderSentAt;
+
     @Builder
     public MeetingPoll(Project project, Member createdBy, String title, int durationMin,
                        LocalDate rangeStart, LocalDate rangeEnd,
@@ -101,5 +104,9 @@ public class MeetingPoll {
 
     public boolean isCollecting() {
         return this.status == MeetingPollStatus.COLLECTING;
+    }
+
+    public void markReminderSent() {
+        this.reminderSentAt = LocalDateTime.now();
     }
 }
