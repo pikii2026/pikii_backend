@@ -53,6 +53,8 @@ import com.pickii.domain.resume.repository.MemberResumeRepository;
 import com.pickii.domain.resume.repository.MemberTechStackRepository;
 import com.pickii.domain.schedule.repository.MeetingPollAvailabilityRepository;
 import com.pickii.domain.schedule.repository.MeetingPollMemberRepository;
+import com.pickii.domain.schedule.repository.MeetingPollRepository;
+import com.pickii.domain.schedule.repository.MeetingPollSlotRepository;
 import com.pickii.domain.schedule.repository.MemberScheduleRepository;
 import com.pickii.domain.schedule.repository.PartyScheduleAttendanceRepository;
 import com.pickii.domain.schedule.repository.ScheduleCategoryRepository;
@@ -106,6 +108,8 @@ public class AuthService {
     private final AIFeedbackKeywordRepository aiFeedbackKeywordRepository;
     private final MemberScheduleRepository memberScheduleRepository;
     private final ScheduleCategoryRepository scheduleCategoryRepository;
+    private final MeetingPollRepository meetingPollRepository;
+    private final MeetingPollSlotRepository meetingPollSlotRepository;
     private final MeetingPollMemberRepository meetingPollMemberRepository;
     private final MeetingPollAvailabilityRepository meetingPollAvailabilityRepository;
     private final PartyScheduleAttendanceRepository partyScheduleAttendanceRepository;
@@ -289,12 +293,31 @@ public class AuthService {
 
         memberScheduleRepository.deleteAllByMemberId(memberId);
         scheduleCategoryRepository.deleteAllByMemberId(memberId);
+        deleteCreatedMeetingPolls(memberId);
         meetingPollMemberRepository.deleteAllByMemberId(memberId);
         meetingPollAvailabilityRepository.deleteAllByMemberId(memberId);
         partyScheduleAttendanceRepository.deleteAllByMemberId(memberId);
 
         chatRoomMemberRepository.deleteAllByMemberId(memberId);
         notificationHistoryRepository.deleteAllByMemberId(memberId);
+    }
+
+    /**
+     * MeetingPoll.CreatedBy는 NOT NULL FK이며 DB_Schema 정책상 ON DELETE CASCADE 대상이다.
+     * Hibernate가 실제 CASCADE 제약을 생성하지 않으므로(어노테이션 없음), 탈퇴 전 본인이 개설한 조율과
+     * 그 자식 테이블(슬롯 → 슬롯별 응답 → 참여자 응답 여부)을 순서대로 직접 정리한다.
+     * 확정된 회의(PartySchedule)는 프로젝트 소유 데이터라 별도이며, 개설자 탈퇴와 무관하게 유지된다.
+     */
+    private void deleteCreatedMeetingPolls(Long memberId) {
+        List<Long> pollIds = meetingPollRepository.findIdsByCreatedById(memberId);
+        if (pollIds.isEmpty()) {
+            return;
+        }
+        List<Long> slotIds = meetingPollSlotRepository.findIdsByPollIdIn(pollIds);
+        meetingPollAvailabilityRepository.deleteAllBySlotIdIn(slotIds);
+        meetingPollSlotRepository.deleteAllByPollIdIn(pollIds);
+        meetingPollMemberRepository.deleteAllByPollIdIn(pollIds);
+        meetingPollRepository.deleteAllByCreatedById(memberId);
     }
 
     /** 1-10 소셜 로그인 */
