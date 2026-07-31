@@ -143,7 +143,9 @@ public class FeedbackService {
     private FeedbackListResponse toFeedbackListItem(Project project, Long memberId) {
         int teamSize = projectMemberRepository.findAllByProjectIdAndLeftAtIsNull(project.getId()).size();
         long evaluatedCount = feedbackRepository.countByProjectIdAndRevieweeId(project.getId(), memberId);
-        int requiredCount = requiredEvaluatorCount(teamSize);
+        // requiredEvaluatorCount()는 2인 이하 팀에서 "생성 불가"를 표현하려고 MAX_VALUE를 반환하므로,
+        // 화면 표시용 값은 그대로 노출하지 않고 0(대상 아님)으로 clamp한다.
+        int requiredCount = teamSize < 3 ? 0 : requiredEvaluatorCount(teamSize);
 
         LocalDate start = project.getEndedAt().toLocalDate();
         LocalDate end = start.plusDays(EVALUATION_PERIOD_DAYS);
@@ -230,10 +232,15 @@ public class FeedbackService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.EVALUATION_NOT_FOUND));
     }
 
-    /** 팀 인원(N)에 따른 AI 피드백 생성 최소 평가 인원. 2인 이하는 생성 대상 아님. */
+    /**
+     * 팀 인원(N)에 따른 AI 피드백 생성 최소 평가 인원.
+     * 2인 이하는 생성 대상 아님 — evaluatedCount(항상 0 이상)로는 절대 충족할 수 없도록
+     * Integer.MAX_VALUE를 반환한다. (0을 반환하면 "평가 0건 >= 0건"이 항상 참이 되어
+     * 2인 팀도 AI 피드백이 생성되던 버그가 있었다.)
+     */
     private int requiredEvaluatorCount(int teamSize) {
         if (teamSize < 3) {
-            return 0;
+            return Integer.MAX_VALUE;
         }
         return (int) Math.ceil(teamSize / 2.0);
     }
