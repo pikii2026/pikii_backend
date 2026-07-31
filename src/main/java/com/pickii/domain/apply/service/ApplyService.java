@@ -39,6 +39,7 @@ import com.pickii.global.common.response.PageResponse;
 import com.pickii.global.exception.BusinessException;
 import com.pickii.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -147,7 +148,8 @@ public class ApplyService {
         applyRepository.delete(apply);
     }
 
-    /** 5-7 지원 키워드 조회 (카테고리별 Nested) */
+    /** 5-7 지원 키워드 조회 (카테고리별 Nested, 마스터 데이터라 캐싱) */
+    @Cacheable("applyKeywords")
     public List<ApplyKeywordCategoryResponse> getApplyKeywords() {
         Map<Long, List<ApplyKeyword>> keywordsByCategoryId = applyKeywordRepository.findAll().stream()
                 .collect(Collectors.groupingBy(keyword -> keyword.getCategory().getId()));

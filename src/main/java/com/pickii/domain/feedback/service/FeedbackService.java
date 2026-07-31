@@ -29,6 +29,7 @@ import com.pickii.global.common.response.PageResponse;
 import com.pickii.global.exception.BusinessException;
 import com.pickii.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -68,7 +69,8 @@ public class FeedbackService {
     private final GeminiClient geminiClient;
     private final ObjectMapper objectMapper;
 
-    /** 5-6 피드백 키워드 조회 */
+    /** 5-6 피드백 키워드 조회 (마스터 데이터, 거의 변경 없어 캐싱) */
+    @Cacheable("feedbackKeywords")
     public List<KeywordResponse> getKeywords() {
         return keywordRepository.findAll().stream()
                 .map(KeywordResponse::from)
