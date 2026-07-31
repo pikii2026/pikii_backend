@@ -87,7 +87,8 @@ public class ResumeService {
         MemberResume resume = memberResumeRepository.findById(memberId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESUME_NOT_FOUND));
         Member member = resume.getMember();
-        MemberUniv memberUniv = memberUnivRepository.findById(memberId).orElseThrow();
+        MemberUniv memberUniv = memberUnivRepository.findById(memberId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESUME_NOT_FOUND));
 
         List<Long> topicIds = detailTopicRepository.findTopicIdsByMemberId(memberId);
         List<SkillToolItem> skillTool = getSkillTools(memberId);
@@ -118,7 +119,8 @@ public class ResumeService {
         MemberResume resume = memberResumeRepository.findById(targetMemberId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESUME_NOT_FOUND));
         Member member = resume.getMember();
-        MemberUniv memberUniv = memberUnivRepository.findById(targetMemberId).orElseThrow();
+        MemberUniv memberUniv = memberUnivRepository.findById(targetMemberId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESUME_NOT_FOUND));
 
         return new MemberProfileResponse(
                 member.getNickname(),

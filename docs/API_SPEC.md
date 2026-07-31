@@ -3077,6 +3077,7 @@ Bearer Access Token
 | 400  | ALREADY_EVALUATED         | 이미 평가 완료        |
 | 403  | FORBIDDEN                 | 평가 권한 없음        |
 | 404  | PROJECT_NOT_FOUND         | 프로젝트 없음         |
+| 404  | PROJECT_MEMBER_NOT_FOUND  | 평가 대상이 팀원이 아님   |
 | 409  | PROJECT_NOT_ENDED         | 아직 종료되지 않은 프로젝트 |
 | 409  | EVALUATION_PERIOD_EXPIRED | 평가 기간(3일) 종료    |
 
