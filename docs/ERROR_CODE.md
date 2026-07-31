@@ -459,9 +459,10 @@ Pickii 프로젝트에서 사용하는 모든 Error Code를 정의한다.
 
 ## 프로필 생성
 
-| HTTP | Error Code           | 설명       |
-|:---- |:-------------------- |:-------- |
-| 500  | AI_GENERATION_FAILED | AI 생성 실패 |
+| HTTP | Error Code            | 설명            |
+|:---- |:--------------------- |:-------------- |
+| 409  | RESUME_ALREADY_EXISTS | 이미 프로필을 작성한 회원 |
+| 500  | AI_GENERATION_FAILED  | AI 생성 실패       |
 
 ---
 

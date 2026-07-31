@@ -2637,9 +2637,10 @@ Bearer Access Token
 
 ## Error
 
-| HTTP | Error Code           |
-|:---- |:-------------------- |
-| 500  | AI_GENERATION_FAILED |
+| HTTP | Error Code            |
+|:---- |:--------------------- |
+| 409  | RESUME_ALREADY_EXISTS |
+| 500  | AI_GENERATION_FAILED  |
 
 ---
 

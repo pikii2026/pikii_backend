@@ -142,6 +142,9 @@ public class ResumeService {
     /** 4-2 프로필 생성 */
     @Transactional
     public ResumeCreateResponse createResume(Long memberId, ResumeRequest request) {
+        if (memberResumeRepository.existsById(memberId)) {
+            throw new BusinessException(ErrorCode.RESUME_ALREADY_EXISTS);
+        }
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         Univ univ = univRepository.findById(request.univId())
