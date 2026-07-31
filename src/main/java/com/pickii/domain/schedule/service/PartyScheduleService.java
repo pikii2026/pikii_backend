@@ -1,6 +1,9 @@
 package com.pickii.domain.schedule.service;
 
+import com.pickii.domain.chat.repository.ChatRoomRepository;
+import com.pickii.domain.chat.service.ChatMessageService;
 import com.pickii.domain.member.entity.Member;
+import com.pickii.domain.member.repository.MemberRepository;
 import com.pickii.domain.notification.entity.NotificationHistory;
 import com.pickii.domain.notification.entity.NotificationReferenceType;
 import com.pickii.domain.notification.entity.NotificationSetting;
@@ -56,6 +59,9 @@ public class PartyScheduleService {
     private final ScheduleCategoryRepository scheduleCategoryRepository;
     private final NotificationSettingRepository notificationSettingRepository;
     private final NotificationHistoryRepository notificationHistoryRepository;
+    private final MemberRepository memberRepository;
+    private final ChatRoomRepository chatRoomRepository;
+    private final ChatMessageService chatMessageService;
 
     /** 7-15 팀 일정 조회 */
     public List<MyScheduleResponse> getMonthlySchedules(Long memberId, Long projectId, int year, int month) {
@@ -179,7 +185,10 @@ public class PartyScheduleService {
                             partyScheduleAttendanceRepository.save(attendance);
                         }
                 );
-        // TODO: 그룹 채팅방 시스템 메시지 발송 (채팅 시스템 메시지 기능 연동 후 추가)
+
+        String nickname = memberRepository.findById(memberId).map(Member::getNickname).orElse("알 수 없음");
+        announceToGroupChat(schedule.getProject().getId(),
+                nickname + "님이 '" + schedule.getTitle() + "' 일정에 " + (attending ? "참석" : "불참") + "으로 표시했습니다.");
     }
 
     /** 7-19 프로젝트 색상(카테고리) 지정 - 개인별 */
@@ -280,6 +289,12 @@ public class PartyScheduleService {
         } catch (Exception e) {
             throw new BusinessException(ErrorCode.INVALID_RRULE);
         }
+    }
+
+    /** 프로젝트의 그룹 채팅방에 시스템 메시지를 안내한다. 그룹 채팅방이 아직 없으면 조용히 무시한다. */
+    private void announceToGroupChat(Long projectId, String content) {
+        chatRoomRepository.findByProjectId(projectId)
+                .ifPresent(chatRoom -> chatMessageService.sendSystemMessage(chatRoom.getId(), content));
     }
 
     private void notify(Member member, Project project, String title, String content) {

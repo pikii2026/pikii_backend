@@ -13,6 +13,8 @@ public interface RecruitScrapRepository extends JpaRepository<RecruitScrap, Recr
 
     void deleteByMemberIdAndRecruitId(Long memberId, Long recruitId);
 
+    void deleteAllByMemberId(Long memberId);
+
     @Query(value = "select rs from RecruitScrap rs join Recruit r on r.id = rs.recruitId "
             + "where rs.memberId = :memberId and r.deletedAt is null",
             countQuery = "select count(rs) from RecruitScrap rs join Recruit r on r.id = rs.recruitId "

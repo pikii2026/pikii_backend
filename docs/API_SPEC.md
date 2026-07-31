@@ -1742,6 +1742,7 @@ CLOSED ──(팀원 이탈로 인원 부족)──> ADDITIONAL
 | 403  | FORBIDDEN           | 작성자가 아님       |
 | 404  | RECRUIT_NOT_FOUND   | 공고 없음         |
 | 409  | ALREADY_ADDITIONAL  | 이미 추가 모집 중인 공고 |
+| 409  | RECRUIT_NOT_CLOSED  | 마감(CLOSED) 상태가 아닌 공고 |
 
 ---
 
@@ -2637,9 +2638,10 @@ Bearer Access Token
 
 ## Error
 
-| HTTP | Error Code           |
-|:---- |:-------------------- |
-| 500  | AI_GENERATION_FAILED |
+| HTTP | Error Code            |
+|:---- |:--------------------- |
+| 409  | RESUME_ALREADY_EXISTS |
+| 500  | AI_GENERATION_FAILED  |
 
 ---
 
@@ -3075,6 +3077,7 @@ Bearer Access Token
 | 400  | ALREADY_EVALUATED         | 이미 평가 완료        |
 | 403  | FORBIDDEN                 | 평가 권한 없음        |
 | 404  | PROJECT_NOT_FOUND         | 프로젝트 없음         |
+| 404  | PROJECT_MEMBER_NOT_FOUND  | 평가 대상이 팀원이 아님   |
 | 409  | PROJECT_NOT_ENDED         | 아직 종료되지 않은 프로젝트 |
 | 409  | EVALUATION_PERIOD_EXPIRED | 평가 기간(3일) 종료    |
 

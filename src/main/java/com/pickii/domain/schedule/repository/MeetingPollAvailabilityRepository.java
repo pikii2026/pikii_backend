@@ -10,4 +10,6 @@ public interface MeetingPollAvailabilityRepository extends JpaRepository<Meeting
     List<MeetingPollAvailability> findAllBySlotIdIn(List<Long> slotIds);
 
     long countBySlotId(Long slotId);
+
+    void deleteAllByMemberId(Long memberId);
 }

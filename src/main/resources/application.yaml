@@ -11,6 +11,12 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
+  # 5장 Master Data 캐싱(API_SPEC). Redis는 Redis_Policy.md상 인증/세션 전용이라
+  # 마스터 데이터는 별도 역할 확장 없이 인메모리 캐시로 처리한다.
+  # (spring-boot-starter-data-redis가 클래스패스에 있으면 Spring Boot가 기본값을
+  # Redis 캐시로 자동 선택하므로 명시적으로 simple로 고정해야 한다.)
+  cache:
+    type: simple
 
 server:
   port: 8080

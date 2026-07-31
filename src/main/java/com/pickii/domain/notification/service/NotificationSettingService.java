@@ -4,6 +4,8 @@ import com.pickii.domain.notification.dto.NotificationSettingRequest;
 import com.pickii.domain.notification.dto.NotificationSettingResponse;
 import com.pickii.domain.notification.entity.NotificationSetting;
 import com.pickii.domain.notification.repository.NotificationSettingRepository;
+import com.pickii.global.exception.BusinessException;
+import com.pickii.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,8 +49,9 @@ public class NotificationSettingService {
         );
     }
 
+    /** 정상 가입 플로우에서는 항상 함께 생성되는 데이터라 여기 도달하면 데이터 정합성 문제다. */
     private NotificationSetting getSettingEntity(Long memberId) {
         return notificationSettingRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalStateException("알림 설정이 없는 회원입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR, "알림 설정이 없는 회원입니다."));
     }
 }

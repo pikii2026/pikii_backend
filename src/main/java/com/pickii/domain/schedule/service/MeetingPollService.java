@@ -1,5 +1,7 @@
 package com.pickii.domain.schedule.service;
 
+import com.pickii.domain.chat.repository.ChatRoomRepository;
+import com.pickii.domain.chat.service.ChatMessageService;
 import com.pickii.domain.member.entity.Member;
 import com.pickii.domain.member.repository.MemberRepository;
 import com.pickii.domain.notification.entity.NotificationHistory;
@@ -63,6 +65,8 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class MeetingPollService {
 
+    private static final Set<Integer> ALLOWED_DURATION_MINUTES = Set.of(30, 60, 90, 120);
+
     private final MeetingPollRepository meetingPollRepository;
     private final MeetingPollSlotRepository meetingPollSlotRepository;
     private final MeetingPollMemberRepository meetingPollMemberRepository;
@@ -75,6 +79,8 @@ public class MeetingPollService {
     private final MemberRepository memberRepository;
     private final NotificationSettingRepository notificationSettingRepository;
     private final NotificationHistoryRepository notificationHistoryRepository;
+    private final ChatRoomRepository chatRoomRepository;
+    private final ChatMessageService chatMessageService;
 
     /** 7-10 회의 조율 개설 */
     @Transactional
@@ -88,6 +94,9 @@ public class MeetingPollService {
         }
         if (!request.dayStart().isBefore(request.dayEnd())) {
             throw new BusinessException(ErrorCode.VALIDATION_FAILED, "탐색 시작 시각은 종료 시각보다 이전이어야 합니다.");
+        }
+        if (!ALLOWED_DURATION_MINUTES.contains(request.durationMin())) {
+            throw new BusinessException(ErrorCode.VALIDATION_FAILED, "소요 시간은 30/60/90/120분 중 하나여야 합니다.");
         }
 
         int deadlineHours = request.deadlineHours() != null ? request.deadlineHours() : 12;
@@ -119,7 +128,7 @@ public class MeetingPollService {
             meetingPollMemberRepository.save(new MeetingPollMember(poll.getId(), pm.getMember().getId()));
             notify(pm.getMember(), project, "회의 조율이 시작되었습니다.", "'" + poll.getTitle() + "' 회의 시간 조율에 응답해주세요.");
         });
-        // TODO: 그룹 채팅방 공지 (채팅 시스템 메시지 기능 연동 후 추가)
+        announceToGroupChat(projectId, "'" + poll.getTitle() + "' 회의 시간 조율이 시작되었습니다. 응답해주세요.");
 
         return new MeetingPollCreateResponse(
                 poll.getId(),
@@ -273,9 +282,37 @@ public class MeetingPollService {
             notify(pm.getMember(), poll.getProject(), "회의 일정이 확정되었습니다.",
                     "'" + poll.getTitle() + "' 회의가 " + scheduleStart + "로 확정되었습니다.");
         });
-        // TODO: 그룹 채팅방 공지 (채팅 시스템 메시지 기능 연동 후 추가)
+        announceToGroupChat(poll.getProject().getId(),
+                "'" + poll.getTitle() + "' 회의가 " + scheduleStart + "로 확정되었습니다.");
 
         return new MeetingPollConfirmResponse(poll.getId(), poll.getStatus().name(), schedule.getId());
+    }
+
+    /**
+     * 배치: 응답 마감 3시간 전, 아직 응답하지 않은 팀원에게 리마인더 알림을 발송한다.
+     * (day-plan: 짧은 주기로 자주 실행 — 정각 배치가 아니라 "마감까지 3시간 이내"인
+     * 조율을 매번 스캔하고, reminderSentAt으로 중복 발송을 막는다.)
+     */
+    @Transactional
+    public void sendPendingReminders() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime threshold = now.plusHours(3);
+        List<MeetingPoll> targets = meetingPollRepository.findAllPendingReminders(
+                MeetingPollStatus.COLLECTING, now, threshold);
+
+        for (MeetingPoll poll : targets) {
+            List<Long> unrespondedMemberIds = meetingPollMemberRepository.findAllByPollIdAndRespondedFalse(poll.getId())
+                    .stream()
+                    .map(MeetingPollMember::getMemberId)
+                    .toList();
+            if (!unrespondedMemberIds.isEmpty()) {
+                List<Member> unrespondedMembers = memberRepository.findAllById(unrespondedMemberIds);
+                unrespondedMembers.forEach(member -> notify(member, poll.getProject(),
+                        "회의 조율 응답 마감이 얼마 남지 않았습니다.",
+                        "'" + poll.getTitle() + "' 회의 시간 조율 응답 마감이 3시간 이내로 임박했습니다. 아직 응답하지 않으셨다면 서둘러주세요."));
+            }
+            poll.markReminderSent();
+        }
     }
 
     /** 7-14 조율 취소 / 재조율 */
@@ -296,14 +333,19 @@ public class MeetingPollService {
                 "'" + poll.getTitle() + "' 회의 조율이 취소되었습니다."));
     }
 
-    /** 탐색 기간 × 탐색 시간대를 30분 단위로 나누어 후보 슬롯 전체를 생성한다. */
+    /**
+     * 탐색 기간 × 탐색 시간대를 30분 간격 후보 시작 시각으로 나누고, 각 슬롯의 길이는
+     * 회의 소요 시간(durationMin)만큼 잡아 후보 슬롯 전체를 생성한다.
+     * (예: durationMin=60이면 09:00~10:00, 09:30~10:30, 10:00~11:00 ... 30분씩 밀려가며 겹치는 1시간 슬롯이 나온다.)
+     */
     private List<MeetingPollSlot> generateSlots(MeetingPoll poll) {
         List<MeetingPollSlot> slots = new ArrayList<>();
+        int durationMin = poll.getDurationMin();
         for (LocalDate date = poll.getRangeStart(); !date.isAfter(poll.getRangeEnd()); date = date.plusDays(1)) {
             LocalDateTime cursor = LocalDateTime.of(date, poll.getDayStart());
             LocalDateTime dayEnd = LocalDateTime.of(date, poll.getDayEnd());
-            while (!cursor.plusMinutes(30).isAfter(dayEnd)) {
-                slots.add(new MeetingPollSlot(poll, cursor, cursor.plusMinutes(30)));
+            while (!cursor.plusMinutes(durationMin).isAfter(dayEnd)) {
+                slots.add(new MeetingPollSlot(poll, cursor, cursor.plusMinutes(durationMin)));
                 cursor = cursor.plusMinutes(30);
             }
         }
@@ -407,6 +449,12 @@ public class MeetingPollService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.PROJECT_NOT_FOUND));
         requireLeader(projectId, memberId);
         return project;
+    }
+
+    /** 프로젝트의 그룹 채팅방에 시스템 메시지를 안내한다. 그룹 채팅방이 아직 없으면 조용히 무시한다. */
+    private void announceToGroupChat(Long projectId, String content) {
+        chatRoomRepository.findByProjectId(projectId)
+                .ifPresent(chatRoom -> chatMessageService.sendSystemMessage(chatRoom.getId(), content));
     }
 
     private void notify(Member member, Project project, String title, String content) {

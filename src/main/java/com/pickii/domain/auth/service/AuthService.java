@@ -26,13 +26,36 @@ import com.pickii.domain.auth.dto.SocialLoginResponse;
 import com.pickii.domain.auth.dto.TokenRefreshRequest;
 import com.pickii.domain.auth.dto.TokenRefreshResponse;
 import com.pickii.domain.auth.dto.WithdrawRequest;
+import com.pickii.domain.apply.repository.ApplyRepository;
+import com.pickii.domain.chat.repository.ChatRoomMemberRepository;
+import com.pickii.domain.feedback.entity.AIFeedback;
+import com.pickii.domain.feedback.repository.AIFeedbackKeywordRepository;
+import com.pickii.domain.feedback.repository.AIFeedbackRepository;
+import com.pickii.domain.feedback.repository.FeedbackRepository;
 import com.pickii.domain.member.entity.LoginProvider;
 import com.pickii.domain.member.entity.Member;
 import com.pickii.domain.member.entity.SocialAccount;
 import com.pickii.domain.member.repository.MemberRepository;
+import com.pickii.domain.member.repository.MemberUnivRepository;
 import com.pickii.domain.member.repository.SocialAccountRepository;
 import com.pickii.domain.notification.entity.NotificationSetting;
+import com.pickii.domain.notification.repository.NotificationHistoryRepository;
 import com.pickii.domain.notification.repository.NotificationSettingRepository;
+import com.pickii.domain.project.repository.ProjectMemberRepository;
+import com.pickii.domain.recruit.repository.CommentRepository;
+import com.pickii.domain.recruit.repository.RecruitRepository;
+import com.pickii.domain.recruit.repository.RecruitScrapRepository;
+import com.pickii.domain.resume.repository.AdditionalLinkRepository;
+import com.pickii.domain.resume.repository.DetailExperienceRepository;
+import com.pickii.domain.resume.repository.DetailTopicRepository;
+import com.pickii.domain.resume.repository.MemberLicenseRepository;
+import com.pickii.domain.resume.repository.MemberResumeRepository;
+import com.pickii.domain.resume.repository.MemberTechStackRepository;
+import com.pickii.domain.schedule.repository.MeetingPollAvailabilityRepository;
+import com.pickii.domain.schedule.repository.MeetingPollMemberRepository;
+import com.pickii.domain.schedule.repository.MemberScheduleRepository;
+import com.pickii.domain.schedule.repository.PartyScheduleAttendanceRepository;
+import com.pickii.domain.schedule.repository.ScheduleCategoryRepository;
 import com.pickii.global.exception.BusinessException;
 import com.pickii.global.exception.ErrorCode;
 import com.pickii.global.security.JwtProperties;
@@ -64,6 +87,31 @@ public class AuthService {
     private final MemberRepository memberRepository;
     private final SocialAccountRepository socialAccountRepository;
     private final NotificationSettingRepository notificationSettingRepository;
+
+    // 1-9 회원 탈퇴 시 연관 데이터 정리용 (DB_Schema 삭제 정책: 본인 소유 데이터는 CASCADE, 남에게 보이는 활동 이력은 SET NULL)
+    private final MemberUnivRepository memberUnivRepository;
+    private final MemberResumeRepository memberResumeRepository;
+    private final MemberTechStackRepository memberTechStackRepository;
+    private final MemberLicenseRepository memberLicenseRepository;
+    private final DetailExperienceRepository detailExperienceRepository;
+    private final DetailTopicRepository detailTopicRepository;
+    private final AdditionalLinkRepository additionalLinkRepository;
+    private final RecruitRepository recruitRepository;
+    private final CommentRepository commentRepository;
+    private final RecruitScrapRepository recruitScrapRepository;
+    private final ApplyRepository applyRepository;
+    private final ProjectMemberRepository projectMemberRepository;
+    private final FeedbackRepository feedbackRepository;
+    private final AIFeedbackRepository aiFeedbackRepository;
+    private final AIFeedbackKeywordRepository aiFeedbackKeywordRepository;
+    private final MemberScheduleRepository memberScheduleRepository;
+    private final ScheduleCategoryRepository scheduleCategoryRepository;
+    private final MeetingPollMemberRepository meetingPollMemberRepository;
+    private final MeetingPollAvailabilityRepository meetingPollAvailabilityRepository;
+    private final PartyScheduleAttendanceRepository partyScheduleAttendanceRepository;
+    private final ChatRoomMemberRepository chatRoomMemberRepository;
+    private final NotificationHistoryRepository notificationHistoryRepository;
+
     private final StringRedisTemplate redisTemplate;
     private final ObjectMapper objectMapper;
     private final PasswordEncoder passwordEncoder;
@@ -197,14 +245,56 @@ public class AuthService {
 
         redisTemplate.delete(RedisKey.verificationToken(request.emailVerificationToken()));
 
-        // Member Hard Delete 전에 FK로 물린 인증 관련 데이터부터 즉시 삭제한다.
-        // 작성 게시글/댓글/채팅 등 다른 도메인 데이터는 유지하고 memberId만 null로 남는다(DB_SCHEMA 삭제 정책).
+        // Member Hard Delete 전에 FK로 물린 데이터를 DB_Schema 삭제 정책대로 먼저 정리한다.
+        // - 본인만 소유하는 데이터(프로필/일정/알림/채팅방 참여 등)는 함께 삭제(CASCADE)한다.
+        // - 다른 사람에게 노출되는 활동 이력(작성 공고/댓글/지원/팀 참여/평가)은 남기고 작성자만 '알 수 없음'으로 남긴다(SET NULL).
+        detachContentAuthorship(memberId);
+        deleteOwnedData(memberId);
+
         socialAccountRepository.deleteAllByMemberId(memberId);
         notificationSettingRepository.deleteByMemberId(memberId);
         memberRepository.delete(member);
 
         deleteAllRefreshTokens(memberId);
         blacklistAccessToken(memberId, accessToken, "WITHDRAWAL");
+    }
+
+    /** 남에게 노출되는 활동 이력은 유지하고 작성자만 '알 수 없음'으로 남긴다 (DB_Schema: ON DELETE SET NULL). */
+    private void detachContentAuthorship(Long memberId) {
+        recruitRepository.detachMember(memberId);
+        commentRepository.detachMember(memberId);
+        applyRepository.detachMember(memberId);
+        projectMemberRepository.detachMember(memberId);
+        feedbackRepository.detachReviewer(memberId);
+    }
+
+    /** 본인만 소유하는 데이터는 Member와 함께 삭제한다 (DB_Schema: ON DELETE CASCADE). */
+    private void deleteOwnedData(Long memberId) {
+        // AIFeedbackKeyword는 FK 없는 매핑 테이블이라 AIFeedback을 지우기 전에 먼저 정리해야 한다.
+        List<AIFeedback> aiFeedbacks = aiFeedbackRepository.findAllByMemberId(memberId);
+        aiFeedbacks.forEach(aiFeedback -> aiFeedbackKeywordRepository.deleteAllByAiFeedbackId(aiFeedback.getId()));
+        aiFeedbackRepository.deleteAllByMemberId(memberId);
+
+        feedbackRepository.deleteAllByRevieweeId(memberId);
+
+        additionalLinkRepository.deleteAllByMemberId(memberId);
+        detailExperienceRepository.deleteAllByMemberId(memberId);
+        detailTopicRepository.deleteAllByMemberId(memberId);
+        memberTechStackRepository.deleteAllByMemberId(memberId);
+        memberLicenseRepository.deleteAllByMemberId(memberId);
+        memberResumeRepository.deleteById(memberId);
+        memberUnivRepository.deleteById(memberId);
+
+        recruitScrapRepository.deleteAllByMemberId(memberId);
+
+        memberScheduleRepository.deleteAllByMemberId(memberId);
+        scheduleCategoryRepository.deleteAllByMemberId(memberId);
+        meetingPollMemberRepository.deleteAllByMemberId(memberId);
+        meetingPollAvailabilityRepository.deleteAllByMemberId(memberId);
+        partyScheduleAttendanceRepository.deleteAllByMemberId(memberId);
+
+        chatRoomMemberRepository.deleteAllByMemberId(memberId);
+        notificationHistoryRepository.deleteAllByMemberId(memberId);
     }
 
     /** 1-10 소셜 로그인 */

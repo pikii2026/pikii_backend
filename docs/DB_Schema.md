@@ -702,6 +702,7 @@ DB에는 규칙 문자열만 저장된다
 | **Deadline**    | DATETIME     | -                   | 응답 마감 시각 (**기본 생성 시각 + 12시간**, 프로젝트장 조정 가능) |
 | **ScheduleId**  | FK, NULLABLE | `PartySchedule(Id)` | 확정된 팀 일정 (확정 전 NULL)                     |
 | **CreatedAt**   | DATETIME     | -                   | 생성 일시                                    |
+| **ReminderSentAt** | DATETIME, NULLABLE | -             | 응답 마감 3시간 전 리마인더 발송 시각 (중복 발송 방지, 미발송이면 NULL) |
 
 ##### Referential Integrity Constraint
 
@@ -1067,8 +1068,8 @@ WHERE ProjectId = ? AND LeftAt IS NULL
 | 필드           | 타입       | 설명                            |
 |:------------ |:-------- |:----------------------------- |
 | `chatRoomId` | Long     | 소속 채팅방 식별자                    |
-| `memberId`   | Long     | 발신자 (탈퇴 시 null)               |
-| `type`       | String   | 메시지 종류 (`TEXT`, `IMAGE`)      |
+| `memberId`   | Long     | 발신자 (탈퇴 시 null, `SYSTEM` 타입은 원래 null) |
+| `type`       | String   | 메시지 종류 (`TEXT`, `IMAGE`, `SYSTEM`) |
 | `message`    | String   | 텍스트 본문 (IMAGE 타입인 경우 null)    |
 | `imageUrl`   | String   | 이미지 접근 URL (TEXT 타입인 경우 null) |
 | `createdAt`  | DateTime | 전송 일시                         |

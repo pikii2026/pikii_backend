@@ -298,6 +298,9 @@ public class RecruitService {
         if (recruit.getStatus() == RecruitStatus.ADDITIONAL) {
             throw new BusinessException(ErrorCode.ALREADY_ADDITIONAL);
         }
+        if (recruit.getStatus() != RecruitStatus.CLOSED) {
+            throw new BusinessException(ErrorCode.RECRUIT_NOT_CLOSED);
+        }
         recruit.openAdditional();
     }
 

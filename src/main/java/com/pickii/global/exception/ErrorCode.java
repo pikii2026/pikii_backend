@@ -45,6 +45,7 @@ public enum ErrorCode {
     RECRUIT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 공고입니다."),
     ALREADY_CLOSED(HttpStatus.CONFLICT, "이미 마감된 공고입니다."),
     ALREADY_ADDITIONAL(HttpStatus.CONFLICT, "이미 추가 모집 중인 공고입니다."),
+    RECRUIT_NOT_CLOSED(HttpStatus.CONFLICT, "마감된 공고만 추가 모집으로 전환할 수 있습니다."),
     COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 댓글입니다."),
     RECRUIT_CLOSED(HttpStatus.BAD_REQUEST, "모집이 종료된 공고입니다."),
     ALREADY_APPLIED(HttpStatus.CONFLICT, "이미 지원한 공고입니다."),
@@ -85,6 +86,7 @@ public enum ErrorCode {
     // ===== User / Resume =====
     UNIV_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 대학교입니다."),
     RESUME_NOT_FOUND(HttpStatus.NOT_FOUND, "작성된 프로필이 없습니다."),
+    RESUME_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 작성된 프로필이 있습니다."),
 
     // ===== Feedback =====
     PROJECT_NOT_ENDED(HttpStatus.CONFLICT, "아직 종료되지 않은 프로젝트입니다."),

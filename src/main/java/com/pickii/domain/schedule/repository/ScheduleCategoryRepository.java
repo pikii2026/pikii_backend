@@ -12,4 +12,6 @@ public interface ScheduleCategoryRepository extends JpaRepository<ScheduleCatego
 
     /** 7-6/7-7 일정 생성 시 categoryId가 본인 카테고리인지 확인 */
     Optional<ScheduleCategory> findByIdAndMemberId(Long id, Long memberId);
+
+    void deleteAllByMemberId(Long memberId);
 }
