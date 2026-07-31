@@ -4,6 +4,7 @@ import com.pickii.domain.recruit.entity.Comment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -17,4 +18,9 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     @Query("SELECT c FROM Comment c JOIN FETCH c.recruit r "
             + "WHERE c.member.id = :memberId AND c.deletedAt IS NULL AND r.deletedAt IS NULL")
     Page<Comment> findMyComments(@Param("memberId") Long memberId, Pageable pageable);
+
+    /** 회원 탈퇴 시 댓글은 유지하고 작성자만 '알 수 없음'으로 남긴다 (DB_Schema: MemberId ON DELETE SET NULL) */
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Comment c SET c.member = NULL WHERE c.member.id = :memberId")
+    void detachMember(@Param("memberId") Long memberId);
 }

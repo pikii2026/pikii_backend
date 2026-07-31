@@ -14,4 +14,6 @@ public interface NotificationHistoryRepository extends JpaRepository<Notificatio
     List<NotificationHistory> findAllByMemberIdAndIsReadFalse(Long memberId);
 
     long countByMemberIdAndIsReadFalse(Long memberId);
+
+    void deleteAllByMemberId(Long memberId);
 }

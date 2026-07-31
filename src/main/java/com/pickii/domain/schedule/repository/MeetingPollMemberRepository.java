@@ -8,4 +8,6 @@ public interface MeetingPollMemberRepository extends JpaRepository<MeetingPollMe
     long countByPollId(Long pollId);
 
     long countByPollIdAndRespondedTrue(Long pollId);
+
+    void deleteAllByMemberId(Long memberId);
 }

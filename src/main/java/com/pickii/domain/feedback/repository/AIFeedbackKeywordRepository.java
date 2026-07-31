@@ -8,4 +8,6 @@ import java.util.List;
 public interface AIFeedbackKeywordRepository extends JpaRepository<AIFeedbackKeyword, AIFeedbackKeyword.Pk> {
 
     List<AIFeedbackKeyword> findAllByAiFeedbackId(Long aiFeedbackId);
+
+    void deleteAllByAiFeedbackId(Long aiFeedbackId);
 }
