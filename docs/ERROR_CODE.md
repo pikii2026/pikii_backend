@@ -178,6 +178,7 @@ Pickii 프로젝트에서 사용하는 모든 Error Code를 정의한다.
 | 404  | RECRUIT_NOT_FOUND  | 공고 없음         |
 | 409  | ALREADY_CLOSED     | 이미 마감됨        |
 | 409  | ALREADY_ADDITIONAL | 이미 추가 모집 중임   |
+| 409  | RECRUIT_NOT_CLOSED | 마감(CLOSED) 상태가 아닌 공고를 추가 모집으로 전환 시도 |
 
 ---
 

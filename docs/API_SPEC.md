@@ -1742,6 +1742,7 @@ CLOSED ──(팀원 이탈로 인원 부족)──> ADDITIONAL
 | 403  | FORBIDDEN           | 작성자가 아님       |
 | 404  | RECRUIT_NOT_FOUND   | 공고 없음         |
 | 409  | ALREADY_ADDITIONAL  | 이미 추가 모집 중인 공고 |
+| 409  | RECRUIT_NOT_CLOSED  | 마감(CLOSED) 상태가 아닌 공고 |
 
 ---
 
