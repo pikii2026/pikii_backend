@@ -211,12 +211,12 @@ public class ProjectService {
     /** 6-7 팀원 퇴출 */
     @Transactional
     public void kick(Long memberId, Long projectId, Long targetMemberId) {
-        if (memberId.equals(targetMemberId)) {
-            throw new BusinessException(ErrorCode.CANNOT_KICK_SELF);
-        }
         getLeaderOwnedProject(memberId, projectId);
         ProjectMember target = projectMemberRepository.findByProjectIdAndMemberIdAndLeftAtIsNull(projectId, targetMemberId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PROJECT_MEMBER_NOT_FOUND));
+        if (memberId.equals(targetMemberId)) {
+            throw new BusinessException(ErrorCode.CANNOT_KICK_SELF);
+        }
         Project project = target.getProject();
         leaveInternal(target);
         notify(target.getMember(), project, "프로젝트에서 퇴출되었습니다.", "'" + project.getName() + "' 프로젝트에서 퇴출되었습니다.");
