@@ -31,7 +31,14 @@ spring:
           auth: true
           starttls:
             enable: true
+          # SMTP가 막히거나 느릴 때 요청이 무한정 매달리지 않도록 타임아웃(ms)
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
 
 server:
   # Railway가 주입하는 PORT로 바인딩해야 트래픽이 연결된다
   port: ${PORT:8080}
+  # 프록시(Railway)의 X-Forwarded-* 헤더를 신뢰해 https로 인식하게 함
+  # (없으면 Swagger가 http 주소로 요청을 만들어 브라우저에서 차단됨)
+  forward-headers-strategy: framework
