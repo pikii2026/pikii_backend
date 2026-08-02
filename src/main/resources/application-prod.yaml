@@ -21,16 +21,22 @@ spring:
       uri: ${MONGODB_URI}
 
   mail:
-    host: smtp.gmail.com
-    port: 587
+    # Railway는 25/465/587 등 표준 SMTP 포트의 아웃바운드를 차단하므로,
+    # 2525 포트를 지원하는 릴레이(Brevo 등)로 우회할 수 있게 전부 환경변수로 뺐다.
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
     username: ${MAIL_USERNAME:}
     password: ${MAIL_PASSWORD:}
     properties:
       mail:
+        # 릴레이 사용 시 인증 계정과 발신 주소가 다를 수 있어 From을 명시
+        from: ${MAIL_FROM:${MAIL_USERNAME:}}
         smtp:
           auth: true
           starttls:
-            enable: true
+            enable: ${MAIL_STARTTLS:true}
+          ssl:
+            enable: ${MAIL_SSL:false}
           # SMTP가 막히거나 느릴 때 요청이 무한정 매달리지 않도록 타임아웃(ms)
           connectiontimeout: 5000
           timeout: 5000
