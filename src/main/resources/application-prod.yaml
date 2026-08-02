@@ -1,0 +1,37 @@
+spring:
+  datasource:
+    # Railway Variables에서 조립해 주입:
+    # jdbc:mysql://${{MySQL.MYSQLHOST}}:${{MySQL.MYSQLPORT}}/${{MySQL.MYSQLDATABASE}}?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      # 스키마 안정화 후 validate로 전환
+      ddl-auto: update
+    open-in-view: false
+
+  data:
+    redis:
+      # redis://[:password@]host:port 형식 (Railway REDIS_URL 그대로 사용 가능)
+      url: ${REDIS_URL}
+    mongodb:
+      uri: ${MONGODB_URI}
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+server:
+  # Railway가 주입하는 PORT로 바인딩해야 트래픽이 연결된다
+  port: ${PORT:8080}
