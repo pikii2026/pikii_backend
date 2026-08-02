@@ -8,10 +8,9 @@ import com.pickii.domain.auth.dto.EmailVerifyResponse;
 import com.pickii.domain.member.repository.MemberRepository;
 import com.pickii.global.exception.BusinessException;
 import com.pickii.global.exception.ErrorCode;
+import com.pickii.global.mail.MailClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,7 +34,7 @@ public class EmailVerificationService {
 
     private final MemberRepository memberRepository;
     private final StringRedisTemplate redisTemplate;
-    private final JavaMailSender mailSender;
+    private final MailClient mailClient;
     private final VerificationTokenIssuer verificationTokenIssuer;
 
     public void sendCode(String email, VerificationPurpose purpose, String clientIp) {
@@ -101,10 +100,7 @@ public class EmailVerificationService {
     }
 
     private void sendMail(String email, String code) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(email);
-        message.setSubject("[Pickii] 이메일 인증번호");
-        message.setText("인증번호는 [%s] 입니다. 180초 이내에 입력해주세요.".formatted(code));
-        mailSender.send(message);
+        mailClient.send(email, "[Pickii] 이메일 인증번호",
+                "인증번호는 [%s] 입니다. 180초 이내에 입력해주세요.".formatted(code));
     }
 }

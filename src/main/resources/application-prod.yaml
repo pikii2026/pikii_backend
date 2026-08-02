@@ -42,6 +42,11 @@ spring:
           timeout: 5000
           writetimeout: 5000
 
+# Railway는 SMTP 포트(587/465/2525)를 전부 차단하므로 Brevo HTTPS API로 발송
+app:
+  mail:
+    provider: ${MAIL_PROVIDER:brevo}
+
 server:
   # Railway가 주입하는 PORT로 바인딩해야 트래픽이 연결된다
   port: ${PORT:8080}
