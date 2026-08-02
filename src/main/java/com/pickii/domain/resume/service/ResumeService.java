@@ -236,9 +236,10 @@ public class ResumeService {
             return;
         }
         licenses.forEach(item -> {
+            // 자격증은 종류가 너무 많아 마스터로 전부 관리할 수 없으므로,
+            // 목록에 없는 이름은 사용자 입력 그대로 마스터에 자동 등록한다
             License license = licenseRepository.findByName(item.licenseName())
-                    .orElseThrow(() -> new BusinessException(ErrorCode.VALIDATION_FAILED,
-                            "존재하지 않는 자격증입니다: " + item.licenseName()));
+                    .orElseGet(() -> licenseRepository.save(new License(item.licenseName())));
             memberLicenseRepository.save(new MemberLicense(memberId, license.getId(), parseYearMonth(item.date())));
         });
     }
