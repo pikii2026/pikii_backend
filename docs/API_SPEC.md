@@ -2720,9 +2720,50 @@ Bearer Access Token
 
 ## Response
 
-Pagination Response
+### 200 OK
 
-Apply 목록 반환
+```json
+{
+    "data":{
+        "content":[
+            {
+                "applyId":7,
+                "recruitId":1,
+                "recruitTitle":"제일기획 공모전 팀원 모집",
+                "recruitStatus":"OPEN",
+                "status":"WAITING",
+                "keywords":[
+                    { "keywordId":5, "content":"마감기한 잘 지켜요" },
+                    { "keywordId":9, "content":"꼼꼼하게 마무리해요" }
+                ],
+                "createdAt":"2026-07-02T14:30:00+09:00"
+            }
+        ],
+        "pageInfo":{
+            "currentPage":0,
+            "pageSize":10,
+            "totalElements":3,
+            "totalPages":1,
+            "hasNext":false
+        }
+    },
+    "timestamp":"2026-07-06T13:30:00+09:00"
+}
+```
+
+### Field
+
+| Name         | Type              | Description                          |
+|:------------ |:----------------- |:------------------------------------ |
+| applyId      | Long               | 지원 ID                                |
+| recruitId    | Long               | 공고 이동용 ID ('공고 글 바로가기')              |
+| recruitTitle | String             | 지원한 공고의 제목                          |
+| recruitStatus| Enum               | 공고 상태 (OPEN / CLOSED / ADDITIONAL)   |
+| status       | Enum               | 지원 상태 (WAITING / ACCEPTED / REJECTED) |
+| keywords     | List<KeywordItem>  | 지원 시 선택한 지원 키워드 (텍스트 포함, 5-7과 동일 형태) |
+| createdAt    | String             | 지원 일시                              |
+
+`KeywordItem`: `{ "keywordId": Long, "content": String }`
 
 ---
 
@@ -2730,7 +2771,8 @@ Apply 목록 반환
 
 1. 로그인 사용자 조회
 2. Apply 목록 조회
-3. Pagination 적용
+3. 각 Apply에 매핑된 지원 키워드를 함께 조회 (ApplyKeywordMap → ApplyKeyword)
+4. Pagination 적용
 
 ---
 
@@ -2860,9 +2902,50 @@ Bearer Access Token
 
 ## Response
 
-Pagination Response
+### 200 OK
 
-Applicant 목록 반환
+```json
+{
+    "data":{
+        "content":[
+            {
+                "applyId":7,
+                "memberId":12,
+                "nickname":"pickii",
+                "message":"열심히 하겠습니다!",
+                "keywords":[
+                    { "keywordId":5, "content":"마감기한 잘 지켜요" },
+                    { "keywordId":9, "content":"꼼꼼하게 마무리해요" }
+                ],
+                "status":"WAITING",
+                "createdAt":"2026-07-02T14:30:00+09:00"
+            }
+        ],
+        "pageInfo":{
+            "currentPage":0,
+            "pageSize":10,
+            "totalElements":3,
+            "totalPages":1,
+            "hasNext":false
+        }
+    },
+    "timestamp":"2026-07-06T13:30:00+09:00"
+}
+```
+
+### Field
+
+| Name      | Type              | Description                          |
+|:--------- |:----------------- |:------------------------------------ |
+| applyId   | Long               | 지원 ID                                |
+| memberId  | Long               | 지원자 회원 ID                            |
+| nickname  | String             | 지원자 닉네임                              |
+| message   | String             | 지원 메시지                              |
+| keywords  | List<KeywordItem>  | 지원자가 선택한 지원 키워드 (텍스트 포함, 5-7과 동일 형태) |
+| status    | Enum               | 지원 상태 (WAITING / ACCEPTED / REJECTED) |
+| createdAt | String             | 지원 일시                              |
+
+`KeywordItem`: `{ "keywordId": Long, "content": String }`
 
 ---
 
@@ -2870,7 +2953,8 @@ Applicant 목록 반환
 
 1. 작성자 여부 확인
 2. 지원자 조회
-3. Pagination 적용
+3. 각 지원자에게 매핑된 지원 키워드를 함께 조회 (ApplyKeywordMap → ApplyKeyword)
+4. Pagination 적용
 
 ---
 
