@@ -43,4 +43,4 @@ app:
 # AI 연동 (공고초안/지원메시지/자기소개/상호평가요약) - Gemini 3.5 Flash-Lite (무료 티어)
 gemini:
   api-key: ${GEMINI_API_KEY:}
-  model: gemini-3.5-flash-lite
+  model: gemini-2.5-flash-lite
