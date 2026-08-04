@@ -4958,11 +4958,14 @@ Bearer Access Token (프로젝트장만)
         "deadline":"2026-07-15T03:00:00+09:00",
         "totalMembers":4,
         "respondedCount":0,
-        "slotCount":50
+        "slotCount":125
     },
     "timestamp":"2026-07-14T15:00:00+09:00"
 }
 ```
+
+> `slotCount`는 탐색 기간 × 탐색 시간대를 30분 간격으로 밀어가며 `durationMin` 길이의 슬롯을 생성한 개수다.
+> 위 예시(5일, 09:00~22:00, durationMin=60)는 하루 25개(09:00~21:00, 30분 간격) × 5일 = 125개다.
 
 ## Business Logic
 

@@ -6,6 +6,7 @@ import com.pickii.domain.schedule.dto.ScheduleCategoryRequest;
 import com.pickii.domain.schedule.dto.ScheduleCategoryResponse;
 import com.pickii.domain.schedule.entity.ScheduleCategory;
 import com.pickii.domain.schedule.repository.MemberScheduleRepository;
+import com.pickii.domain.schedule.repository.ProjectScheduleCategoryRepository;
 import com.pickii.domain.schedule.repository.ScheduleCategoryRepository;
 import com.pickii.global.exception.BusinessException;
 import com.pickii.global.exception.ErrorCode;
@@ -25,6 +26,7 @@ public class ScheduleCategoryService {
 
     private final ScheduleCategoryRepository scheduleCategoryRepository;
     private final MemberScheduleRepository memberScheduleRepository;
+    private final ProjectScheduleCategoryRepository projectScheduleCategoryRepository;
     private final MemberRepository memberRepository;
 
     /** 7-1 일정 카테고리 목록 조회 */
@@ -58,6 +60,7 @@ public class ScheduleCategoryService {
     public void delete(Long memberId, Long categoryId) {
         ScheduleCategory category = getOwnedCategory(memberId, categoryId);
         memberScheduleRepository.clearCategory(categoryId);
+        projectScheduleCategoryRepository.deleteAllByScId(categoryId);
         scheduleCategoryRepository.delete(category);
     }
 
