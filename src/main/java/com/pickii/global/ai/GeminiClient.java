@@ -64,7 +64,17 @@ public class GeminiClient {
                 throw new BusinessException(ErrorCode.AI_GENERATION_FAILED);
             }
             return text;
-        } catch (RestClientException e) {
+        } catch (org.springframework.web.client.RestClientResponseException e) {
+            // 구글 서버가 반환한 진짜 상태 코드와 에러 원문을 로그에 출력합니다.
+            System.err.println(" [Gemini API 응답 에러] ");
+            System.err.println("상태 코드: " + e.getStatusCode());
+            System.err.println("에러 원문: " + e.getResponseBodyAsString());
+            
+            throw new BusinessException(ErrorCode.AI_GENERATION_FAILED);
+        } catch (Exception e) {
+            // 외부 API 요청 전/후의 네트워크 문제나 기타 예외
+            System.err.println(" [네트워크/기타 에러]  : " + e.getMessage());
+            
             throw new BusinessException(ErrorCode.AI_GENERATION_FAILED);
         }
     }
