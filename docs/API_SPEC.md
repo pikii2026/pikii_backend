@@ -1098,7 +1098,6 @@ Bearer Access Token 필요
 ## Endpoint
 
 ```http
-POST /auth/password/code      # 인증코드 발송 (이메일 입력 불필요)
 PATCH /auth/password          # 비밀번호 변경
 ```
 
@@ -1112,54 +1111,24 @@ Bearer Access Token 필요
 
 ## 흐름
 
-이미 로그인된 상태이므로 **이메일을 다시 입력받지 않는다.**
-서버가 Access Token으로 본인 이메일을 알고 있으므로, 곧바로 인증코드를 발송한다.
+이미 로그인된 상태이므로 **이메일을 다시 입력받거나 인증코드를 발송하지 않는다.**
+본인 확인은 **현재 비밀번호 입력**으로 한다.
 
 ```
 '비밀번호 변경' 진입
 
 ↓
 
-POST /auth/password/code   (요청 바디 없음)
-→ 가입된 이메일로 인증코드 자동 발송
-→ "인증코드가 메일로 전송되었습니다"
-
-↓
-
-인증코드 입력 → POST /auth/email/verify
-
-↓
-
-새 비밀번호 입력 → PATCH /auth/password
+현재 비밀번호 / 새 비밀번호 / 새 비밀번호 확인 입력 → PATCH /auth/password
 ```
 
 ---
 
-## 1) 인증코드 발송
-
-### Request
-
-요청 바디 없음. Access Token으로 본인 이메일을 식별한다.
-
-### Response
-
-204 No Content
-
-### Business Logic
-
-1. Access Token 검증
-2. 로그인 사용자의 이메일 조회
-3. 인증코드 생성 후 해당 이메일로 발송 (`purpose = PW_RESET`)
-
----
-
-## 2) 비밀번호 변경
-
-### Request Body
+## Request Body
 
 ```json
 {
-    "emailVerificationToken":"uuid",
+    "currentPassword":"Password",
     "newPassword":"Password",
     "newPasswordConfirm":"Password"
 }
@@ -1167,14 +1136,13 @@ POST /auth/password/code   (요청 바디 없음)
 
 ### Field
 
-| Name                   | Type   | Required | Description               |
-|:---------------------- |:------ |:-------- |:------------------------- |
-| emailVerificationToken | String | O        | 인증코드 확인 후 발급된 토큰          |
-| newPassword            | String | O        | 새 비밀번호                    |
-| newPasswordConfirm     | String | O        | 새 비밀번호 확인                 |
+| Name                | Type   | Required | Description   |
+|:-------------------- |:------ |:-------- |:------------- |
+| currentPassword      | String | O        | 현재 비밀번호       |
+| newPassword          | String | O        | 새 비밀번호        |
+| newPasswordConfirm   | String | O        | 새 비밀번호 확인     |
 
-> **기존 비밀번호는 요구하지 않는다.** 이미 로그인된 상태이며 이메일 인증으로 본인 확인이 끝났기 때문이다.
-> 이메일도 입력받지 않는다. 로그인 사용자의 이메일을 서버가 사용한다.
+> 이메일은 입력받지 않는다. 로그인 사용자의 이메일을 서버가 사용한다.
 
 ### Response
 
@@ -1183,12 +1151,11 @@ POST /auth/password/code   (요청 바디 없음)
 ### Business Logic
 
 1. Access Token 검증
-2. Verification Token 검증 (`purpose = PW_RESET`, 로그인 사용자의 이메일과 일치하는지 확인)
-3. 비밀번호 일치 여부 확인
+2. 현재 비밀번호 일치 여부 확인
+3. 새 비밀번호 확인 일치 여부 확인
 4. BCrypt 암호화 후 저장
-5. Verification Token 삭제
-6. 모든 기기의 Refresh Token 삭제 → 전체 로그아웃
-7. 현재 Access Token Blacklist 등록
+5. 모든 기기의 Refresh Token 삭제 → 전체 로그아웃
+6. 현재 Access Token Blacklist 등록
 
 ---
 
@@ -1198,8 +1165,8 @@ POST /auth/password/code   (요청 바디 없음)
 |:------ |:-------------- |:--------------- |
 | 인증     | 불필요            | Access Token 필요 |
 | 이메일 입력 | **필요**         | **불필요** (서버가 앎)  |
-| 기존 비밀번호 | 불필요            | 불필요             |
-| 이메일 인증 | 필요             | 필요              |
+| 기존 비밀번호 | 불필요            | **필요**          |
+| 이메일 인증 | 필요             | 불필요             |
 
 두 API는 분리하여 유지한다.
 
@@ -1207,12 +1174,11 @@ POST /auth/password/code   (요청 바디 없음)
 
 ## Error
 
-| HTTP | Error Code                 | 설명                    |
-|:---- |:-------------------------- |:--------------------- |
-| 400  | PASSWORD_MISMATCH          | 비밀번호 확인 불일치           |
-| 401  | INVALID_TOKEN              | Access Token 오류       |
-| 401  | INVALID_VERIFICATION_TOKEN | Verification Token 오류 |
-| 429  | TOO_MANY_REQUESTS          | 인증 요청 횟수 초과           |
+| HTTP | Error Code         | 설명            |
+|:---- |:------------------- |:-------------- |
+| 400  | PASSWORD_MISMATCH   | 비밀번호 확인 불일치    |
+| 401  | INVALID_TOKEN        | Access Token 오류 |
+| 401  | INVALID_CREDENTIALS  | 현재 비밀번호 불일치    |
 
 ---
 
@@ -2720,9 +2686,50 @@ Bearer Access Token
 
 ## Response
 
-Pagination Response
+### 200 OK
 
-Apply 목록 반환
+```json
+{
+    "data":{
+        "content":[
+            {
+                "applyId":7,
+                "recruitId":1,
+                "recruitTitle":"제일기획 공모전 팀원 모집",
+                "recruitStatus":"OPEN",
+                "status":"WAITING",
+                "keywords":[
+                    { "keywordId":5, "content":"마감기한 잘 지켜요" },
+                    { "keywordId":9, "content":"꼼꼼하게 마무리해요" }
+                ],
+                "createdAt":"2026-07-02T14:30:00+09:00"
+            }
+        ],
+        "pageInfo":{
+            "currentPage":0,
+            "pageSize":10,
+            "totalElements":3,
+            "totalPages":1,
+            "hasNext":false
+        }
+    },
+    "timestamp":"2026-07-06T13:30:00+09:00"
+}
+```
+
+### Field
+
+| Name         | Type              | Description                          |
+|:------------ |:----------------- |:------------------------------------ |
+| applyId      | Long               | 지원 ID                                |
+| recruitId    | Long               | 공고 이동용 ID ('공고 글 바로가기')              |
+| recruitTitle | String             | 지원한 공고의 제목                          |
+| recruitStatus| Enum               | 공고 상태 (OPEN / CLOSED / ADDITIONAL)   |
+| status       | Enum               | 지원 상태 (WAITING / ACCEPTED / REJECTED) |
+| keywords     | List<KeywordItem>  | 지원 시 선택한 지원 키워드 (텍스트 포함, 5-7과 동일 형태) |
+| createdAt    | String             | 지원 일시                              |
+
+`KeywordItem`: `{ "keywordId": Long, "content": String }`
 
 ---
 
@@ -2730,7 +2737,8 @@ Apply 목록 반환
 
 1. 로그인 사용자 조회
 2. Apply 목록 조회
-3. Pagination 적용
+3. 각 Apply에 매핑된 지원 키워드를 함께 조회 (ApplyKeywordMap → ApplyKeyword)
+4. Pagination 적용
 
 ---
 
@@ -2860,9 +2868,50 @@ Bearer Access Token
 
 ## Response
 
-Pagination Response
+### 200 OK
 
-Applicant 목록 반환
+```json
+{
+    "data":{
+        "content":[
+            {
+                "applyId":7,
+                "memberId":12,
+                "nickname":"pickii",
+                "message":"열심히 하겠습니다!",
+                "keywords":[
+                    { "keywordId":5, "content":"마감기한 잘 지켜요" },
+                    { "keywordId":9, "content":"꼼꼼하게 마무리해요" }
+                ],
+                "status":"WAITING",
+                "createdAt":"2026-07-02T14:30:00+09:00"
+            }
+        ],
+        "pageInfo":{
+            "currentPage":0,
+            "pageSize":10,
+            "totalElements":3,
+            "totalPages":1,
+            "hasNext":false
+        }
+    },
+    "timestamp":"2026-07-06T13:30:00+09:00"
+}
+```
+
+### Field
+
+| Name      | Type              | Description                          |
+|:--------- |:----------------- |:------------------------------------ |
+| applyId   | Long               | 지원 ID                                |
+| memberId  | Long               | 지원자 회원 ID                            |
+| nickname  | String             | 지원자 닉네임                              |
+| message   | String             | 지원 메시지                              |
+| keywords  | List<KeywordItem>  | 지원자가 선택한 지원 키워드 (텍스트 포함, 5-7과 동일 형태) |
+| status    | Enum               | 지원 상태 (WAITING / ACCEPTED / REJECTED) |
+| createdAt | String             | 지원 일시                              |
+
+`KeywordItem`: `{ "keywordId": Long, "content": String }`
 
 ---
 
@@ -2870,7 +2919,8 @@ Applicant 목록 반환
 
 1. 작성자 여부 확인
 2. 지원자 조회
-3. Pagination 적용
+3. 각 지원자에게 매핑된 지원 키워드를 함께 조회 (ApplyKeywordMap → ApplyKeyword)
+4. Pagination 적용
 
 ---
 

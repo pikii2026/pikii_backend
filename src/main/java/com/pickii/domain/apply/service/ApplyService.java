@@ -171,10 +171,12 @@ public class ApplyService {
     /** 4-4 지원 현황 조회 */
     public PageResponse<MyApplyResponse> getMyApplies(Long memberId, Pageable pageable) {
         Page<Apply> applies = applyRepository.findByMemberId(memberId, pageable);
-        return PageResponse.from(applies, this::toMyApplyResponse);
+        Map<Long, List<ApplyKeywordCategoryResponse.KeywordItem>> keywordsByApplyId =
+                loadKeywordsByApplyId(applies.getContent().stream().map(Apply::getId).toList());
+        return PageResponse.from(applies, apply -> toMyApplyResponse(apply, keywordsByApplyId));
     }
 
-    private MyApplyResponse toMyApplyResponse(Apply apply) {
+    private MyApplyResponse toMyApplyResponse(Apply apply, Map<Long, List<ApplyKeywordCategoryResponse.KeywordItem>> keywordsByApplyId) {
         Recruit recruit = apply.getRecruit();
         return new MyApplyResponse(
                 apply.getId(),
@@ -182,6 +184,7 @@ public class ApplyService {
                 recruit.getTitle(),
                 recruit.getStatus(),
                 apply.getStatus(),
+                keywordsByApplyId.getOrDefault(apply.getId(), List.of()),
                 apply.getCreatedAt().atOffset(ZoneOffset.ofHours(9))
         );
     }
@@ -195,19 +198,42 @@ public class ApplyService {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
         Page<Apply> applies = applyRepository.findByRecruitId(recruitId, pageable);
-        return PageResponse.from(applies, this::toApplicantResponse);
+        Map<Long, List<ApplyKeywordCategoryResponse.KeywordItem>> keywordsByApplyId =
+                loadKeywordsByApplyId(applies.getContent().stream().map(Apply::getId).toList());
+        return PageResponse.from(applies, apply -> toApplicantResponse(apply, keywordsByApplyId));
     }
 
-    private ApplicantResponse toApplicantResponse(Apply apply) {
+    private ApplicantResponse toApplicantResponse(Apply apply, Map<Long, List<ApplyKeywordCategoryResponse.KeywordItem>> keywordsByApplyId) {
         Member applicant = apply.getMember();
         return new ApplicantResponse(
                 apply.getId(),
                 applicant == null ? null : applicant.getId(),
                 applicant == null ? "알 수 없음" : applicant.getNickname(),
                 apply.getMessage(),
+                keywordsByApplyId.getOrDefault(apply.getId(), List.of()),
                 apply.getStatus(),
                 apply.getCreatedAt().atOffset(ZoneOffset.ofHours(9))
         );
+    }
+
+    /** Apply 목록(4-4/4-7)에 선택된 키워드를 붙일 때, Apply 개수만큼 조회하지 않도록 한 번에 모아서 조회한다. */
+    private Map<Long, List<ApplyKeywordCategoryResponse.KeywordItem>> loadKeywordsByApplyId(List<Long> applyIds) {
+        if (applyIds.isEmpty()) {
+            return Map.of();
+        }
+        List<ApplyKeywordMap> maps = applyKeywordMapRepository.findAllByApplyIdIn(applyIds);
+        Set<Long> keywordIds = maps.stream().map(ApplyKeywordMap::getKeywordId).collect(Collectors.toSet());
+        Map<Long, ApplyKeyword> keywordById = applyKeywordRepository.findAllById(keywordIds).stream()
+                .collect(Collectors.toMap(ApplyKeyword::getId, keyword -> keyword));
+
+        return maps.stream()
+                .filter(map -> keywordById.containsKey(map.getKeywordId()))
+                .collect(Collectors.groupingBy(
+                        ApplyKeywordMap::getApplyId,
+                        Collectors.mapping(
+                                map -> ApplyKeywordCategoryResponse.KeywordItem.from(keywordById.get(map.getKeywordId())),
+                                Collectors.toList())
+                ));
     }
 
     /** 4-8 지원자 수락/거절 */
