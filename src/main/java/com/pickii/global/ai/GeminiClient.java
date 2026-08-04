@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -27,10 +28,15 @@ public class GeminiClient {
     private final GeminiProperties properties;
 
     public GeminiClient(RestClient.Builder restClientBuilder, GeminiProperties properties) {
-        this.restClient = restClientBuilder.build();
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(10000); // 연결 타임아웃: 10초
+        factory.setReadTimeout(120000);   // 읽기 타임아웃: 120초 (AI 응답을 충분히 기다려줌)
+
+        this.restClient = restClientBuilder
+                .requestFactory(factory)
+                .build();
         this.properties = properties;
     }
-
     /** 자유 텍스트 생성 (리터칭/요약 등 단일 문자열 결과가 필요할 때) */
     public String generateText(String prompt) {
         return generate(prompt, null);
