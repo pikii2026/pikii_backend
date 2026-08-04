@@ -105,11 +105,11 @@ Pickii 프로젝트에서 사용하는 모든 Error Code를 정의한다.
 
 ## 비밀번호 변경 (로그인 상태)
 
-| HTTP | Error Code                 | 설명                    |
-|:---- |:-------------------------- |:--------------------- |
-| 400  | PASSWORD_MISMATCH          | 비밀번호 확인 불일치           |
-| 401  | INVALID_TOKEN              | Access Token 오류       |
-| 401  | INVALID_VERIFICATION_TOKEN | Verification Token 오류 |
+| HTTP | Error Code           | 설명              |
+|:---- |:--------------------- |:---------------- |
+| 400  | PASSWORD_MISMATCH     | 비밀번호 확인 불일치      |
+| 401  | INVALID_TOKEN          | Access Token 오류  |
+| 401  | INVALID_CREDENTIALS    | 현재 비밀번호 불일치      |
 
 ---
 

@@ -156,16 +156,7 @@ public class AuthController {
         return ResponseEntity.noContent().build();
     }
 
-    /** 1-12-1 비밀번호 변경(로그인 상태) 인증코드 발송 */
-    @PostMapping("/password/code")
-    public ResponseEntity<Void> sendPasswordChangeCode(@AuthenticationPrincipal Long memberId,
-                                                        HttpServletRequest httpRequest) {
-        String clientIp = IpUtils.resolve(httpRequest);
-        authService.sendPasswordChangeCode(memberId, clientIp);
-        return ResponseEntity.noContent().build();
-    }
-
-    /** 1-12-2 비밀번호 변경(로그인 상태) */
+    /** 1-12 비밀번호 변경(로그인 상태) */
     @PatchMapping("/password")
     public ResponseEntity<Void> changePassword(@AuthenticationPrincipal Long memberId,
                                                 @Valid @RequestBody PasswordChangeRequest request,

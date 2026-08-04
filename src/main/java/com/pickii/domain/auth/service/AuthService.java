@@ -121,7 +121,6 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtProperties jwtProperties;
-    private final EmailVerificationService emailVerificationService;
     private final KakaoOAuthClient kakaoOAuthClient;
 
     /** 1-4 회원가입 */
@@ -392,23 +391,17 @@ public class AuthService {
         }
     }
 
-    /** 1-12-1 비밀번호 변경(로그인 상태) 인증코드 발송 — 이메일을 다시 입력받지 않고 Access Token으로 식별한다. */
-    public void sendPasswordChangeCode(Long memberId, String clientIp) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-        emailVerificationService.sendCode(member.getEmail(), VerificationPurpose.PW_RESET, clientIp);
-    }
-
-    /** 1-12-2 비밀번호 변경(로그인 상태) */
+    /** 1-12 비밀번호 변경(로그인 상태) — 이메일 재인증 대신 현재 비밀번호로 본인 확인한다. */
     @Transactional
     public void changePasswordLoggedIn(Long memberId, String accessToken, PasswordChangeRequest request) {
         validatePasswordMatch(request.newPassword(), request.newPasswordConfirm());
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-        validateEmailToken(request.emailVerificationToken(), member.getEmail(), VerificationPurpose.PW_RESET);
+        if (!passwordEncoder.matches(request.currentPassword(), member.getPassword())) {
+            throw new BusinessException(ErrorCode.INVALID_CREDENTIALS);
+        }
 
         member.changePassword(passwordEncoder.encode(request.newPassword()));
-        redisTemplate.delete(RedisKey.verificationToken(request.emailVerificationToken()));
         deleteAllRefreshTokens(memberId);
         blacklistAccessToken(memberId, accessToken, "PASSWORD_CHANGE");
     }
