@@ -2,6 +2,8 @@ package com.pickii.domain.recruit.service;
 
 import com.pickii.domain.member.repository.MemberRepository;
 import com.pickii.domain.member.repository.MemberUnivRepository;
+import com.pickii.domain.project.entity.Project;
+import com.pickii.domain.project.repository.ProjectRepository;
 import com.pickii.domain.recruit.dto.AiDraftRequest;
 import com.pickii.domain.recruit.dto.AiDraftResponse;
 import com.pickii.domain.recruit.dto.CommentCreateRequest;
@@ -48,6 +50,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -73,6 +76,7 @@ public class RecruitService {
     private final RecruitTopicRepository recruitTopicRepository;
     private final RecruitScrapRepository recruitScrapRepository;
     private final CommentRepository commentRepository;
+    private final ProjectRepository projectRepository;
 
     public PageResponse<RecruitSummaryResponse> searchRecruits(String keyword, Boolean onCampus,
                                                                 List<Long> categoryIds, List<Long> topicIds,
@@ -292,6 +296,10 @@ public class RecruitService {
         }
         if (recruit.getStatus() == RecruitStatus.ADDITIONAL) {
             throw new BusinessException(ErrorCode.ALREADY_ADDITIONAL);
+        }
+        Optional<Project> project = projectRepository.findByRecruitId(recruitId);
+        if (project.isPresent() && project.get().isEnded()) {
+            throw new BusinessException(ErrorCode.PROJECT_ENDED_CANNOT_RECRUIT);
         }
         recruit.openAdditional();
     }

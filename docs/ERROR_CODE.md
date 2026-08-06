@@ -172,12 +172,13 @@ Pickii 프로젝트에서 사용하는 모든 Error Code를 정의한다.
 
 ## 공고 상태 변경
 
-| HTTP | Error Code        | 설명      |
-|:---- |:----------------- |:------- |
-| 403  | FORBIDDEN          | 작성자가 아님      |
-| 404  | RECRUIT_NOT_FOUND  | 공고 없음         |
-| 409  | ALREADY_CLOSED     | 이미 마감됨        |
-| 409  | ALREADY_ADDITIONAL | 이미 추가 모집 중임   |
+| HTTP | Error Code                  | 설명                    |
+|:---- |:---------------------------- |:---------------------- |
+| 403  | FORBIDDEN                    | 작성자가 아님             |
+| 404  | RECRUIT_NOT_FOUND             | 공고 없음                |
+| 409  | ALREADY_CLOSED                | 이미 마감됨              |
+| 409  | ALREADY_ADDITIONAL            | 이미 추가 모집 중임       |
+| 409  | PROJECT_ENDED_CANNOT_RECRUIT  | 연결된 프로젝트가 이미 종료됨(추가 모집 불가) |
 
 ---
 
