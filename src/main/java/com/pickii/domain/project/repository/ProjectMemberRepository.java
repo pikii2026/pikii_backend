@@ -4,6 +4,7 @@ import com.pickii.domain.project.entity.ProjectMember;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -26,4 +27,9 @@ public interface ProjectMemberRepository extends JpaRepository<ProjectMember, Lo
     @Query("SELECT pm FROM ProjectMember pm JOIN FETCH pm.project p "
             + "WHERE pm.member.id = :memberId AND pm.leftAt IS NULL AND p.status = 'END'")
     Page<ProjectMember> findEndedProjectsByMemberId(@Param("memberId") Long memberId, Pageable pageable);
+
+    /** 회원 탈퇴 시 참여 이력은 유지하고 팀원만 '알 수 없음'으로 남긴다 (DB_Schema: MemberId ON DELETE SET NULL) */
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE ProjectMember pm SET pm.member = NULL WHERE pm.member.id = :memberId")
+    void detachMember(@Param("memberId") Long memberId);
 }

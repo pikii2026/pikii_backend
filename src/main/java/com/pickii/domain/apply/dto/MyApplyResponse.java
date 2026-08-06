@@ -4,6 +4,7 @@ import com.pickii.domain.apply.entity.ApplyStatus;
 import com.pickii.domain.recruit.entity.RecruitStatus;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 /**
  * API_SPEC 4-4 지원 현황 조회 응답 항목
@@ -14,6 +15,7 @@ public record MyApplyResponse(
         String recruitTitle,
         RecruitStatus recruitStatus,
         ApplyStatus status,
+        List<ApplyKeywordCategoryResponse.KeywordItem> keywords,
         OffsetDateTime createdAt
 ) {
 }

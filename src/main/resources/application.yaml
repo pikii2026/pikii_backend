@@ -7,6 +7,16 @@ spring:
     # API_SPEC 0.4 Null Policy: null 필드는 응답에서 제외
     default-property-inclusion: non_null
     time-zone: Asia/Seoul
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  # 5장 Master Data 캐싱(API_SPEC). Redis는 Redis_Policy.md상 인증/세션 전용이라
+  # 마스터 데이터는 별도 역할 확장 없이 인메모리 캐시로 처리한다.
+  # (spring-boot-starter-data-redis가 클래스패스에 있으면 Spring Boot가 기본값을
+  # Redis 캐시로 자동 선택하므로 명시적으로 simple로 고정해야 한다.)
+  cache:
+    type: simple
 
 server:
   port: 8080
@@ -21,3 +31,16 @@ jwt:
   # Refresh Token 유효시간(초) - REDIS_POLICY: autoLogin=false 1일 / true 30일
   refresh-token-validity: 86400
   refresh-token-validity-auto-login: 2592000
+
+# 메일 발송 방식: smtp(기본, 로컬 Gmail) | brevo(Railway 등 SMTP 차단 환경용 HTTPS API)
+app:
+  mail:
+    provider: smtp
+    sender-name: Pickii
+    from: ${MAIL_FROM:${MAIL_USERNAME:}}
+    brevo-api-key: ${BREVO_API_KEY:}
+
+# AI 연동 (공고초안/지원메시지/자기소개/상호평가요약) - Gemini 3.5 Flash-Lite (무료 티어)
+gemini:
+  api-key: ${GEMINI_API_KEY:}
+  model: ${GEMINI_MODEL:gemini-2.5-flash}

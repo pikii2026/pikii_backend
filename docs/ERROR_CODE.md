@@ -105,11 +105,11 @@ Pickii 프로젝트에서 사용하는 모든 Error Code를 정의한다.
 
 ## 비밀번호 변경 (로그인 상태)
 
-| HTTP | Error Code                 | 설명                    |
-|:---- |:-------------------------- |:--------------------- |
-| 400  | PASSWORD_MISMATCH          | 비밀번호 확인 불일치           |
-| 401  | INVALID_TOKEN              | Access Token 오류       |
-| 401  | INVALID_VERIFICATION_TOKEN | Verification Token 오류 |
+| HTTP | Error Code           | 설명              |
+|:---- |:--------------------- |:---------------- |
+| 400  | PASSWORD_MISMATCH     | 비밀번호 확인 불일치      |
+| 401  | INVALID_TOKEN          | Access Token 오류  |
+| 401  | INVALID_CREDENTIALS    | 현재 비밀번호 불일치      |
 
 ---
 
@@ -178,6 +178,7 @@ Pickii 프로젝트에서 사용하는 모든 Error Code를 정의한다.
 | 404  | RECRUIT_NOT_FOUND             | 공고 없음                |
 | 409  | ALREADY_CLOSED                | 이미 마감됨              |
 | 409  | ALREADY_ADDITIONAL            | 이미 추가 모집 중임       |
+| 409  | RECRUIT_NOT_CLOSED             | 마감(CLOSED) 상태가 아닌 공고를 추가 모집으로 전환 시도 |
 | 409  | PROJECT_ENDED_CANNOT_RECRUIT  | 연결된 프로젝트가 이미 종료됨(추가 모집 불가) |
 
 ---
@@ -460,9 +461,10 @@ Pickii 프로젝트에서 사용하는 모든 Error Code를 정의한다.
 
 ## 프로필 생성
 
-| HTTP | Error Code           | 설명       |
-|:---- |:-------------------- |:-------- |
-| 500  | AI_GENERATION_FAILED | AI 생성 실패 |
+| HTTP | Error Code            | 설명            |
+|:---- |:--------------------- |:-------------- |
+| 409  | RESUME_ALREADY_EXISTS | 이미 프로필을 작성한 회원 |
+| 500  | AI_GENERATION_FAILED  | AI 생성 실패       |
 
 ---
 
@@ -486,6 +488,7 @@ Pickii 프로젝트에서 사용하는 모든 Error Code를 정의한다.
 | 400  | ALREADY_EVALUATED         | 이미 평가 완료        |
 | 403  | FORBIDDEN                 | 평가 권한 없음        |
 | 404  | PROJECT_NOT_FOUND         | 프로젝트 없음         |
+| 404  | PROJECT_MEMBER_NOT_FOUND  | 평가 대상이 팀원이 아님   |
 | 409  | PROJECT_NOT_ENDED         | 아직 종료되지 않은 프로젝트 |
 | 409  | EVALUATION_PERIOD_EXPIRED | 평가 기간(3일) 종료    |
 

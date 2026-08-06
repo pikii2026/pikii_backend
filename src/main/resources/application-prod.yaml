@@ -1,0 +1,55 @@
+spring:
+  datasource:
+    # Railway Variables에서 조립해 주입:
+    # jdbc:mysql://${{MySQL.MYSQLHOST}}:${{MySQL.MYSQLPORT}}/${{MySQL.MYSQLDATABASE}}?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      # 스키마 안정화 후 validate로 전환
+      ddl-auto: update
+    open-in-view: false
+
+  data:
+    redis:
+      # redis://[:password@]host:port 형식 (Railway REDIS_URL 그대로 사용 가능)
+      url: ${REDIS_URL}
+    mongodb:
+      uri: ${MONGODB_URI}
+
+  mail:
+    # Railway는 25/465/587 등 표준 SMTP 포트의 아웃바운드를 차단하므로,
+    # 2525 포트를 지원하는 릴레이(Brevo 등)로 우회할 수 있게 전부 환경변수로 뺐다.
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        # 릴레이 사용 시 인증 계정과 발신 주소가 다를 수 있어 From을 명시
+        from: ${MAIL_FROM:${MAIL_USERNAME:}}
+        smtp:
+          auth: true
+          starttls:
+            enable: ${MAIL_STARTTLS:true}
+          ssl:
+            enable: ${MAIL_SSL:false}
+          # SMTP가 막히거나 느릴 때 요청이 무한정 매달리지 않도록 타임아웃(ms)
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+# Railway는 SMTP 포트(587/465/2525)를 전부 차단하므로 Brevo HTTPS API로 발송
+app:
+  mail:
+    provider: ${MAIL_PROVIDER:brevo}
+
+server:
+  # Railway가 주입하는 PORT로 바인딩해야 트래픽이 연결된다
+  port: ${PORT:8080}
+  # 프록시(Railway)의 X-Forwarded-* 헤더를 신뢰해 https로 인식하게 함
+  # (없으면 Swagger가 http 주소로 요청을 만들어 브라우저에서 차단됨)
+  forward-headers-strategy: framework

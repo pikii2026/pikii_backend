@@ -19,4 +19,6 @@ public interface MemberScheduleRepository extends JpaRepository<MemberSchedule, 
     @Modifying
     @Query("UPDATE MemberSchedule m SET m.category = NULL WHERE m.category.id = :categoryId")
     void clearCategory(@Param("categoryId") Long categoryId);
+
+    void deleteAllByMemberId(Long memberId);
 }

@@ -18,13 +18,13 @@ public record ResumeRequest(
         Long univId,
 
         @NotBlank(message = "전공을 입력해주세요.")
-        @Size(min = 2, max = 20, message = "전공은 2자 이상 20자 이하로 입력해주세요.")
+        @Size(min = 2, max = 50, message = "전공은 2자 이상 50자 이하로 입력해주세요.")
         String major,
 
         @NotNull(message = "학적 상태를 선택해주세요.")
         AcademicStatus academicStatus,
 
-        @Size(max = 20, message = "희망 진로는 20자 이하로 입력해주세요.")
+        @Size(max = 100, message = "희망 진로는 100자 이하로 입력해주세요.")
         String hope,
 
         @Size(max = 300, message = "장점은 300자 이하로 입력해주세요.")

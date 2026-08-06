@@ -34,10 +34,12 @@ import com.pickii.domain.project.repository.ProjectMemberRepository;
 import com.pickii.domain.project.repository.ProjectRepository;
 import com.pickii.domain.recruit.entity.Recruit;
 import com.pickii.domain.recruit.repository.RecruitRepository;
+import com.pickii.global.ai.GeminiClient;
 import com.pickii.global.common.response.PageResponse;
 import com.pickii.global.exception.BusinessException;
 import com.pickii.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -71,14 +73,30 @@ public class ApplyService {
     private final ProjectMemberRepository projectMemberRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomMemberRepository chatRoomMemberRepository;
+    private final GeminiClient geminiClient;
 
-    /**
-     * 3-10 AI 지원서 초안 생성
-     *
-     * <p>TODO: 실제 AI 서버 연동 전까지는 입력값을 가공해 돌려주는 목업으로 구현한다.</p>
-     */
-    public ApplyAiDraftResponse generateAiDraft(ApplyAiDraftRequest request) {
-        return new ApplyAiDraftResponse("AI가 다듬은: " + request.message());
+    /** 3-10 AI 지원서 초안 생성 (Gemini) */
+    public ApplyAiDraftResponse generateAiDraft(Long recruitId, ApplyAiDraftRequest request) {
+        Recruit recruit = recruitRepository.findById(recruitId)
+                .filter(r -> !r.isDeleted())
+                .orElseThrow(() -> new BusinessException(ErrorCode.RECRUIT_NOT_FOUND));
+
+        String prompt = """
+                너는 대학생 공모전/스터디/프로젝트 팀원 모집 공고에 지원하는 지원자의 메시지를 다듬어주는 도우미다.
+                아래 공고 내용을 참고하여, 지원자가 작성한 원본 메시지를 공고 맥락에 맞게 더 정중하고 설득력 있게 다듬어라.
+                없는 사실을 지어내지 말고, 결과는 다듬어진 지원 메시지 본문만 출력하라 (설명, 따옴표, 접두사 없이).
+
+                [공고 정보]
+                제목: %s
+                간단소개: %s
+                상세내용: %s
+
+                [지원자 원본 메시지]
+                %s
+                """.formatted(recruit.getTitle(), recruit.getSimpleDesc(), recruit.getContent(), request.message());
+
+        String convertedText = geminiClient.generateText(prompt);
+        return new ApplyAiDraftResponse(convertedText.trim());
     }
 
     /** 3-11 공고 지원하기 */
@@ -130,7 +148,8 @@ public class ApplyService {
         applyRepository.delete(apply);
     }
 
-    /** 5-7 지원 키워드 조회 (카테고리별 Nested) */
+    /** 5-7 지원 키워드 조회 (카테고리별 Nested, 마스터 데이터라 캐싱) */
+    @Cacheable("applyKeywords")
     public List<ApplyKeywordCategoryResponse> getApplyKeywords() {
         Map<Long, List<ApplyKeyword>> keywordsByCategoryId = applyKeywordRepository.findAll().stream()
                 .collect(Collectors.groupingBy(keyword -> keyword.getCategory().getId()));
@@ -152,10 +171,12 @@ public class ApplyService {
     /** 4-4 지원 현황 조회 */
     public PageResponse<MyApplyResponse> getMyApplies(Long memberId, Pageable pageable) {
         Page<Apply> applies = applyRepository.findByMemberId(memberId, pageable);
-        return PageResponse.from(applies, this::toMyApplyResponse);
+        Map<Long, List<ApplyKeywordCategoryResponse.KeywordItem>> keywordsByApplyId =
+                loadKeywordsByApplyId(applies.getContent().stream().map(Apply::getId).toList());
+        return PageResponse.from(applies, apply -> toMyApplyResponse(apply, keywordsByApplyId));
     }
 
-    private MyApplyResponse toMyApplyResponse(Apply apply) {
+    private MyApplyResponse toMyApplyResponse(Apply apply, Map<Long, List<ApplyKeywordCategoryResponse.KeywordItem>> keywordsByApplyId) {
         Recruit recruit = apply.getRecruit();
         return new MyApplyResponse(
                 apply.getId(),
@@ -163,6 +184,7 @@ public class ApplyService {
                 recruit.getTitle(),
                 recruit.getStatus(),
                 apply.getStatus(),
+                keywordsByApplyId.getOrDefault(apply.getId(), List.of()),
                 apply.getCreatedAt().atOffset(ZoneOffset.ofHours(9))
         );
     }
@@ -176,19 +198,42 @@ public class ApplyService {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
         Page<Apply> applies = applyRepository.findByRecruitId(recruitId, pageable);
-        return PageResponse.from(applies, this::toApplicantResponse);
+        Map<Long, List<ApplyKeywordCategoryResponse.KeywordItem>> keywordsByApplyId =
+                loadKeywordsByApplyId(applies.getContent().stream().map(Apply::getId).toList());
+        return PageResponse.from(applies, apply -> toApplicantResponse(apply, keywordsByApplyId));
     }
 
-    private ApplicantResponse toApplicantResponse(Apply apply) {
+    private ApplicantResponse toApplicantResponse(Apply apply, Map<Long, List<ApplyKeywordCategoryResponse.KeywordItem>> keywordsByApplyId) {
         Member applicant = apply.getMember();
         return new ApplicantResponse(
                 apply.getId(),
                 applicant == null ? null : applicant.getId(),
                 applicant == null ? "알 수 없음" : applicant.getNickname(),
                 apply.getMessage(),
+                keywordsByApplyId.getOrDefault(apply.getId(), List.of()),
                 apply.getStatus(),
                 apply.getCreatedAt().atOffset(ZoneOffset.ofHours(9))
         );
+    }
+
+    /** Apply 목록(4-4/4-7)에 선택된 키워드를 붙일 때, Apply 개수만큼 조회하지 않도록 한 번에 모아서 조회한다. */
+    private Map<Long, List<ApplyKeywordCategoryResponse.KeywordItem>> loadKeywordsByApplyId(List<Long> applyIds) {
+        if (applyIds.isEmpty()) {
+            return Map.of();
+        }
+        List<ApplyKeywordMap> maps = applyKeywordMapRepository.findAllByApplyIdIn(applyIds);
+        Set<Long> keywordIds = maps.stream().map(ApplyKeywordMap::getKeywordId).collect(Collectors.toSet());
+        Map<Long, ApplyKeyword> keywordById = applyKeywordRepository.findAllById(keywordIds).stream()
+                .collect(Collectors.toMap(ApplyKeyword::getId, keyword -> keyword));
+
+        return maps.stream()
+                .filter(map -> keywordById.containsKey(map.getKeywordId()))
+                .collect(Collectors.groupingBy(
+                        ApplyKeywordMap::getApplyId,
+                        Collectors.mapping(
+                                map -> ApplyKeywordCategoryResponse.KeywordItem.from(keywordById.get(map.getKeywordId())),
+                                Collectors.toList())
+                ));
     }
 
     /** 4-8 지원자 수락/거절 */
@@ -200,6 +245,9 @@ public class ApplyService {
         if (recruit.getMember() == null || !recruit.getMember().getId().equals(memberId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
+        if (!apply.isWaiting()) {
+            throw new BusinessException(ErrorCode.APPLY_NOT_WAITING, "이미 처리된 지원건은 상태를 변경할 수 없습니다.");
+        }
 
         if (request.status() == ApplyStatus.ACCEPTED) {
             if (recruit.getAvailableSlots() <= 0) {
@@ -209,9 +257,11 @@ public class ApplyService {
             recruit.increaseCurrentCount();
             joinExistingProjectIfPresent(recruit, apply.getMember());
             notifyApplicant(apply.getMember(), recruit, true);
-        } else {
+        } else if (request.status() == ApplyStatus.REJECTED) {
             apply.reject();
             notifyApplicant(apply.getMember(), recruit, false);
+        } else {
+            throw new BusinessException(ErrorCode.VALIDATION_FAILED, "ACCEPTED 또는 REJECTED만 입력 가능합니다.");
         }
     }
 

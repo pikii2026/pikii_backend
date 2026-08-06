@@ -1098,7 +1098,6 @@ Bearer Access Token 필요
 ## Endpoint
 
 ```http
-POST /auth/password/code      # 인증코드 발송 (이메일 입력 불필요)
 PATCH /auth/password          # 비밀번호 변경
 ```
 
@@ -1112,54 +1111,24 @@ Bearer Access Token 필요
 
 ## 흐름
 
-이미 로그인된 상태이므로 **이메일을 다시 입력받지 않는다.**
-서버가 Access Token으로 본인 이메일을 알고 있으므로, 곧바로 인증코드를 발송한다.
+이미 로그인된 상태이므로 **이메일을 다시 입력받거나 인증코드를 발송하지 않는다.**
+본인 확인은 **현재 비밀번호 입력**으로 한다.
 
 ```
 '비밀번호 변경' 진입
 
 ↓
 
-POST /auth/password/code   (요청 바디 없음)
-→ 가입된 이메일로 인증코드 자동 발송
-→ "인증코드가 메일로 전송되었습니다"
-
-↓
-
-인증코드 입력 → POST /auth/email/verify
-
-↓
-
-새 비밀번호 입력 → PATCH /auth/password
+현재 비밀번호 / 새 비밀번호 / 새 비밀번호 확인 입력 → PATCH /auth/password
 ```
 
 ---
 
-## 1) 인증코드 발송
-
-### Request
-
-요청 바디 없음. Access Token으로 본인 이메일을 식별한다.
-
-### Response
-
-204 No Content
-
-### Business Logic
-
-1. Access Token 검증
-2. 로그인 사용자의 이메일 조회
-3. 인증코드 생성 후 해당 이메일로 발송 (`purpose = PW_RESET`)
-
----
-
-## 2) 비밀번호 변경
-
-### Request Body
+## Request Body
 
 ```json
 {
-    "emailVerificationToken":"uuid",
+    "currentPassword":"Password",
     "newPassword":"Password",
     "newPasswordConfirm":"Password"
 }
@@ -1167,14 +1136,13 @@ POST /auth/password/code   (요청 바디 없음)
 
 ### Field
 
-| Name                   | Type   | Required | Description               |
-|:---------------------- |:------ |:-------- |:------------------------- |
-| emailVerificationToken | String | O        | 인증코드 확인 후 발급된 토큰          |
-| newPassword            | String | O        | 새 비밀번호                    |
-| newPasswordConfirm     | String | O        | 새 비밀번호 확인                 |
+| Name                | Type   | Required | Description   |
+|:-------------------- |:------ |:-------- |:------------- |
+| currentPassword      | String | O        | 현재 비밀번호       |
+| newPassword          | String | O        | 새 비밀번호        |
+| newPasswordConfirm   | String | O        | 새 비밀번호 확인     |
 
-> **기존 비밀번호는 요구하지 않는다.** 이미 로그인된 상태이며 이메일 인증으로 본인 확인이 끝났기 때문이다.
-> 이메일도 입력받지 않는다. 로그인 사용자의 이메일을 서버가 사용한다.
+> 이메일은 입력받지 않는다. 로그인 사용자의 이메일을 서버가 사용한다.
 
 ### Response
 
@@ -1183,12 +1151,11 @@ POST /auth/password/code   (요청 바디 없음)
 ### Business Logic
 
 1. Access Token 검증
-2. Verification Token 검증 (`purpose = PW_RESET`, 로그인 사용자의 이메일과 일치하는지 확인)
-3. 비밀번호 일치 여부 확인
+2. 현재 비밀번호 일치 여부 확인
+3. 새 비밀번호 확인 일치 여부 확인
 4. BCrypt 암호화 후 저장
-5. Verification Token 삭제
-6. 모든 기기의 Refresh Token 삭제 → 전체 로그아웃
-7. 현재 Access Token Blacklist 등록
+5. 모든 기기의 Refresh Token 삭제 → 전체 로그아웃
+6. 현재 Access Token Blacklist 등록
 
 ---
 
@@ -1198,8 +1165,8 @@ POST /auth/password/code   (요청 바디 없음)
 |:------ |:-------------- |:--------------- |
 | 인증     | 불필요            | Access Token 필요 |
 | 이메일 입력 | **필요**         | **불필요** (서버가 앎)  |
-| 기존 비밀번호 | 불필요            | 불필요             |
-| 이메일 인증 | 필요             | 필요              |
+| 기존 비밀번호 | 불필요            | **필요**          |
+| 이메일 인증 | 필요             | 불필요             |
 
 두 API는 분리하여 유지한다.
 
@@ -1207,12 +1174,11 @@ POST /auth/password/code   (요청 바디 없음)
 
 ## Error
 
-| HTTP | Error Code                 | 설명                    |
-|:---- |:-------------------------- |:--------------------- |
-| 400  | PASSWORD_MISMATCH          | 비밀번호 확인 불일치           |
-| 401  | INVALID_TOKEN              | Access Token 오류       |
-| 401  | INVALID_VERIFICATION_TOKEN | Verification Token 오류 |
-| 429  | TOO_MANY_REQUESTS          | 인증 요청 횟수 초과           |
+| HTTP | Error Code         | 설명            |
+|:---- |:------------------- |:-------------- |
+| 400  | PASSWORD_MISMATCH   | 비밀번호 확인 불일치    |
+| 401  | INVALID_TOKEN        | Access Token 오류 |
+| 401  | INVALID_CREDENTIALS  | 현재 비밀번호 불일치    |
 
 ---
 
@@ -1612,6 +1578,11 @@ Bearer Access Token
 }
 ```
 
+| 필드         | 필수 | 설명                                    |
+|:------------ |:---- |:--------------------------------------- |
+| simpleDesc   | 선택 | 간단 소개 초안 (최대 50자)               |
+| content      | 필수 | 상세 내용 초안 (최대 1000자, 공란 불가)   |
+
 ---
 
 ## Response
@@ -1632,8 +1603,8 @@ Bearer Access Token
 
 ## Business Logic
 
-1. 입력 데이터 검증
-2. AI 서버 호출
+1. 입력 데이터 검증 (content는 필수 — 미입력 시 AI 호출 없이 400 VALIDATION_FAILED)
+2. AI 서버 호출 — 사용자가 입력한 simpleDesc/content 초안을 기반으로 문장을 다듬어 확장 (없는 사실을 임의로 지어내지 않음)
 3. 초안 생성
 4. 결과 반환
 
@@ -1714,8 +1685,9 @@ Bearer Access Token
 ## Business Logic
 
 1. 작성자 확인
-2. 연결된 프로젝트가 이미 종료(`Project.Status = END`)되었는지 확인
-3. 상태를 `ADDITIONAL`(추가 모집)로 변경
+2. 마감(`CLOSED`) 상태인지 확인
+3. 연결된 프로젝트가 이미 종료(`Project.Status = END`)되었는지 확인
+4. 상태를 `ADDITIONAL`(추가 모집)로 변경
 
 팀 구성이 끝나 마감(`CLOSED`)했으나, 팀원 이탈 등으로 인원이 비었을 때 사용한다.
 
@@ -1740,6 +1712,7 @@ CLOSED ──(팀원 이탈로 인원 부족)──> ADDITIONAL
 | 403  | FORBIDDEN                    | 작성자가 아님             |
 | 404  | RECRUIT_NOT_FOUND             | 공고 없음                |
 | 409  | ALREADY_ADDITIONAL            | 이미 추가 모집 중인 공고   |
+| 409  | RECRUIT_NOT_CLOSED             | 마감(CLOSED) 상태가 아닌 공고 |
 | 409  | PROJECT_ENDED_CANNOT_RECRUIT  | 연결된 프로젝트가 이미 종료됨 |
 
 ---
@@ -2046,6 +2019,7 @@ Bearer Access Token
 | HTTP | Error Code           | 설명       |
 |:---- |:-------------------- |:-------- |
 | 400  | VALIDATION_FAILED    | 원본 메시지 없음 |
+| 404  | RECRUIT_NOT_FOUND    | 존재하지 않는 공고 |
 | 500  | AI_GENERATION_FAILED | AI 생성 실패 |
 
 ---
@@ -2577,9 +2551,9 @@ Bearer Access Token
 | Name           | Type   | Required | Description                                                   | 저장 위치                |
 |:-------------- |:------ |:-------- |:------------------------------------------------------------- |:-------------------- |
 | univId         | Long   | O        | 대학교 ID (마스터에서 **선택**, `GET /universities`)                    | `MemberUniv.UnivId`  |
-| major          | String | O        | 전공 (2~20자, 사용자 **직접 입력**)                                     | `MemberUniv.Major`   |
+| major          | String | O        | 전공 (2~50자, 사용자 **직접 입력**)                                     | `MemberUniv.Major`   |
 | academicStatus | Enum   | O        | ENROLLED / LEAVE_OF_ABSENCE / GRADUATION_DEFERRED / GRADUATED | `MemberUniv.Status`  |
-| hope           | String | X        | 희망 진로 (20자 이하)                                               | `MemberResume.Hope`  |
+| hope           | String | X        | 희망 진로 (100자 이하)                                              | `MemberResume.Hope`  |
 | strength       | String | X        | 장점 (300자 이하)                                                  | `MemberResume.Strength` |
 | topic          | Array  | X        | 관심 주제 ID 목록                                                   | `DetailTopic`        |
 | skillTool      | Array  | X        | 기술 스택 + 숙련도(1~3)                                              | `MemberTechStack`    |
@@ -2635,9 +2609,10 @@ Bearer Access Token
 
 ## Error
 
-| HTTP | Error Code           |
-|:---- |:-------------------- |
-| 500  | AI_GENERATION_FAILED |
+| HTTP | Error Code            |
+|:---- |:--------------------- |
+| 409  | RESUME_ALREADY_EXISTS |
+| 500  | AI_GENERATION_FAILED  |
 
 ---
 
@@ -2716,9 +2691,50 @@ Bearer Access Token
 
 ## Response
 
-Pagination Response
+### 200 OK
 
-Apply 목록 반환
+```json
+{
+    "data":{
+        "content":[
+            {
+                "applyId":7,
+                "recruitId":1,
+                "recruitTitle":"제일기획 공모전 팀원 모집",
+                "recruitStatus":"OPEN",
+                "status":"WAITING",
+                "keywords":[
+                    { "keywordId":5, "content":"마감기한 잘 지켜요" },
+                    { "keywordId":9, "content":"꼼꼼하게 마무리해요" }
+                ],
+                "createdAt":"2026-07-02T14:30:00+09:00"
+            }
+        ],
+        "pageInfo":{
+            "currentPage":0,
+            "pageSize":10,
+            "totalElements":3,
+            "totalPages":1,
+            "hasNext":false
+        }
+    },
+    "timestamp":"2026-07-06T13:30:00+09:00"
+}
+```
+
+### Field
+
+| Name         | Type              | Description                          |
+|:------------ |:----------------- |:------------------------------------ |
+| applyId      | Long               | 지원 ID                                |
+| recruitId    | Long               | 공고 이동용 ID ('공고 글 바로가기')              |
+| recruitTitle | String             | 지원한 공고의 제목                          |
+| recruitStatus| Enum               | 공고 상태 (OPEN / CLOSED / ADDITIONAL)   |
+| status       | Enum               | 지원 상태 (WAITING / ACCEPTED / REJECTED) |
+| keywords     | List<KeywordItem>  | 지원 시 선택한 지원 키워드 (텍스트 포함, 5-7과 동일 형태) |
+| createdAt    | String             | 지원 일시                              |
+
+`KeywordItem`: `{ "keywordId": Long, "content": String }`
 
 ---
 
@@ -2726,7 +2742,8 @@ Apply 목록 반환
 
 1. 로그인 사용자 조회
 2. Apply 목록 조회
-3. Pagination 적용
+3. 각 Apply에 매핑된 지원 키워드를 함께 조회 (ApplyKeywordMap → ApplyKeyword)
+4. Pagination 적용
 
 ---
 
@@ -2856,9 +2873,50 @@ Bearer Access Token
 
 ## Response
 
-Pagination Response
+### 200 OK
 
-Applicant 목록 반환
+```json
+{
+    "data":{
+        "content":[
+            {
+                "applyId":7,
+                "memberId":12,
+                "nickname":"pickii",
+                "message":"열심히 하겠습니다!",
+                "keywords":[
+                    { "keywordId":5, "content":"마감기한 잘 지켜요" },
+                    { "keywordId":9, "content":"꼼꼼하게 마무리해요" }
+                ],
+                "status":"WAITING",
+                "createdAt":"2026-07-02T14:30:00+09:00"
+            }
+        ],
+        "pageInfo":{
+            "currentPage":0,
+            "pageSize":10,
+            "totalElements":3,
+            "totalPages":1,
+            "hasNext":false
+        }
+    },
+    "timestamp":"2026-07-06T13:30:00+09:00"
+}
+```
+
+### Field
+
+| Name      | Type              | Description                          |
+|:--------- |:----------------- |:------------------------------------ |
+| applyId   | Long               | 지원 ID                                |
+| memberId  | Long               | 지원자 회원 ID                            |
+| nickname  | String             | 지원자 닉네임                              |
+| message   | String             | 지원 메시지                              |
+| keywords  | List<KeywordItem>  | 지원자가 선택한 지원 키워드 (텍스트 포함, 5-7과 동일 형태) |
+| status    | Enum               | 지원 상태 (WAITING / ACCEPTED / REJECTED) |
+| createdAt | String             | 지원 일시                              |
+
+`KeywordItem`: `{ "keywordId": Long, "content": String }`
 
 ---
 
@@ -2866,7 +2924,8 @@ Applicant 목록 반환
 
 1. 작성자 여부 확인
 2. 지원자 조회
-3. Pagination 적용
+3. 각 지원자에게 매핑된 지원 키워드를 함께 조회 (ApplyKeywordMap → ApplyKeyword)
+4. Pagination 적용
 
 ---
 
@@ -2924,10 +2983,12 @@ Bearer Access Token
 
 ## Error
 
-| HTTP | Error Code   |
-|:---- |:------------ |
-| 403  | FORBIDDEN    |
-| 409  | RECRUIT_FULL |
+| HTTP | Error Code        | 설명               |
+|:---- |:------------------ |:----------------- |
+| 400  | VALIDATION_FAILED  | status가 ACCEPTED/REJECTED가 아님 |
+| 403  | FORBIDDEN          | 공고 작성자가 아님        |
+| 409  | RECRUIT_FULL       | 모집 정원 마감          |
+| 409  | APPLY_NOT_WAITING  | 이미 처리된 지원건 (재처리 불가) |
 
 ---
 
@@ -3067,9 +3128,11 @@ Bearer Access Token
 
 | HTTP | Error Code                | 설명              |
 |:---- |:------------------------- |:--------------- |
+| 400  | VALIDATION_FAILED         | 입력값 검증 실패       |
 | 400  | ALREADY_EVALUATED         | 이미 평가 완료        |
 | 403  | FORBIDDEN                 | 평가 권한 없음        |
 | 404  | PROJECT_NOT_FOUND         | 프로젝트 없음         |
+| 404  | PROJECT_MEMBER_NOT_FOUND  | 평가 대상이 팀원이 아님   |
 | 409  | PROJECT_NOT_ENDED         | 아직 종료되지 않은 프로젝트 |
 | 409  | EVALUATION_PERIOD_EXPIRED | 평가 기간(3일) 종료    |
 
@@ -4819,11 +4882,12 @@ Bearer Access Token
 
 ## Error
 
-| HTTP | Error Code         | 설명        |
-|:---- |:------------------ |:--------- |
-| 400  | VALIDATION_FAILED  | 입력값 검증 실패 |
-| 403  | FORBIDDEN          | 본인 일정이 아님 |
-| 404  | SCHEDULE_NOT_FOUND | 일정 없음     |
+| HTTP | Error Code                  | 설명        |
+|:---- |:--------------------------- |:--------- |
+| 400  | VALIDATION_FAILED           | 입력값 검증 실패 |
+| 403  | FORBIDDEN                   | 본인 일정이 아님 |
+| 404  | SCHEDULE_NOT_FOUND          | 일정 없음     |
+| 404  | SCHEDULE_CATEGORY_NOT_FOUND | 카테고리 없음   |
 
 ---
 
@@ -4950,11 +5014,14 @@ Bearer Access Token (프로젝트장만)
         "deadline":"2026-07-15T03:00:00+09:00",
         "totalMembers":4,
         "respondedCount":0,
-        "slotCount":50
+        "slotCount":125
     },
     "timestamp":"2026-07-14T15:00:00+09:00"
 }
 ```
+
+> `slotCount`는 탐색 기간 × 탐색 시간대를 30분 간격으로 밀어가며 `durationMin` 길이의 슬롯을 생성한 개수다.
+> 위 예시(5일, 09:00~22:00, durationMin=60)는 하루 25개(09:00~21:00, 30분 간격) × 5일 = 125개다.
 
 ## Business Logic
 
@@ -5349,7 +5416,7 @@ Bearer Access Token
 
 ## Request Body
 
-단발이면 7-11, 반복이면 7-12와 동일
+개인 일정 수정(7-8)과 동일한 구조 (단발이면 date, 반복이면 startDate/endDate/rrule)이되 categoryId는 없다 (색상은 7-19로 팀원별 지정)
 
 ---
 
@@ -5554,6 +5621,19 @@ Bearer Access Token
 
 REST API는 채팅방 및 채팅 내역 **조회**, **1:1 채팅방 생성**, **이미지 업로드**에 사용한다.
 
+## WebSocket (STOMP)
+
+| 항목 | 값 |
+|:--- |:--- |
+| Endpoint | `ws(s)://{host}/api/v1/ws` (SockJS) |
+| 인증 | STOMP `CONNECT` 프레임의 `Authorization: Bearer {AccessToken}` 헤더 (Blacklist 포함 REST와 동일 규칙) |
+| 메시지 발행(Publish) | `/pub/chatrooms/{chatRoomId}/messages` — `{ "type":"TEXT\|IMAGE", "message":"...", "imageUrl":"..." }` |
+| 읽음 처리(Publish) | `/pub/chatrooms/{chatRoomId}/read` — `{ "lastReadMessageId":"..." }` (REST 8-6과 동일 로직) |
+| 구독(Subscribe) | `/sub/chatrooms/{chatRoomId}` — 새 메시지 브로드캐스트 |
+| 에러 알림(Subscribe) | `/user/queue/errors` — `{ "code":"FORBIDDEN", "message":"..." }` (채팅방 참여자가 아닌 경우 등) |
+
+`senderId`는 클라이언트가 보내지 않는다. 서버가 STOMP 세션의 인증된 Principal에서만 가져온다(클라이언트가 다른 사용자를 사칭해 보낼 수 없다).
+
 ## 채팅방 종류
 
 | Type   | 설명           | 생성 시점                                   |
@@ -5636,7 +5716,8 @@ Bearer Access Token
                 "projectId":null,
                 "lastMessage":"지원서 잘 봤습니다.",
                 "lastMessageAt":"2026-07-06T11:00:00+09:00",
-                "unreadCount":0
+                "unreadCount":0,
+                "notiEnabled":true
             }
         ],
         "pageInfo":{
@@ -5695,11 +5776,18 @@ Bearer Access Token
                 "memberId":10,
                 "nickname":"픽키"
             }
-        ]
+        ],
+        "projectId":1,
+        "startDate":"2026-07-01",
+        "endDate":"2026-08-31",
+        "status":"IN_PROGRESS",
+        "isLeader":true
     },
     "timestamp":"2026-07-06T13:30:00+09:00"
 }
 ```
+
+> `projectId`/`startDate`/`endDate`/`status`/`isLeader`는 GROUP 채팅방일 때만 채워진다. DIRECT 채팅방 응답에는 해당 필드가 없다(null 필드 제외 정책).
 
 ---
 
@@ -5707,7 +5795,7 @@ Bearer Access Token
 
 1. 채팅방 참여 여부 확인
 2. 채팅방 상세 정보 조회
-3. GROUP인 경우 연결된 프로젝트 정보(팀원, 진행 기간, 상태, 프로젝트장 여부)를 함께 반환
+3. GROUP인 경우 연결된 프로젝트 정보(진행 기간, 상태, 프로젝트장 여부)를 함께 반환 — 팀원 목록은 위 `members`로 대체된다.
 
 > **프로젝트 관리의 진입점은 그룹 채팅방이다.**
 > 채팅방 상단 메뉴에서 팀원 조회, 회의 일정 잡기, 팀 일정 보기, 프로젝트 종료/연장, 프로젝트장 위임, 팀원 퇴출에 접근한다.
@@ -6234,7 +6322,7 @@ Bearer Access Token
         "content":[
             {
                 "notificationId":1,
-                "type":"APPLICATION",
+                "type":"APPLY",
                 "title":"새로운 지원자가 있습니다.",
                 "content":"픽키님이 '제일기획 공모전'에 지원했습니다.",
                 "referenceType":"RECRUIT",

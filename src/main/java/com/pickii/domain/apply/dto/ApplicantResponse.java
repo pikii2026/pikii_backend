@@ -3,6 +3,7 @@ package com.pickii.domain.apply.dto;
 import com.pickii.domain.apply.entity.ApplyStatus;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 /**
  * API_SPEC 4-7 지원자 목록 조회 응답 항목
@@ -12,6 +13,7 @@ public record ApplicantResponse(
         Long memberId,
         String nickname,
         String message,
+        List<ApplyKeywordCategoryResponse.KeywordItem> keywords,
         ApplyStatus status,
         OffsetDateTime createdAt
 ) {

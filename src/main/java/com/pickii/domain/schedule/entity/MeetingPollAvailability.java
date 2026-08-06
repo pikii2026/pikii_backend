@@ -37,6 +37,11 @@ public class MeetingPollAvailability {
         this.available = available;
     }
 
+    /** 7-12 응답 재제출 시 기존 응답 갱신 */
+    public void changeAvailable(boolean available) {
+        this.available = available;
+    }
+
     @NoArgsConstructor
     @AllArgsConstructor
     @EqualsAndHashCode

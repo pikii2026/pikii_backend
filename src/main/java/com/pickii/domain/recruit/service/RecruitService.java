@@ -32,9 +32,12 @@ import com.pickii.domain.recruit.repository.RecruitScrapRepository;
 import com.pickii.domain.recruit.repository.RecruitSpecification;
 import com.pickii.domain.recruit.repository.RecruitTopicRepository;
 import com.pickii.domain.recruit.repository.TopicRepository;
+import com.pickii.global.ai.GeminiClient;
 import com.pickii.global.common.response.PageResponse;
 import com.pickii.global.exception.BusinessException;
 import com.pickii.global.exception.ErrorCode;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -77,6 +80,8 @@ public class RecruitService {
     private final RecruitScrapRepository recruitScrapRepository;
     private final CommentRepository commentRepository;
     private final ProjectRepository projectRepository;
+    private final GeminiClient geminiClient;
+    private final ObjectMapper objectMapper;
 
     public PageResponse<RecruitSummaryResponse> searchRecruits(String keyword, Boolean onCampus,
                                                                 List<Long> categoryIds, List<Long> topicIds,
@@ -297,6 +302,9 @@ public class RecruitService {
         if (recruit.getStatus() == RecruitStatus.ADDITIONAL) {
             throw new BusinessException(ErrorCode.ALREADY_ADDITIONAL);
         }
+        if (recruit.getStatus() != RecruitStatus.CLOSED) {
+            throw new BusinessException(ErrorCode.RECRUIT_NOT_CLOSED);
+        }
         Optional<Project> project = projectRepository.findByRecruitId(recruitId);
         if (project.isPresent() && project.get().isEnded()) {
             throw new BusinessException(ErrorCode.PROJECT_ENDED_CANNOT_RECRUIT);
@@ -440,17 +448,37 @@ public class RecruitService {
         return recruitAuthorId.equals(comment.getMember().getId());
     }
 
-    /**
-     * 3-3 AI 공고 초안 생성
-     *
-     * <p>TODO: 실제 AI 서버 연동 전까지는 입력값을 가공해 돌려주는 목업으로 구현한다.
-     * (팀 컨벤션: {@code docs/dev-plan/person1/day-02-recruit-create.md} 참고)</p>
-     */
+    /** 3-3 AI 공고 초안 생성 (Gemini) */
     public AiDraftResponse generateAiDraft(AiDraftRequest request) {
-        return new AiDraftResponse(
-                "AI가 다듬은: " + request.simpleDesc(),
-                "AI가 다듬은: " + request.content()
+        String prompt = """
+                너는 대학생 공모전/스터디/프로젝트 팀원 모집 공고 작성을 돕는 도우미다.
+                아래 사용자가 입력한 초안을 더 구체적이고 매력적인 한국어 모집 공고 문구로 다듬어라.
+                말투는 정중하고 신뢰가 가도록 작성하고, 없는 사실을 지어내지 마라.
+
+                간단소개(원본): %s
+                상세내용(원본): %s
+
+                simpleDesc는 50자 이내 한 줄 요약, content는 1000자 이내 상세 설명으로 작성하라.
+                """.formatted(
+                        StringUtils.hasText(request.simpleDesc()) ? request.simpleDesc() : "(없음)",
+                        request.content()
+                );
+
+        Map<String, Object> responseSchema = Map.of(
+                "type", "object",
+                "properties", Map.of(
+                        "simpleDesc", Map.of("type", "string"),
+                        "content", Map.of("type", "string")
+                ),
+                "required", List.of("simpleDesc", "content")
         );
+
+        String json = geminiClient.generateJson(prompt, responseSchema);
+        try {
+            return objectMapper.readValue(json, AiDraftResponse.class);
+        } catch (JsonProcessingException e) {
+            throw new BusinessException(ErrorCode.AI_GENERATION_FAILED);
+        }
     }
 
     /** 3-1 공고 상세 조회 */
