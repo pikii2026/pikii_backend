@@ -13,14 +13,10 @@ RUN gradle bootJar --no-daemon
 FROM eclipse-temurin:17-jre
 WORKDIR /app
 COPY --from=build /app/build/libs/*.jar app.jar
-# 저사양 컨테이너(Railway 등)에서 OOM 재시작 루프를 막기 위한 JVM 메모리 제한:
-# 힙/메타스페이스/코드캐시/스택을 전부 고정값으로 묶어 총 사용량을 ~450MB 이내로 유지
+# 힙은 컨테이너 메모리에 비례해 잡고, 메타스페이스는 넉넉히 상한만 둔다.
+# (상한을 너무 낮게 잡으면 Swagger/JPA 프록시 클래스가 쌓이며 Metaspace OOM이 난다)
 ENTRYPOINT ["java", \
-    "-Xms128m", "-Xmx224m", \
-    "-XX:MaxMetaspaceSize=128m", \
-    "-XX:ReservedCodeCacheSize=48m", \
-    "-XX:MaxDirectMemorySize=32m", \
-    "-Xss512k", \
-    "-XX:+UseSerialGC", \
+    "-XX:MaxRAMPercentage=70", \
+    "-XX:MaxMetaspaceSize=512m", \
     "-Dspring.profiles.active=prod", \
     "-jar", "app.jar"]
