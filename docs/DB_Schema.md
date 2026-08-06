@@ -531,6 +531,7 @@ Project.Status = END → 상호평가
 - 프로젝트 생성 이후, 모집중(OPEN)이든 추가모집(ADDITIONAL)이든 **수락된 지원자는 자동으로 기존 그룹 채팅방과 Project에 합류**한다.
 - 공고 마감은 별도다: 진행기간(EndDate) 만료 또는 작성자의 수동 마감으로만 CLOSED가 된다.
 - 프로젝트 생성에는 `ACCEPTED` 상태의 지원자가 최소 1명 필요하다. (혼자서는 프로젝트 생성 불가)
+- **단, `Project.Status = END`로 전환된 이후에는 해당 공고를 추가 모집(3-5, `Recruit.Status = ADDITIONAL`)으로 전환할 수 없다.** 프로젝트가 이미 종료되어 더 이상 합류할 팀이 없기 때문이다.
 
 #### [Table: ProjectMember] - 프로젝트 실제 참여자 명단
 
