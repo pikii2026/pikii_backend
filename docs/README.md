@@ -15,6 +15,7 @@ Pickii 백엔드 개발 문서 저장소입니다.
 | REDIS_POLICY.md | Redis 인증 및 세션 관리 정책   |
 | ERROR_CODE.md   | 프로젝트 전체 Error Code 정의 |
 | ENUM.md         | 프로젝트에서 사용하는 Enum 정의   |
+| PUSH_NOTIFICATION.md | 시스템 푸시 알림(FCM) 도입 계획 (미구현, 설계 문서) |
 
 ---
 
@@ -28,7 +29,8 @@ docs
 ├── DB_SCHEMA.md
 ├── REDIS_POLICY.md
 ├── ERROR_CODE.md
-└── ENUM.md
+├── ENUM.md
+└── PUSH_NOTIFICATION.md
 ```
 
 ---
