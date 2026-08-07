@@ -437,6 +437,12 @@ Pickii 프로젝트에서 사용하는 모든 Error Code를 정의한다.
 | 403  | FORBIDDEN              | 본인 알림이 아님 |
 | 404  | NOTIFICATION_NOT_FOUND | 알림 없음     |
 
+## 디바이스 토큰 등록 / 삭제
+
+| HTTP | Error Code         | 설명    |
+|:---- |:------------------- |:------ |
+| 400  | VALIDATION_FAILED  | 필드 누락 |
+
 ---
 
 # 10. User

@@ -552,3 +552,27 @@ API에서는 Enum 이름 그대로 문자열을 사용한다.
 Enum 값은 변경하지 않는다.
 
 기존 Enum을 삭제해야 하는 경우에는 Deprecated 처리 후 제거한다.
+
+---
+
+# 22. Platform
+
+디바이스 플랫폼 종류 (시스템 푸시용 `DeviceToken` 등록 시 사용)
+
+| Enum    | 설명       |
+|:------- |:--------- |
+| ANDROID | 안드로이드 기기 |
+| IOS     | iOS 기기    |
+
+사용 위치
+
+- DeviceToken
+- `POST /devices` (9-8)
+
+예시
+
+```json
+{
+    "platform": "ANDROID"
+}
+```

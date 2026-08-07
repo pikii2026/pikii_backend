@@ -19,7 +19,7 @@ spring:
     type: simple
 
 server:
-  port: 8080
+  port: 8083
   servlet:
     # API_SPEC 0.1 Base URL: http://localhost:8080/api/v1
     context-path: /api/v1
@@ -40,7 +40,13 @@ app:
     from: ${MAIL_FROM:${MAIL_USERNAME:}}
     brevo-api-key: ${BREVO_API_KEY:}
 
-# AI 연동 (공고초안/지원메시지/자기소개/상호평가요약) - Gemini 3.5 Flash-Lite (무료 티어)
+# AI 연동 (공고초안/지원메시지/자기소개/상호평가요약) - Gemini (무료 티어)
+# gemini-2.5-flash/-lite, gemini-2.0-flash는 이 API 키(신규 발급)에서 각각 404(신규 사용자 미제공)/429(무료 쿼터 0)로 막혀 있어 사용 불가 확인됨(2026-08-07).
+# ListModels로 확인한 사용 가능 모델 중 gemini-3-flash-preview만 정상 응답.
 gemini:
   api-key: ${GEMINI_API_KEY:}
-  model: ${GEMINI_MODEL:gemini-2.5-flash}
+  model: ${GEMINI_MODEL:gemini-3-flash-preview}
+
+# 시스템 푸시(FCM) 연동 - 서비스 계정 키 JSON 원문. 미설정 시 푸시 발송은 비활성화된다(서버 부팅에는 영향 없음)
+fcm:
+  credentials-json: ${FCM_CREDENTIALS_JSON:}

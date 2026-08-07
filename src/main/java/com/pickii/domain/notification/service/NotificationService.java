@@ -1,8 +1,13 @@
 package com.pickii.domain.notification.service;
 
+import com.pickii.domain.member.entity.Member;
+import com.pickii.domain.member.repository.MemberRepository;
+import com.pickii.domain.notification.dto.DeviceTokenRegisterRequest;
 import com.pickii.domain.notification.dto.NotificationResponse;
 import com.pickii.domain.notification.dto.UnreadCountResponse;
+import com.pickii.domain.notification.entity.DeviceToken;
 import com.pickii.domain.notification.entity.NotificationHistory;
+import com.pickii.domain.notification.repository.DeviceTokenRepository;
 import com.pickii.domain.notification.repository.NotificationHistoryRepository;
 import com.pickii.global.common.response.PageResponse;
 import com.pickii.global.exception.BusinessException;
@@ -16,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.ZoneOffset;
 
 /**
- * 알림 목록/읽음처리/삭제/안읽음 개수 (API_SPEC 9-1~9-4, 9-7)
+ * 알림 목록/읽음처리/삭제/안읽음 개수/디바이스 토큰 등록·삭제 (API_SPEC 9-1~9-4, 9-7~9-9)
  */
 @Service
 @RequiredArgsConstructor
@@ -24,6 +29,8 @@ import java.time.ZoneOffset;
 public class NotificationService {
 
     private final NotificationHistoryRepository notificationHistoryRepository;
+    private final DeviceTokenRepository deviceTokenRepository;
+    private final MemberRepository memberRepository;
 
     /** 9-1 알림 목록 조회 */
     public PageResponse<NotificationResponse> getNotifications(Long memberId, Pageable pageable) {
@@ -55,6 +62,26 @@ public class NotificationService {
     /** 9-7 안 읽은 알림 개수 조회 */
     public UnreadCountResponse getUnreadCount(Long memberId) {
         return new UnreadCountResponse(notificationHistoryRepository.countByMemberIdAndIsReadFalse(memberId));
+    }
+
+    /** 9-8 디바이스 토큰 등록 (upsert) */
+    @Transactional
+    public void registerDeviceToken(Long memberId, DeviceTokenRegisterRequest request) {
+        Member member = memberRepository.getReferenceById(memberId);
+        deviceTokenRepository.findByFcmToken(request.fcmToken())
+                .ifPresentOrElse(
+                        existing -> existing.reassign(member, request.platform()),
+                        () -> deviceTokenRepository.save(DeviceToken.builder()
+                                .member(member)
+                                .fcmToken(request.fcmToken())
+                                .platform(request.platform())
+                                .build()));
+    }
+
+    /** 9-9 디바이스 토큰 삭제 (idempotent) */
+    @Transactional
+    public void unregisterDeviceToken(Long memberId, String fcmToken) {
+        deviceTokenRepository.deleteByFcmTokenAndMemberId(fcmToken, memberId);
     }
 
     private NotificationHistory getOwnedNotification(Long memberId, Long notificationId) {

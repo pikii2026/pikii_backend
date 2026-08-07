@@ -8,6 +8,7 @@ import com.pickii.domain.notification.entity.NotificationHistory;
 import com.pickii.domain.notification.entity.NotificationReferenceType;
 import com.pickii.domain.notification.entity.NotificationSetting;
 import com.pickii.domain.notification.entity.NotificationType;
+import com.pickii.domain.notification.event.NotificationCreatedEvent;
 import com.pickii.domain.notification.repository.NotificationHistoryRepository;
 import com.pickii.domain.notification.repository.NotificationSettingRepository;
 import com.pickii.domain.project.entity.Project;
@@ -42,6 +43,7 @@ import net.fortuna.ical4j.model.Date;
 import net.fortuna.ical4j.model.DateList;
 import net.fortuna.ical4j.model.Recur;
 import net.fortuna.ical4j.model.parameter.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -81,6 +83,7 @@ public class MeetingPollService {
     private final NotificationHistoryRepository notificationHistoryRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageService chatMessageService;
+    private final ApplicationEventPublisher eventPublisher;
 
     /** 7-10 회의 조율 개설 */
     @Transactional
@@ -473,5 +476,7 @@ public class MeetingPollService {
                 .referenceType(NotificationReferenceType.PROJECT)
                 .referenceId(project.getId())
                 .build());
+        eventPublisher.publishEvent(new NotificationCreatedEvent(
+                member.getId(), title, content, NotificationType.MEETING, NotificationReferenceType.PROJECT, project.getId()));
     }
 }

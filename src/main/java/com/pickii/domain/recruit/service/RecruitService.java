@@ -1,7 +1,15 @@
 package com.pickii.domain.recruit.service;
 
+import com.pickii.domain.member.entity.Member;
 import com.pickii.domain.member.repository.MemberRepository;
 import com.pickii.domain.member.repository.MemberUnivRepository;
+import com.pickii.domain.notification.entity.NotificationHistory;
+import com.pickii.domain.notification.entity.NotificationReferenceType;
+import com.pickii.domain.notification.entity.NotificationSetting;
+import com.pickii.domain.notification.entity.NotificationType;
+import com.pickii.domain.notification.event.NotificationCreatedEvent;
+import com.pickii.domain.notification.repository.NotificationHistoryRepository;
+import com.pickii.domain.notification.repository.NotificationSettingRepository;
 import com.pickii.domain.project.entity.Project;
 import com.pickii.domain.project.repository.ProjectRepository;
 import com.pickii.domain.recruit.dto.AiDraftRequest;
@@ -39,6 +47,7 @@ import com.pickii.global.exception.ErrorCode;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -82,6 +91,9 @@ public class RecruitService {
     private final ProjectRepository projectRepository;
     private final GeminiClient geminiClient;
     private final ObjectMapper objectMapper;
+    private final NotificationSettingRepository notificationSettingRepository;
+    private final NotificationHistoryRepository notificationHistoryRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     public PageResponse<RecruitSummaryResponse> searchRecruits(String keyword, Boolean onCampus,
                                                                 List<Long> categoryIds, List<Long> topicIds,
@@ -385,7 +397,32 @@ public class RecruitService {
                 .build();
         commentRepository.save(comment);
 
+        notifyRecruitAuthor(recruit, comment);
+
         return new CommentCreateResponse(comment.getId());
+    }
+
+    private void notifyRecruitAuthor(Recruit recruit, Comment comment) {
+        Member author = recruit.getMember();
+        if (author == null || author.getId().equals(comment.getMember().getId())) {
+            return;
+        }
+        NotificationSetting setting = notificationSettingRepository.findById(author.getId()).orElse(null);
+        if (setting == null || !setting.isCommentNoti()) {
+            return;
+        }
+        String title = "새로운 댓글이 있습니다.";
+        String content = comment.getMember().getNickname() + "님이 '" + recruit.getTitle() + "'에 댓글을 남겼습니다.";
+        notificationHistoryRepository.save(NotificationHistory.builder()
+                .member(author)
+                .title(title)
+                .content(content)
+                .type(NotificationType.COMMENT)
+                .referenceType(NotificationReferenceType.RECRUIT)
+                .referenceId(recruit.getId())
+                .build());
+        eventPublisher.publishEvent(new NotificationCreatedEvent(
+                author.getId(), title, content, NotificationType.COMMENT, NotificationReferenceType.RECRUIT, recruit.getId()));
     }
 
     /** 3-9 댓글 삭제 */
