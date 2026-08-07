@@ -13,6 +13,7 @@ import com.pickii.domain.notification.entity.NotificationHistory;
 import com.pickii.domain.notification.entity.NotificationReferenceType;
 import com.pickii.domain.notification.entity.NotificationSetting;
 import com.pickii.domain.notification.entity.NotificationType;
+import com.pickii.domain.notification.event.NotificationCreatedEvent;
 import com.pickii.domain.notification.repository.NotificationHistoryRepository;
 import com.pickii.domain.notification.repository.NotificationSettingRepository;
 import com.pickii.domain.project.dto.LeaderDelegateRequest;
@@ -34,6 +35,7 @@ import com.pickii.global.common.response.PageResponse;
 import com.pickii.global.exception.BusinessException;
 import com.pickii.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -66,6 +68,7 @@ public class ProjectService {
     private final ChatRoomMemberRepository chatRoomMemberRepository;
     private final NotificationSettingRepository notificationSettingRepository;
     private final NotificationHistoryRepository notificationHistoryRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     /** 6-1 프로젝트 생성 (그룹 채팅 생성) */
     @Transactional
@@ -318,5 +321,7 @@ public class ProjectService {
                 .referenceType(NotificationReferenceType.PROJECT)
                 .referenceId(project.getId())
                 .build());
+        eventPublisher.publishEvent(new NotificationCreatedEvent(
+                member.getId(), title, content, NotificationType.PROJECT, NotificationReferenceType.PROJECT, project.getId()));
     }
 }

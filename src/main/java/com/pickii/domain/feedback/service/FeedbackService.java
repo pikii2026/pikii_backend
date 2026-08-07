@@ -19,6 +19,13 @@ import com.pickii.domain.feedback.repository.FeedbackRepository;
 import com.pickii.domain.feedback.repository.KeywordRepository;
 import com.pickii.domain.member.entity.Member;
 import com.pickii.domain.member.repository.MemberRepository;
+import com.pickii.domain.notification.entity.NotificationHistory;
+import com.pickii.domain.notification.entity.NotificationReferenceType;
+import com.pickii.domain.notification.entity.NotificationSetting;
+import com.pickii.domain.notification.entity.NotificationType;
+import com.pickii.domain.notification.event.NotificationCreatedEvent;
+import com.pickii.domain.notification.repository.NotificationHistoryRepository;
+import com.pickii.domain.notification.repository.NotificationSettingRepository;
 import com.pickii.domain.project.entity.Project;
 import com.pickii.domain.project.entity.ProjectMember;
 import com.pickii.domain.project.entity.ProjectStatus;
@@ -30,6 +37,7 @@ import com.pickii.global.exception.BusinessException;
 import com.pickii.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -68,6 +76,9 @@ public class FeedbackService {
     private final KeywordRepository keywordRepository;
     private final GeminiClient geminiClient;
     private final ObjectMapper objectMapper;
+    private final NotificationSettingRepository notificationSettingRepository;
+    private final NotificationHistoryRepository notificationHistoryRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     /** 5-6 피드백 키워드 조회 (마스터 데이터, 거의 변경 없어 캐싱) */
     @Cacheable("feedbackKeywords")
@@ -280,6 +291,28 @@ public class FeedbackService {
                 : result.keywordIds().stream().distinct().filter(poolIds::contains).limit(MAX_AI_FEEDBACK_KEYWORDS).toList();
         chosenKeywordIds.forEach(keywordId ->
                 aiFeedbackKeywordRepository.save(new AIFeedbackKeyword(keywordId, aiFeedback.getId())));
+
+        notifyAiFeedbackReady(project, reviewee);
+    }
+
+    /** AI가 상호평가를 종합한 결과가 나왔음을 평가 대상 본인에게 알린다. */
+    private void notifyAiFeedbackReady(Project project, Member reviewee) {
+        NotificationSetting setting = notificationSettingRepository.findById(reviewee.getId()).orElse(null);
+        if (setting == null || !setting.isProjectNoti()) {
+            return;
+        }
+        String title = "AI 상호평가 리포트가 도착했습니다.";
+        String content = "'" + project.getName() + "' 프로젝트의 AI 종합 리포트를 확인해보세요.";
+        notificationHistoryRepository.save(NotificationHistory.builder()
+                .member(reviewee)
+                .title(title)
+                .content(content)
+                .type(NotificationType.FEEDBACK)
+                .referenceType(NotificationReferenceType.FEEDBACK)
+                .referenceId(project.getId())
+                .build());
+        eventPublisher.publishEvent(new NotificationCreatedEvent(
+                reviewee.getId(), title, content, NotificationType.FEEDBACK, NotificationReferenceType.FEEDBACK, project.getId()));
     }
 
     private AiFeedbackResult requestAiFeedback(List<Feedback> feedbacks, List<Keyword> keywordPool) {

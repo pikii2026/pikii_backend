@@ -1901,6 +1901,7 @@ parentCommentId
 2. Recruit 존재 여부 확인
 3. 부모 댓글 존재 여부 확인(답글인 경우)
 4. 댓글 생성
+5. 댓글 작성자가 공고 작성자 본인이 아니면, 공고 작성자에게 알림(`type=COMMENT`, `referenceType=RECRUIT`, `referenceId=recruitId`) 발송 (`NotificationSetting.CommentNoti` OFF면 미발송)
 
 ---
 
@@ -3289,6 +3290,8 @@ AI 피드백은 다음 **두 트리거 중 먼저 도달하는 시점**에 생�
 ```
 
 전원이 일찍 평가를 마치면 3일을 기다리지 않는다.
+
+AI 피드백이 생성되면(두 트리거 중 어느 쪽이든), 평가 대상 본인에게 알림(`type=FEEDBACK`, `referenceType=FEEDBACK`, `referenceId=projectId`)을 발송한다. `NotificationSetting.ProjectNoti`가 OFF면 미발송.
 
 ### 평가 대상 인원 (기준 N)
 
@@ -5634,6 +5637,8 @@ REST API는 채팅방 및 채팅 내역 **조회**, **1:1 채팅방 생성**, **
 
 `senderId`는 클라이언트가 보내지 않는다. 서버가 STOMP 세션의 인증된 Principal에서만 가져온다(클라이언트가 다른 사용자를 사칭해 보낼 수 없다).
 
+메시지가 저장되면, 발신자를 제외한 방 참여자 중 알림 설정이 `ChatNoti`(전역, 9-6) AND `notiEnabled`(방별, 8-8)가 모두 켜져 있는 사람에게 `NotificationHistory`(`type=CHAT`, `referenceType=CHATROOM`, `referenceId=chatRoomId`)를 저장한다. 소켓 연결이 끊긴 상태에서도 9-1 알림함에서 확인할 수 있다.
+
 ## 채팅방 종류
 
 | Type   | 설명           | 생성 시점                                   |
@@ -6618,6 +6623,122 @@ Bearer Access Token
 
 - ERROR_CODE.md
 - ENUM.md
+
+---
+
+# 9-8 디바이스 토큰 등록
+
+앱이 꺼진 상태에서도 시스템 푸시(FCM)를 받기 위해, 로그인/포그라운드 진입 시 클라이언트가 발급받은 FCM 토큰을 서버에 등록한다.
+
+## Endpoint
+
+```http
+POST /devices
+```
+
+---
+
+## Authentication
+
+Bearer Access Token
+
+---
+
+## Request Body
+
+```json
+{
+    "fcmToken":"...",
+    "platform":"ANDROID"
+}
+```
+
+### Field
+
+| Name     | Type   | Required | Description         |
+|:-------- |:------ |:-------- |:------------------- |
+| fcmToken | String | O        | 클라이언트가 발급받은 FCM 등록 토큰 |
+| platform | Enum   | O        | `ANDROID` / `IOS`  |
+
+---
+
+## Response
+
+204 No Content
+
+---
+
+## Business Logic
+
+1. Access Token 검증
+2. `fcmToken`으로 기존 `DeviceToken` 조회
+   - 있으면 소유 회원을 현재 로그인 회원으로 교체(재설치, 다른 계정 로그인 등 대비 upsert) + `UpdatedAt` 갱신
+   - 없으면 신규 `DeviceToken` 저장
+3. 회원 1명이 여러 기기를 등록할 수 있다 (기기별로 별도 row)
+
+---
+
+## Error
+
+| HTTP | Error Code        | 설명    |
+|:---- |:----------------- |:------ |
+| 400  | VALIDATION_FAILED | 필드 누락 |
+
+---
+
+# 9-9 디바이스 토큰 삭제
+
+로그아웃 시 해당 기기에서는 더 이상 푸시를 받지 않도록 토큰을 삭제한다.
+
+## Endpoint
+
+```http
+DELETE /devices
+```
+
+---
+
+## Authentication
+
+Bearer Access Token
+
+---
+
+## Request Body
+
+```json
+{
+    "fcmToken":"..."
+}
+```
+
+### Field
+
+| Name     | Type   | Required | Description |
+|:-------- |:------ |:-------- |:----------- |
+| fcmToken | String | O        | 삭제할 FCM 토큰 |
+
+---
+
+## Response
+
+204 No Content
+
+---
+
+## Business Logic
+
+1. Access Token 검증
+2. 로그인 회원 소유의 `fcmToken`과 일치하는 `DeviceToken` 삭제
+3. 이미 없거나 본인 소유가 아니어도 204를 반환한다(idempotent — 클라이언트가 삭제 성공/실패를 구분할 필요가 없음)
+
+---
+
+## Error
+
+| HTTP | Error Code        | 설명    |
+|:---- |:----------------- |:------ |
+| 400  | VALIDATION_FAILED | 필드 누락 |
 
 ---
 

@@ -919,6 +919,27 @@ unreadCount = 해당 채팅방에서 LastReadMessageId 이후에 생성된 메�
 
 - MemberId, ON DELETE CASCADE
 
+#### [Table: DeviceToken] - 시스템 푸시(FCM)용 기기 토큰
+
+| 컬럼명            | 타입 / 제약조건    | 참조 (FK)      | 설명                        |
+|:-------------- |:------------ |:------------ |:------------------------- |
+| **Id**         | PK, Serial   | -            | 기기 토큰 식별자                 |
+| **MemberId**   | FK           | `Member(Id)` | 토큰 소유 회원                  |
+| **FcmToken**   | VARCHAR, UNIQUE | -         | 기기별 FCM 등록 토큰             |
+| **Platform**   | VARCHAR      | -            | `ANDROID` / `IOS`         |
+| **CreatedAt**  | DATETIME     | -            | 최초 등록 일시                  |
+| **UpdatedAt**  | DATETIME     | -            | 토큰 갱신 일시                  |
+
+회원 1명이 여러 기기(폰+태블릿 등)를 쓸 수 있으므로 회원당 N개 허용한다. 같은 `FcmToken`으로 재등록 요청이 오면(재설치, 다른 계정 로그인 등) 소유 회원을 교체하는 upsert로 처리한다. Soft Delete 대상이 아니다 — 무효화되면 즉시 하드 삭제한다.
+
+##### Referential Integrity Constraint
+
+- MemberId, ON DELETE CASCADE
+
+##### Composite Constraint
+
+- Unique(FcmToken) : 같은 기기 토큰이 여러 행에 중복 저장되지 않음(재등록 시 upsert)
+
 ---
 
 ### 1.5 평가 및 AI 피드백 도메인 (Feedback & AI Data)

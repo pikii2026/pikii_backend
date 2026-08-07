@@ -8,6 +8,7 @@ import com.pickii.domain.notification.entity.NotificationHistory;
 import com.pickii.domain.notification.entity.NotificationReferenceType;
 import com.pickii.domain.notification.entity.NotificationSetting;
 import com.pickii.domain.notification.entity.NotificationType;
+import com.pickii.domain.notification.event.NotificationCreatedEvent;
 import com.pickii.domain.notification.repository.NotificationHistoryRepository;
 import com.pickii.domain.notification.repository.NotificationSettingRepository;
 import com.pickii.domain.project.entity.Project;
@@ -34,6 +35,7 @@ import com.pickii.global.exception.BusinessException;
 import com.pickii.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import net.fortuna.ical4j.model.Recur;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,6 +64,7 @@ public class PartyScheduleService {
     private final MemberRepository memberRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageService chatMessageService;
+    private final ApplicationEventPublisher eventPublisher;
 
     /** 7-15 팀 일정 조회 */
     public List<MyScheduleResponse> getMonthlySchedules(Long memberId, Long projectId, int year, int month) {
@@ -313,5 +316,7 @@ public class PartyScheduleService {
                 .referenceType(NotificationReferenceType.PROJECT)
                 .referenceId(project.getId())
                 .build());
+        eventPublisher.publishEvent(new NotificationCreatedEvent(
+                member.getId(), title, content, NotificationType.SCHEDULE, NotificationReferenceType.PROJECT, project.getId()));
     }
 }

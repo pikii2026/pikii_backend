@@ -26,6 +26,7 @@ import com.pickii.domain.notification.entity.NotificationHistory;
 import com.pickii.domain.notification.entity.NotificationReferenceType;
 import com.pickii.domain.notification.entity.NotificationSetting;
 import com.pickii.domain.notification.entity.NotificationType;
+import com.pickii.domain.notification.event.NotificationCreatedEvent;
 import com.pickii.domain.notification.repository.NotificationHistoryRepository;
 import com.pickii.domain.notification.repository.NotificationSettingRepository;
 import com.pickii.domain.project.entity.Project;
@@ -40,6 +41,7 @@ import com.pickii.global.exception.BusinessException;
 import com.pickii.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -74,6 +76,7 @@ public class ApplyService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomMemberRepository chatRoomMemberRepository;
     private final GeminiClient geminiClient;
+    private final ApplicationEventPublisher eventPublisher;
 
     /** 3-10 AI 지원서 초안 생성 (Gemini) */
     public ApplyAiDraftResponse generateAiDraft(Long recruitId, ApplyAiDraftRequest request) {
@@ -286,14 +289,19 @@ public class ApplyService {
         if (setting == null || !setting.isMatchNoti()) {
             return;
         }
+        String title = accepted ? "지원이 수락되었습니다." : "지원이 거절되었습니다.";
+        String content = "'" + recruit.getTitle() + "' 공고에 대한 지원이 " + (accepted ? "수락" : "거절") + "되었습니다.";
+        NotificationType type = accepted ? NotificationType.ACCEPT : NotificationType.REJECT;
         notificationHistoryRepository.save(NotificationHistory.builder()
                 .member(applicant)
-                .title(accepted ? "지원이 수락되었습니다." : "지원이 거절되었습니다.")
-                .content("'" + recruit.getTitle() + "' 공고에 대한 지원이 " + (accepted ? "수락" : "거절") + "되었습니다.")
-                .type(accepted ? NotificationType.ACCEPT : NotificationType.REJECT)
+                .title(title)
+                .content(content)
+                .type(type)
                 .referenceType(NotificationReferenceType.RECRUIT)
                 .referenceId(recruit.getId())
                 .build());
+        eventPublisher.publishEvent(new NotificationCreatedEvent(
+                applicant.getId(), title, content, type, NotificationReferenceType.RECRUIT, recruit.getId()));
     }
 
     private void notifyRecruitAuthor(Recruit recruit, Member applicant) {
@@ -305,13 +313,17 @@ public class ApplyService {
         if (setting == null || !setting.isApplicantNoti()) {
             return;
         }
+        String title = "새로운 지원자가 있습니다.";
+        String content = applicant.getNickname() + "님이 '" + recruit.getTitle() + "'에 지원했습니다.";
         notificationHistoryRepository.save(NotificationHistory.builder()
                 .member(author)
-                .title("새로운 지원자가 있습니다.")
-                .content(applicant.getNickname() + "님이 '" + recruit.getTitle() + "'에 지원했습니다.")
+                .title(title)
+                .content(content)
                 .type(NotificationType.APPLY)
                 .referenceType(NotificationReferenceType.RECRUIT)
                 .referenceId(recruit.getId())
                 .build());
+        eventPublisher.publishEvent(new NotificationCreatedEvent(
+                author.getId(), title, content, NotificationType.APPLY, NotificationReferenceType.RECRUIT, recruit.getId()));
     }
 }

@@ -4,13 +4,22 @@ import com.pickii.domain.chat.document.ChatMessage;
 import com.pickii.domain.chat.dto.ChatMessageResponse;
 import com.pickii.domain.chat.dto.ChatMessageSendRequest;
 import com.pickii.domain.chat.entity.ChatMessageType;
+import com.pickii.domain.chat.entity.ChatRoomMember;
 import com.pickii.domain.chat.repository.ChatMessageRepository;
 import com.pickii.domain.chat.repository.ChatRoomMemberRepository;
 import com.pickii.domain.member.entity.Member;
 import com.pickii.domain.member.repository.MemberRepository;
+import com.pickii.domain.notification.entity.NotificationHistory;
+import com.pickii.domain.notification.entity.NotificationReferenceType;
+import com.pickii.domain.notification.entity.NotificationSetting;
+import com.pickii.domain.notification.entity.NotificationType;
+import com.pickii.domain.notification.event.NotificationCreatedEvent;
+import com.pickii.domain.notification.repository.NotificationHistoryRepository;
+import com.pickii.domain.notification.repository.NotificationSettingRepository;
 import com.pickii.global.exception.BusinessException;
 import com.pickii.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +38,9 @@ public class ChatMessageService {
     private final ChatRoomMemberRepository chatRoomMemberRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final MemberRepository memberRepository;
+    private final NotificationSettingRepository notificationSettingRepository;
+    private final NotificationHistoryRepository notificationHistoryRepository;
+    private final ApplicationEventPublisher eventPublisher;
     private final SimpMessagingTemplate messagingTemplate;
 
     @Transactional
@@ -46,6 +58,10 @@ public class ChatMessageService {
                 .message(request.message())
                 .imageUrl(request.imageUrl())
                 .build());
+
+        chatRoomMemberRepository.findAllByChatRoomId(chatRoomId).stream()
+                .filter(crm -> !crm.getMember().getId().equals(memberId))
+                .forEach(crm -> notify(crm, chatRoomId, sender.getNickname()));
 
         return new ChatMessageResponse(
                 saved.getId(),
@@ -81,5 +97,28 @@ public class ChatMessageService {
                 saved.getCreatedAt().atOffset(ZoneOffset.ofHours(9))
         );
         messagingTemplate.convertAndSend("/sub/chatrooms/" + chatRoomId, response);
+    }
+
+    private void notify(ChatRoomMember recipient, Long chatRoomId, String senderNickname) {
+        if (!recipient.isNotiEnabled()) {
+            return;
+        }
+        NotificationSetting setting = notificationSettingRepository.findById(recipient.getMember().getId()).orElse(null);
+        if (setting == null || !setting.isChatNoti()) {
+            return;
+        }
+        String title = "새 메시지가 도착했습니다.";
+        String content = senderNickname + "님이 메시지를 보냈습니다.";
+        notificationHistoryRepository.save(NotificationHistory.builder()
+                .member(recipient.getMember())
+                .title(title)
+                .content(content)
+                .type(NotificationType.CHAT)
+                .referenceType(NotificationReferenceType.CHATROOM)
+                .referenceId(chatRoomId)
+                .build());
+        eventPublisher.publishEvent(new NotificationCreatedEvent(
+                recipient.getMember().getId(), title, content,
+                NotificationType.CHAT, NotificationReferenceType.CHATROOM, chatRoomId));
     }
 }
