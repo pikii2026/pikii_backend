@@ -259,10 +259,12 @@ public class RecruitService {
     private RecruitScrapSummaryResponse toScrapSummary(RecruitScrap scrap) {
         Recruit recruit = recruitRepository.findById(scrap.getRecruitId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.RECRUIT_NOT_FOUND));
+        Long authorId = recruit.getMember() == null ? null : recruit.getMember().getId();
         String authorNickname = recruit.getMember() == null ? "알 수 없음" : recruit.getMember().getNickname();
         return new RecruitScrapSummaryResponse(
                 recruit.getId(),
                 recruit.getTitle(),
+                authorId,
                 authorNickname,
                 recruit.isOnCampus(),
                 recruit.getStatus(),
@@ -555,10 +557,12 @@ public class RecruitService {
     }
 
     private RecruitSummaryResponse toSummary(Recruit recruit) {
+        Long authorId = recruit.getMember() == null ? null : recruit.getMember().getId();
         String authorNickname = recruit.getMember() == null ? "알 수 없음" : recruit.getMember().getNickname();
         return new RecruitSummaryResponse(
                 recruit.getId(),
                 recruit.getTitle(),
+                authorId,
                 authorNickname,
                 recruit.getTargetCount(),
                 recruit.getAvailableSlots(),

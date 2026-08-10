@@ -10,6 +10,7 @@ import java.time.OffsetDateTime;
 public record RecruitSummaryResponse(
         Long recruitId,
         String title,
+        Long authorId,
         String authorNickname,
         int maxMembers,
         int availableSlots,
