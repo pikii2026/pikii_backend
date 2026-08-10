@@ -28,7 +28,7 @@ public class Member extends BaseTimeEntity {
     @Column(nullable = false)
     private String password;
 
-    /** 활동 경험치 (적립 규칙 추후 확정) */
+    /** 활동 경험치. 프로젝트 상호평가(Feedback) 종합 시 리뷰어들의 평균 점수만큼 적립된다. */
     @Column(nullable = false)
     private int exp;
 
@@ -48,5 +48,14 @@ public class Member extends BaseTimeEntity {
 
     public void changePassword(String encodedPassword) {
         this.password = encodedPassword;
+    }
+
+    /** 상호평가 결과 등으로 획득한 경험치를 누적한다. */
+    public void gainExp(int amount) {
+        this.exp += amount;
+    }
+
+    public MemberLevel getLevel() {
+        return MemberLevel.from(this.exp);
     }
 }

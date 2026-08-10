@@ -2441,6 +2441,7 @@ Bearer Access Token
         "strength":"책임감, 꼼꼼한 일정 관리",
         "aboutMe":"AI가 생성한 자기소개",
         "exp":500,
+        "level":4,
         "topic":[1,2,3],
         "skillTool":[
             {
@@ -2473,6 +2474,9 @@ Bearer Access Token
     "timestamp":"2026-07-06T13:30:00+09:00"
 }
 ```
+
+`exp`는 상호평가로 누적된 경험치이며, `level`(1~4)은 exp로부터 계산되어 함께 내려간다
+(1: 기본, 2: exp 20 이상, 3: exp 60 이상, 4: exp 140 이상 · 최종 단계).
 
 ---
 
@@ -3124,6 +3128,10 @@ Bearer Access Token
 3. 평가 기간(종료 후 3일) 내인지 확인
 4. 평가 중복 확인 (Unique: ProjectId + ReviewerId + RevieweeId)
 5. Feedback 저장
+6. 본인을 제외한 팀원 전원이 평가를 완료하면 AI 종합 피드백을 즉시 생성하고, 그때 리뷰이(revieweeId)에게
+   해당 평가들의 점수(5개 항목 합계, 5~25점) 평균만큼 경험치(exp)를 적립한다. 팀원 전원이 아직 평가를
+   완료하지 못한 경우, 평가 기간(3일) 마감 후 배치(`generatePendingAiFeedbackBatch`)가 최소 평가 인원
+   충족 여부를 확인해 동일한 방식으로 AI 피드백 생성과 경험치 적립을 수행한다.
 
 ---
 
@@ -6789,6 +6797,7 @@ Bearer Access Token
         "strength":"책임감, 꼼꼼한 일정 관리",
         "aboutMe":"AI가 생성한 자기소개",
         "exp":500,
+        "level":4,
         "topic":[1,2,3],
         "skillTool":[
             {

@@ -32,7 +32,7 @@
 | **Nick**        | VARCHAR, UNIQUE | -       | 서비스 내 닉네임                                                            |
 | **Email**       | VARCHAR, UNIQUE | -       | 이메일 주소 (로그인 ID)                                                      |
 | **PW**          | VARCHAR         | -       | 암호화된 비밀번호                                                            |
-| **EXP**         | INT, DEFAULT 0  | -       | 활동 경험치 점수 (프로필의 경험치 바/레벨 산출에 사용. 적립 규칙은 추후 확정)                       |
+| **EXP**         | INT, DEFAULT 0  | -       | 활동 경험치 점수. 프로젝트 상호평가(Feedback) 종합 시, 본인을 평가한 리뷰어들의 점수(5개 문항 합계, 5~25점) 평균만큼 적립. 레벨 산출에 사용(레벨은 저장하지 않고 exp로부터 계산: 1(기본)/2(20 이상)/3(60 이상)/4(140 이상, 최종)) |
 | **CreatedAt**   | DATETIME        | -       | 계정 생성 일시                                                             |
 | **UpdatedAt**   | DATETIME        | -       | 계정 수정 일시                                                             |
 | **LastLoginAt** | DATETIME        | -       | 마지막 로그인 일시 (로그인 시 즉시 갱신, 자동 로그인은 Redis `lastUsedAt` 갱신 후 배치로 DB 동기화) |

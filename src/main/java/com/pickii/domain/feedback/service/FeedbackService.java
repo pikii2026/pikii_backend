@@ -276,6 +276,8 @@ public class FeedbackService {
         List<Feedback> feedbacks = feedbackRepository.findAllByProjectIdAndRevieweeId(project.getId(), revieweeId);
         List<Keyword> keywordPool = keywordRepository.findAll();
 
+        reviewee.gainExp(averageFeedbackScore(feedbacks));
+
         AiFeedbackResult result = requestAiFeedback(feedbacks, keywordPool);
 
         AIFeedback aiFeedback = aiFeedbackRepository.save(AIFeedback.builder()
@@ -313,6 +315,18 @@ public class FeedbackService {
                 .build());
         eventPublisher.publishEvent(new NotificationCreatedEvent(
                 reviewee.getId(), title, content, NotificationType.FEEDBACK, NotificationReferenceType.FEEDBACK, project.getId()));
+    }
+
+    /**
+     * 상호평가 5개 문항(각 1~5점) 합계를 리뷰어별로 구한 뒤, 리뷰어 수만큼 평균 내어
+     * 경험치로 적립할 점수를 산출한다. (예: 5명 참여 시 본인 제외 4명이 준 점수의 평균)
+     */
+    private int averageFeedbackScore(List<Feedback> feedbacks) {
+        int totalScore = feedbacks.stream()
+                .mapToInt(f -> f.getCommitScore() + f.getCommScore() + f.getDeadlineScore()
+                        + f.getCooperateScore() + f.getContributeScore())
+                .sum();
+        return Math.round((float) totalScore / feedbacks.size());
     }
 
     private AiFeedbackResult requestAiFeedback(List<Feedback> feedbacks, List<Keyword> keywordPool) {
