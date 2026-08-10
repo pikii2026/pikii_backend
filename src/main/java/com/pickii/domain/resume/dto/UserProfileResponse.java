@@ -17,6 +17,7 @@ public record UserProfileResponse(
         String strength,
         String aboutMe,
         int exp,
+        int level,
         List<Long> topic,
         List<SkillToolItem> skillTool,
         List<LicenseItem> license,
