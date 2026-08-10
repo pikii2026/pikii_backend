@@ -2601,12 +2601,8 @@ Bearer Access Token
 1. Access Token 검증
 2. 입력값 검증
 3. MemberUniv / MemberResume / DetailTopic / MemberTechStack / MemberLicense / DetailExperience / AdditionalLink 저장
-4. **가입 이메일(`Member.Email`)을 `MemberResume.ContactEmail`로 복사** (연락용 이메일 초기값)
-5. 저장된 입력 정보를 기반으로 **AI가 AboutMe 자동 생성**
-6. `MemberResume.AboutMe` 저장
-
-> `contactEmail`은 요청에서 받지 않는다. 이력서 **생성 시점**에 가입 이메일이 자동으로 들어간다.
-> 이후 프로필 수정(4-3)에서 사용자가 연락용 이메일을 변경할 수 있다.
+4. 저장된 입력 정보를 기반으로 **AI가 AboutMe 자동 생성**
+5. `MemberResume.AboutMe` 저장
 
 ---
 
@@ -2645,10 +2641,9 @@ Bearer Access Token
 
 프로필 생성(4-2)과 동일한 항목에 더해, **`aboutMe`를 직접 수정**할 수 있다.
 
-| Name         | Type   | Required | Description                              |
-|:------------ |:------ |:-------- |:---------------------------------------- |
-| aboutMe      | String | X        | 자기소개 (최초 생성 시 AI가 만든 초안을 직접 수정)           |
-| contactEmail | String | X        | 연락용 이메일 (생성 시 가입 이메일이 들어가며, 여기서 변경 가능)     |
+| Name    | Type   | Required | Description                    |
+|:------- |:------ |:-------- |:------------------------------- |
+| aboutMe | String | X        | 자기소개 (최초 생성 시 AI가 만든 초안을 직접 수정) |
 
 > 수정 시 **AI 재생성은 수행하지 않는다.** 최초 생성 이후 이력서는 사용자가 직접 관리한다.
 
@@ -6784,7 +6779,6 @@ Bearer Access Token
         "univ":"명지대학교",
         "major":"융합소프트웨어학부 데이터사이언스전공",
         "academicStatus":"ENROLLED",
-        "contactEmail":"contact@email.com",
         "hope":"백엔드 개발자",
         "strength":"책임감, 꼼꼼한 일정 관리",
         "aboutMe":"AI가 생성한 자기소개",

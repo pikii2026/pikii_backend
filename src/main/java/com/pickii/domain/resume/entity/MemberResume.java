@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 
 /**
  * 프로필 = 이력서 (Member와 1:1).
- * contactEmail은 이력서 생성 시점에 가입 이메일을 복사해 초기값으로 넣는다.
  * aboutMe는 최초 1회 AI가 생성하고 이후 사용자가 직접 수정한다.
  */
 @Entity
@@ -26,9 +25,6 @@ public class MemberResume extends BaseTimeEntity {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @Column(nullable = false)
-    private String contactEmail;
-
     /** 희망 진로 (100자 이하) */
     @Column(length = 100)
     private String hope;
@@ -42,23 +38,19 @@ public class MemberResume extends BaseTimeEntity {
     private String aboutMe;
 
     @Builder
-    public MemberResume(Member member, String contactEmail, String hope, String strength, String aboutMe) {
+    public MemberResume(Member member, String hope, String strength, String aboutMe) {
         this.member = member;
-        this.contactEmail = contactEmail;
         this.hope = hope;
         this.strength = strength;
         this.aboutMe = aboutMe;
     }
 
-    /** aboutMe/contactEmail은 요청에 없으면(null) 기존 값을 유지한다. */
-    public void update(String hope, String strength, String aboutMe, String contactEmail) {
+    /** aboutMe는 요청에 없으면(null) 기존 값을 유지한다. */
+    public void update(String hope, String strength, String aboutMe) {
         this.hope = hope;
         this.strength = strength;
         if (aboutMe != null) {
             this.aboutMe = aboutMe;
-        }
-        if (contactEmail != null) {
-            this.contactEmail = contactEmail;
         }
     }
 }

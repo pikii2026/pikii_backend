@@ -128,7 +128,6 @@ public class ResumeService {
                 memberUniv.getUniv().getName(),
                 memberUniv.getMajor(),
                 memberUniv.getStatus(),
-                resume.getContactEmail(),
                 resume.getHope(),
                 resume.getStrength(),
                 resume.getAboutMe(),
@@ -164,7 +163,6 @@ public class ResumeService {
 
         MemberResume resume = MemberResume.builder()
                 .member(member)
-                .contactEmail(member.getEmail())
                 .hope(request.hope())
                 .strength(request.strength())
                 .aboutMe(generateAboutMe(univ, topicIds, request))
@@ -193,7 +191,7 @@ public class ResumeService {
         validateTopicIds(topicIds);
 
         memberUniv.update(univ, request.major(), request.academicStatus());
-        resume.update(request.hope(), request.strength(), request.aboutMe(), request.contactEmail());
+        resume.update(request.hope(), request.strength(), request.aboutMe());
 
         Member member = resume.getMember();
         detailTopicRepository.deleteAllByMemberId(memberId);

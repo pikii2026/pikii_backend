@@ -2,7 +2,6 @@ package com.pickii.domain.resume.dto;
 
 import com.pickii.domain.member.entity.AcademicStatus;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -11,7 +10,7 @@ import java.util.List;
 
 /**
  * API_SPEC 4-2 프로필 생성 / 4-3 프로필(이력서) 수정 요청 (동일한 Body 형태를 공유한다).
- * aboutMe/contactEmail은 4-3 수정에서만 사용된다.
+ * aboutMe는 4-3 수정에서만 사용된다.
  */
 public record ResumeRequest(
         @NotNull(message = "대학교를 선택해주세요.")
@@ -31,9 +30,6 @@ public record ResumeRequest(
         String strength,
 
         String aboutMe,
-
-        @Email(message = "이메일 형식이 올바르지 않습니다.")
-        String contactEmail,
 
         List<Long> topic,
 
