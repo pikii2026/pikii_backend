@@ -1,0 +1,608 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2254" height="1138" viewBox="0 0 2254 1138" font-family="Malgun Gothic, Segoe UI, sans-serif">
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9.5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7c8ba1"/></marker></defs>
+<rect width="2254" height="1138" fill="#ffffff"/>
+<text x="40" y="48" font-size="28" font-weight="700" fill="#0f172a">Pickii ERD</text>
+<text x="40" y="72" font-size="13.5" fill="#64748b">대학생 팀 매칭·협업 플랫폼 · MySQL 44개 테이블 + MongoDB 1개 컬렉션 · 관계 60개</text>
+<rect x="40" y="87" width="11" height="11" rx="2" fill="#dbeafe" stroke="#2563eb" stroke-width="1.3"/>
+<text x="56" y="96" font-size="11.5" fill="#334155">회원</text>
+<rect x="89.0" y="87" width="11" height="11" rx="2" fill="#cffafe" stroke="#0891b2" stroke-width="1.3"/>
+<text x="105.0" y="96" font-size="11.5" fill="#334155">이력서</text>
+<rect x="150.5" y="87" width="11" height="11" rx="2" fill="#d1fae5" stroke="#059669" stroke-width="1.3"/>
+<text x="166.5" y="96" font-size="11.5" fill="#334155">공고</text>
+<rect x="199.5" y="87" width="11" height="11" rx="2" fill="#ecfccb" stroke="#65a30d" stroke-width="1.3"/>
+<text x="215.5" y="96" font-size="11.5" fill="#334155">지원</text>
+<rect x="248.5" y="87" width="11" height="11" rx="2" fill="#fef3c7" stroke="#ca8a04" stroke-width="1.3"/>
+<text x="264.5" y="96" font-size="11.5" fill="#334155">프로젝트</text>
+<rect x="322.5" y="87" width="11" height="11" rx="2" fill="#fee2e2" stroke="#dc2626" stroke-width="1.3"/>
+<text x="338.5" y="96" font-size="11.5" fill="#334155">일정 · 회의조율</text>
+<rect x="459.0" y="87" width="11" height="11" rx="2" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.3"/>
+<text x="475.0" y="96" font-size="11.5" fill="#334155">채팅</text>
+<rect x="508.0" y="87" width="11" height="11" rx="2" fill="#fce7f3" stroke="#db2777" stroke-width="1.3"/>
+<text x="524.0" y="96" font-size="11.5" fill="#334155">알림</text>
+<rect x="557.0" y="87" width="11" height="11" rx="2" fill="#ffedd5" stroke="#ea580c" stroke-width="1.3"/>
+<text x="573.0" y="96" font-size="11.5" fill="#334155">상호평가</text>
+<line x1="707.0" y1="821.0" x2="707.0" y2="787.0" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" marker-end="url(#arrow)"/>
+<line x1="763.4" y1="821.0" x2="936.3" y2="604.2" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" marker-end="url(#arrow)"/>
+<line x1="597.0" y1="891.8" x2="537.0" y2="891.8" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" marker-end="url(#arrow)"/>
+<line x1="1267.0" y1="933.5" x2="1267.0" y2="996.5" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+<line x1="1233.7" y1="850.0" x2="1037.7" y2="604.2" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+<line x1="908.8" y1="765.2" x2="817.0" y2="822.8" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+<line x1="987.0" y1="667.2" x2="987.0" y2="604.2" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+<line x1="1157.0" y1="1015.3" x2="817.0" y2="922.0" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" marker-end="url(#arrow)"/>
+<line x1="987.0" y1="821.0" x2="987.0" y2="604.2" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" marker-end="url(#arrow)"/>
+<line x1="987.0" y1="962.5" x2="987.0" y2="996.5" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" marker-end="url(#arrow)"/>
+<line x1="537.0" y1="822.8" x2="597.0" y2="785.2" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" marker-end="url(#arrow)"/>
+<line x1="427.0" y1="996.5" x2="427.0" y2="962.5" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+<line x1="481.4" y1="996.5" x2="916.5" y2="604.2" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+<line x1="817.0" y1="1045.5" x2="877.0" y2="1045.5" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+<line x1="707.0" y1="1011.0" x2="707.0" y2="787.0" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+<line x1="987.0" y1="996.5" x2="987.0" y2="604.2" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" marker-end="url(#arrow)"/>
+<line x1="1227.9" y1="238.8" x2="1037.7" y2="477.2" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" marker-end="url(#arrow)"/>
+<line x1="1377.0" y1="189.8" x2="1437.0" y2="189.8" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" marker-end="url(#arrow)"/>
+<line x1="1157.0" y1="647.3" x2="1088.3" y2="604.2" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" marker-end="url(#arrow)"/>
+<line x1="1437.0" y1="399.7" x2="1097.0" y2="506.3" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+<line x1="1657.0" y1="365.2" x2="1717.0" y2="365.2" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+<line x1="1727.1" y1="231.5" x2="1097.0" y2="494.8" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+<line x1="1937.0" y1="189.8" x2="1997.0" y2="189.8" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+<line x1="1165.7" y1="428.8" x2="1088.3" y2="477.2" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" marker-end="url(#arrow)"/>
+<line x1="257.0" y1="540.8" x2="877.0" y2="540.8" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+<line x1="147.0" y1="582.5" x2="147.0" y2="674.5" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+<line x1="1547.0" y1="604.2" x2="1547.0" y2="645.5" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" marker-end="url(#arrow)"/>
+<line x1="1437.0" y1="540.8" x2="1097.0" y2="540.8" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" marker-end="url(#arrow)"/>
+<line x1="1437.0" y1="681.8" x2="1097.0" y2="575.2" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" marker-end="url(#arrow)"/>
+<line x1="1772.0" y1="857.2" x2="1657.0" y2="785.2" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+<line x1="1827.0" y1="926.2" x2="1827.0" y2="1011.0" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+<line x1="1480.4" y1="850.0" x2="1088.3" y2="604.2" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+<line x1="1547.0" y1="850.0" x2="1547.0" y2="787.0" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+<line x1="1772.0" y1="575.2" x2="1657.0" y2="647.3" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+<line x1="1827.0" y1="506.2" x2="1827.0" y2="399.8" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+<line x1="817.0" y1="716.2" x2="1437.0" y2="716.2" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" marker-end="url(#arrow)"/>
+<line x1="707.0" y1="428.8" x2="707.0" y2="645.5" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" marker-end="url(#arrow)"/>
+<line x1="808.3" y1="428.8" x2="885.7" y2="477.2" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" marker-end="url(#arrow)"/>
+<line x1="757.7" y1="253.2" x2="936.3" y2="477.2" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" marker-end="url(#arrow)"/>
+<line x1="987.0" y1="436.0" x2="987.0" y2="477.2" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" marker-end="url(#arrow)"/>
+<line x1="1157.0" y1="540.8" x2="1097.0" y2="540.8" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" marker-end="url(#arrow)"/>
+<line x1="257.0" y1="388.2" x2="877.0" y2="517.8" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" marker-end="url(#arrow)"/>
+<line x1="147.0" y1="309.0" x2="147.0" y2="224.2" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" marker-end="url(#arrow)"/>
+<line x1="987.0" y1="238.8" x2="987.0" y2="477.2" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" marker-end="url(#arrow)"/>
+<line x1="537.0" y1="716.2" x2="597.0" y2="716.2" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" marker-end="url(#arrow)"/>
+<line x1="537.0" y1="681.8" x2="877.0" y2="575.2" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" marker-end="url(#arrow)"/>
+<line x1="147.0" y1="926.2" x2="147.0" y2="1011.0" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+<line x1="202.0" y1="857.2" x2="325.7" y2="779.8" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+<line x1="707.0" y1="611.5" x2="707.0" y2="645.5" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" marker-end="url(#arrow)"/>
+<line x1="817.0" y1="540.8" x2="877.0" y2="540.8" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" marker-end="url(#arrow)"/>
+<line x1="427.0" y1="260.5" x2="427.0" y2="316.2" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+<line x1="537.0" y1="258.7" x2="885.7" y2="477.2" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+<line x1="466.1" y1="414.2" x2="650.6" y2="645.5" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" marker-end="url(#arrow)"/>
+<line x1="427.0" y1="470.0" x2="427.0" y2="414.2" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" marker-end="url(#arrow)"/>
+<line x1="537.0" y1="540.8" x2="877.0" y2="540.8" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" marker-end="url(#arrow)"/>
+<line x1="1717.0" y1="716.2" x2="1657.0" y2="716.2" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" marker-end="url(#arrow)"/>
+<line x1="1717.0" y1="693.3" x2="1097.0" y2="563.7" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" marker-end="url(#arrow)"/>
+<line x1="2107.0" y1="933.5" x2="2107.0" y2="1011.0" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" marker-end="url(#arrow)"/>
+<line x1="1997.0" y1="716.2" x2="1937.0" y2="716.2" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+<line x1="2107.0" y1="750.8" x2="2107.0" y2="850.0" stroke="#7c8ba1" stroke-width="1.5" opacity="0.95" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+<g>
+<rect x="600.0" y="824.0" width="214" height="135.5" rx="6" fill="#ffffff" stroke="#dc2626" stroke-width="1.6"/>
+<path d="M 600.0 830.0 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#fee2e2"/>
+<text x="609.0" y="841.5" font-size="12.5" font-weight="700" fill="#dc2626">MeetingPoll</text>
+<text x="609.0" y="861.0" font-size="10.6" fill="#0f172a" font-weight="700">id</text>
+<text x="805.0" y="861.0" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="609.0" y="875.5" font-size="10.6" fill="#475569" font-weight="400">project</text>
+<text x="805.0" y="875.5" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="609.0" y="890.0" font-size="10.6" fill="#475569" font-weight="400">createdBy</text>
+<text x="805.0" y="890.0" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="609.0" y="904.5" font-size="10.6" fill="#64748b" font-weight="400">title</text>
+<text x="609.0" y="919.0" font-size="10.6" fill="#64748b" font-weight="400">status</text>
+<text x="609.0" y="933.5" font-size="10.6" fill="#64748b" font-weight="400">durationMin</text>
+<text x="609.0" y="948.0" font-size="10.6" fill="#64748b" font-weight="400">rangeStart</text>
+<text x="609.0" y="962.5" font-size="9.8" fill="#94a3b8" font-style="italic">… 외 7개</text>
+</g>
+<g>
+<rect x="1160.0" y="853.0" width="214" height="77.5" rx="6" fill="#ffffff" stroke="#dc2626" stroke-width="1.6"/>
+<path d="M 1160.0 859.0 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#fee2e2"/>
+<text x="1169.0" y="870.5" font-size="12.5" font-weight="700" fill="#dc2626">MeetingPollAvailability</text>
+<text x="1169.0" y="890.0" font-size="10.6" fill="#0f172a" font-weight="700">slotId</text>
+<text x="1365.0" y="890.0" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="1169.0" y="904.5" font-size="10.6" fill="#0f172a" font-weight="700">memberId</text>
+<text x="1365.0" y="904.5" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="1169.0" y="919.0" font-size="10.6" fill="#64748b" font-weight="400">available</text>
+</g>
+<g>
+<rect x="880.0" y="670.2" width="214" height="92.0" rx="6" fill="#ffffff" stroke="#dc2626" stroke-width="1.6"/>
+<path d="M 880.0 676.2 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#fee2e2"/>
+<text x="889.0" y="687.8" font-size="12.5" font-weight="700" fill="#dc2626">MeetingPollMember</text>
+<text x="889.0" y="707.2" font-size="10.6" fill="#0f172a" font-weight="700">pollId</text>
+<text x="1085.0" y="707.2" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="889.0" y="721.8" font-size="10.6" fill="#0f172a" font-weight="700">memberId</text>
+<text x="1085.0" y="721.8" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="889.0" y="736.2" font-size="10.6" fill="#64748b" font-weight="400">responded</text>
+<text x="889.0" y="750.8" font-size="10.6" fill="#64748b" font-weight="400">respondedAt</text>
+</g>
+<g>
+<rect x="1160.0" y="999.5" width="214" height="92.0" rx="6" fill="#ffffff" stroke="#dc2626" stroke-width="1.6"/>
+<path d="M 1160.0 1005.5 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#fee2e2"/>
+<text x="1169.0" y="1017.0" font-size="12.5" font-weight="700" fill="#dc2626">MeetingPollSlot</text>
+<text x="1169.0" y="1036.5" font-size="10.6" fill="#0f172a" font-weight="700">id</text>
+<text x="1365.0" y="1036.5" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="1169.0" y="1051.0" font-size="10.6" fill="#475569" font-weight="400">poll</text>
+<text x="1365.0" y="1051.0" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="1169.0" y="1065.5" font-size="10.6" fill="#64748b" font-weight="400">startAt</text>
+<text x="1169.0" y="1080.0" font-size="10.6" fill="#64748b" font-weight="400">endAt</text>
+</g>
+<g>
+<rect x="880.0" y="824.0" width="214" height="135.5" rx="6" fill="#ffffff" stroke="#dc2626" stroke-width="1.6"/>
+<path d="M 880.0 830.0 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#fee2e2"/>
+<text x="889.0" y="841.5" font-size="12.5" font-weight="700" fill="#dc2626">MemberSchedule</text>
+<text x="889.0" y="861.0" font-size="10.6" fill="#0f172a" font-weight="700">id</text>
+<text x="1085.0" y="861.0" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="889.0" y="875.5" font-size="10.6" fill="#475569" font-weight="400">member</text>
+<text x="1085.0" y="875.5" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="889.0" y="890.0" font-size="10.6" fill="#64748b" font-weight="400">startDate</text>
+<text x="889.0" y="904.5" font-size="10.6" fill="#64748b" font-weight="400">endDate</text>
+<text x="889.0" y="919.0" font-size="10.6" fill="#64748b" font-weight="400">startTime</text>
+<text x="889.0" y="933.5" font-size="10.6" fill="#64748b" font-weight="400">endTime</text>
+<text x="889.0" y="948.0" font-size="10.6" fill="#64748b" font-weight="400">rrule</text>
+<text x="889.0" y="962.5" font-size="9.8" fill="#94a3b8" font-style="italic">… 외 4개</text>
+</g>
+<g>
+<rect x="320.0" y="824.0" width="214" height="135.5" rx="6" fill="#ffffff" stroke="#dc2626" stroke-width="1.6"/>
+<path d="M 320.0 830.0 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#fee2e2"/>
+<text x="329.0" y="841.5" font-size="12.5" font-weight="700" fill="#dc2626">PartySchedule</text>
+<text x="329.0" y="861.0" font-size="10.6" fill="#0f172a" font-weight="700">id</text>
+<text x="525.0" y="861.0" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="329.0" y="875.5" font-size="10.6" fill="#475569" font-weight="400">project</text>
+<text x="525.0" y="875.5" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="329.0" y="890.0" font-size="10.6" fill="#64748b" font-weight="400">startDate</text>
+<text x="329.0" y="904.5" font-size="10.6" fill="#64748b" font-weight="400">endDate</text>
+<text x="329.0" y="919.0" font-size="10.6" fill="#64748b" font-weight="400">startTime</text>
+<text x="329.0" y="933.5" font-size="10.6" fill="#64748b" font-weight="400">endTime</text>
+<text x="329.0" y="948.0" font-size="10.6" fill="#64748b" font-weight="400">rrule</text>
+<text x="329.0" y="962.5" font-size="9.8" fill="#94a3b8" font-style="italic">… 외 3개</text>
+</g>
+<g>
+<rect x="320.0" y="999.5" width="214" height="92.0" rx="6" fill="#ffffff" stroke="#dc2626" stroke-width="1.6"/>
+<path d="M 320.0 1005.5 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#fee2e2"/>
+<text x="329.0" y="1017.0" font-size="12.5" font-weight="700" fill="#dc2626">PartyScheduleAttendance</text>
+<text x="329.0" y="1036.5" font-size="10.6" fill="#0f172a" font-weight="700">scheduleId</text>
+<text x="525.0" y="1036.5" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="329.0" y="1051.0" font-size="10.6" fill="#0f172a" font-weight="700">memberId</text>
+<text x="525.0" y="1051.0" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="329.0" y="1065.5" font-size="10.6" fill="#64748b" font-weight="400">attending</text>
+<text x="329.0" y="1080.0" font-size="10.6" fill="#64748b" font-weight="400">updatedAt</text>
+</g>
+<g>
+<rect x="600.0" y="1014.0" width="214" height="63.0" rx="6" fill="#ffffff" stroke="#dc2626" stroke-width="1.6"/>
+<path d="M 600.0 1020.0 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#fee2e2"/>
+<text x="609.0" y="1031.5" font-size="12.5" font-weight="700" fill="#dc2626">ProjectScheduleCategory</text>
+<text x="609.0" y="1051.0" font-size="10.6" fill="#0f172a" font-weight="700">scId</text>
+<text x="805.0" y="1051.0" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="609.0" y="1065.5" font-size="10.6" fill="#0f172a" font-weight="700">projectId</text>
+<text x="805.0" y="1065.5" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+</g>
+<g>
+<rect x="880.0" y="999.5" width="214" height="92.0" rx="6" fill="#ffffff" stroke="#dc2626" stroke-width="1.6"/>
+<path d="M 880.0 1005.5 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#fee2e2"/>
+<text x="889.0" y="1017.0" font-size="12.5" font-weight="700" fill="#dc2626">ScheduleCategory</text>
+<text x="889.0" y="1036.5" font-size="10.6" fill="#0f172a" font-weight="700">id</text>
+<text x="1085.0" y="1036.5" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="889.0" y="1051.0" font-size="10.6" fill="#475569" font-weight="400">member</text>
+<text x="1085.0" y="1051.0" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="889.0" y="1065.5" font-size="10.6" fill="#64748b" font-weight="400">title</text>
+<text x="889.0" y="1080.0" font-size="10.6" fill="#64748b" font-weight="400">color</text>
+</g>
+<g>
+<rect x="1160.0" y="143.8" width="214" height="92.0" rx="6" fill="#ffffff" stroke="#0891b2" stroke-width="1.6"/>
+<path d="M 1160.0 149.8 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#cffafe"/>
+<text x="1169.0" y="161.2" font-size="12.5" font-weight="700" fill="#0891b2">AdditionalLink</text>
+<text x="1169.0" y="180.8" font-size="10.6" fill="#0f172a" font-weight="700">id</text>
+<text x="1365.0" y="180.8" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="1169.0" y="195.2" font-size="10.6" fill="#475569" font-weight="400">member</text>
+<text x="1365.0" y="195.2" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="1169.0" y="209.8" font-size="10.6" fill="#475569" font-weight="400">linkCategory</text>
+<text x="1365.0" y="209.8" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="1169.0" y="224.2" font-size="10.6" fill="#64748b" font-weight="400">url</text>
+</g>
+<g>
+<rect x="1160.0" y="648.5" width="214" height="135.5" rx="6" fill="#ffffff" stroke="#0891b2" stroke-width="1.6"/>
+<path d="M 1160.0 654.5 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#cffafe"/>
+<text x="1169.0" y="666.0" font-size="12.5" font-weight="700" fill="#0891b2">DetailExperience</text>
+<text x="1169.0" y="685.5" font-size="10.6" fill="#0f172a" font-weight="700">id</text>
+<text x="1365.0" y="685.5" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="1169.0" y="700.0" font-size="10.6" fill="#475569" font-weight="400">member</text>
+<text x="1365.0" y="700.0" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="1169.0" y="714.5" font-size="10.6" fill="#64748b" font-weight="400">title</text>
+<text x="1169.0" y="729.0" font-size="10.6" fill="#64748b" font-weight="400">organization</text>
+<text x="1169.0" y="743.5" font-size="10.6" fill="#64748b" font-weight="400">description</text>
+<text x="1169.0" y="758.0" font-size="10.6" fill="#64748b" font-weight="400">startDate</text>
+<text x="1169.0" y="772.5" font-size="10.6" fill="#64748b" font-weight="400">endDate</text>
+</g>
+<g>
+<rect x="1440.0" y="333.8" width="214" height="63.0" rx="6" fill="#ffffff" stroke="#0891b2" stroke-width="1.6"/>
+<path d="M 1440.0 339.8 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#cffafe"/>
+<text x="1449.0" y="351.2" font-size="12.5" font-weight="700" fill="#0891b2">DetailTopic</text>
+<text x="1449.0" y="370.8" font-size="10.6" fill="#0f172a" font-weight="700">memberId</text>
+<text x="1645.0" y="370.8" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="1449.0" y="385.2" font-size="10.6" fill="#0f172a" font-weight="700">topicId</text>
+<text x="1645.0" y="385.2" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+</g>
+<g>
+<rect x="2000.0" y="158.2" width="214" height="63.0" rx="6" fill="#ffffff" stroke="#0891b2" stroke-width="1.6"/>
+<path d="M 2000.0 164.2 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#cffafe"/>
+<text x="2009.0" y="175.8" font-size="12.5" font-weight="700" fill="#0891b2">License</text>
+<text x="2009.0" y="195.2" font-size="10.6" fill="#0f172a" font-weight="700">id</text>
+<text x="2205.0" y="195.2" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="2009.0" y="209.8" font-size="10.6" fill="#64748b" font-weight="400">name</text>
+</g>
+<g>
+<rect x="1440.0" y="151.0" width="214" height="77.5" rx="6" fill="#ffffff" stroke="#0891b2" stroke-width="1.6"/>
+<path d="M 1440.0 157.0 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#cffafe"/>
+<text x="1449.0" y="168.5" font-size="12.5" font-weight="700" fill="#0891b2">LinkCategory</text>
+<text x="1449.0" y="188.0" font-size="10.6" fill="#0f172a" font-weight="700">id</text>
+<text x="1645.0" y="188.0" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="1449.0" y="202.5" font-size="10.6" fill="#64748b" font-weight="400">name</text>
+<text x="1449.0" y="217.0" font-size="10.6" fill="#64748b" font-weight="400">picUrl</text>
+</g>
+<g>
+<rect x="1720.0" y="151.0" width="214" height="77.5" rx="6" fill="#ffffff" stroke="#0891b2" stroke-width="1.6"/>
+<path d="M 1720.0 157.0 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#cffafe"/>
+<text x="1729.0" y="168.5" font-size="12.5" font-weight="700" fill="#0891b2">MemberLicense</text>
+<text x="1729.0" y="188.0" font-size="10.6" fill="#0f172a" font-weight="700">memberId</text>
+<text x="1925.0" y="188.0" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="1729.0" y="202.5" font-size="10.6" fill="#0f172a" font-weight="700">licenseId</text>
+<text x="1925.0" y="202.5" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="1729.0" y="217.0" font-size="10.6" fill="#64748b" font-weight="400">acquired</text>
+</g>
+<g>
+<rect x="1160.0" y="304.8" width="214" height="121.0" rx="6" fill="#ffffff" stroke="#0891b2" stroke-width="1.6"/>
+<path d="M 1160.0 310.8 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#cffafe"/>
+<text x="1169.0" y="322.2" font-size="12.5" font-weight="700" fill="#0891b2">MemberResume</text>
+<text x="1169.0" y="341.8" font-size="10.6" fill="#0f172a" font-weight="700">memberId</text>
+<text x="1365.0" y="341.8" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="1169.0" y="356.2" font-size="10.6" fill="#475569" font-weight="400">member</text>
+<text x="1365.0" y="356.2" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="1169.0" y="370.8" font-size="10.6" fill="#64748b" font-weight="400">contactEmail</text>
+<text x="1169.0" y="385.2" font-size="10.6" fill="#64748b" font-weight="400">hope</text>
+<text x="1169.0" y="399.8" font-size="10.6" fill="#64748b" font-weight="400">strength</text>
+<text x="1169.0" y="414.2" font-size="10.6" fill="#64748b" font-weight="400">aboutMe</text>
+</g>
+<g>
+<rect x="40.0" y="502.0" width="214" height="77.5" rx="6" fill="#ffffff" stroke="#0891b2" stroke-width="1.6"/>
+<path d="M 40.0 508.0 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#cffafe"/>
+<text x="49.0" y="519.5" font-size="12.5" font-weight="700" fill="#0891b2">MemberTechStack</text>
+<text x="49.0" y="539.0" font-size="10.6" fill="#0f172a" font-weight="700">memberId</text>
+<text x="245.0" y="539.0" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="49.0" y="553.5" font-size="10.6" fill="#0f172a" font-weight="700">techStackId</text>
+<text x="245.0" y="553.5" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="49.0" y="568.0" font-size="10.6" fill="#64748b" font-weight="400">level</text>
+</g>
+<g>
+<rect x="40.0" y="677.5" width="214" height="77.5" rx="6" fill="#ffffff" stroke="#0891b2" stroke-width="1.6"/>
+<path d="M 40.0 683.5 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#cffafe"/>
+<text x="49.0" y="695.0" font-size="12.5" font-weight="700" fill="#0891b2">TechStack</text>
+<text x="49.0" y="714.5" font-size="10.6" fill="#0f172a" font-weight="700">id</text>
+<text x="245.0" y="714.5" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="49.0" y="729.0" font-size="10.6" fill="#64748b" font-weight="400">name</text>
+<text x="49.0" y="743.5" font-size="10.6" fill="#64748b" font-weight="400">type</text>
+</g>
+<g>
+<rect x="1720.0" y="1014.0" width="214" height="63.0" rx="6" fill="#ffffff" stroke="#059669" stroke-width="1.6"/>
+<path d="M 1720.0 1020.0 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#d1fae5"/>
+<text x="1729.0" y="1031.5" font-size="12.5" font-weight="700" fill="#059669">Category</text>
+<text x="1729.0" y="1051.0" font-size="10.6" fill="#0f172a" font-weight="700">id</text>
+<text x="1925.0" y="1051.0" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="1729.0" y="1065.5" font-size="10.6" fill="#64748b" font-weight="400">name</text>
+</g>
+<g>
+<rect x="1440.0" y="480.2" width="214" height="121.0" rx="6" fill="#ffffff" stroke="#059669" stroke-width="1.6"/>
+<path d="M 1440.0 486.2 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#d1fae5"/>
+<text x="1449.0" y="497.8" font-size="12.5" font-weight="700" fill="#059669">Comment</text>
+<text x="1449.0" y="517.2" font-size="10.6" fill="#0f172a" font-weight="700">id</text>
+<text x="1645.0" y="517.2" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="1449.0" y="531.8" font-size="10.6" fill="#475569" font-weight="400">recruit</text>
+<text x="1645.0" y="531.8" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="1449.0" y="546.2" font-size="10.6" fill="#475569" font-weight="400">member</text>
+<text x="1645.0" y="546.2" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="1449.0" y="560.8" font-size="10.6" fill="#475569" font-weight="400">parent</text>
+<text x="1645.0" y="560.8" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="1449.0" y="575.2" font-size="10.6" fill="#64748b" font-weight="400">content</text>
+<text x="1449.0" y="589.8" font-size="10.6" fill="#64748b" font-weight="400">deletedAt</text>
+</g>
+<g>
+<rect x="1440.0" y="648.5" width="214" height="135.5" rx="6" fill="#ffffff" stroke="#059669" stroke-width="1.6"/>
+<path d="M 1440.0 654.5 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#d1fae5"/>
+<text x="1449.0" y="666.0" font-size="12.5" font-weight="700" fill="#059669">Recruit</text>
+<text x="1449.0" y="685.5" font-size="10.6" fill="#0f172a" font-weight="700">id</text>
+<text x="1645.0" y="685.5" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="1449.0" y="700.0" font-size="10.6" fill="#475569" font-weight="400">member</text>
+<text x="1645.0" y="700.0" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="1449.0" y="714.5" font-size="10.6" fill="#64748b" font-weight="400">title</text>
+<text x="1449.0" y="729.0" font-size="10.6" fill="#64748b" font-weight="400">status</text>
+<text x="1449.0" y="743.5" font-size="10.6" fill="#64748b" font-weight="400">onCampus</text>
+<text x="1449.0" y="758.0" font-size="10.6" fill="#64748b" font-weight="400">startDate</text>
+<text x="1449.0" y="772.5" font-size="10.6" fill="#64748b" font-weight="400">endDate</text>
+<text x="1449.0" y="787.0" font-size="9.8" fill="#94a3b8" font-style="italic">… 외 5개</text>
+</g>
+<g>
+<rect x="1720.0" y="860.2" width="214" height="63.0" rx="6" fill="#ffffff" stroke="#059669" stroke-width="1.6"/>
+<path d="M 1720.0 866.2 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#d1fae5"/>
+<text x="1729.0" y="877.8" font-size="12.5" font-weight="700" fill="#059669">RecruitCategory</text>
+<text x="1729.0" y="897.2" font-size="10.6" fill="#0f172a" font-weight="700">recruitId</text>
+<text x="1925.0" y="897.2" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="1729.0" y="911.8" font-size="10.6" fill="#0f172a" font-weight="700">categoryId</text>
+<text x="1925.0" y="911.8" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+</g>
+<g>
+<rect x="1440.0" y="853.0" width="214" height="77.5" rx="6" fill="#ffffff" stroke="#059669" stroke-width="1.6"/>
+<path d="M 1440.0 859.0 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#d1fae5"/>
+<text x="1449.0" y="870.5" font-size="12.5" font-weight="700" fill="#059669">RecruitScrap</text>
+<text x="1449.0" y="890.0" font-size="10.6" fill="#0f172a" font-weight="700">memberId</text>
+<text x="1645.0" y="890.0" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="1449.0" y="904.5" font-size="10.6" fill="#0f172a" font-weight="700">recruitId</text>
+<text x="1645.0" y="904.5" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="1449.0" y="919.0" font-size="10.6" fill="#64748b" font-weight="400">createdAt</text>
+</g>
+<g>
+<rect x="1720.0" y="509.2" width="214" height="63.0" rx="6" fill="#ffffff" stroke="#059669" stroke-width="1.6"/>
+<path d="M 1720.0 515.2 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#d1fae5"/>
+<text x="1729.0" y="526.8" font-size="12.5" font-weight="700" fill="#059669">RecruitTopic</text>
+<text x="1729.0" y="546.2" font-size="10.6" fill="#0f172a" font-weight="700">recruitId</text>
+<text x="1925.0" y="546.2" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="1729.0" y="560.8" font-size="10.6" fill="#0f172a" font-weight="700">topicId</text>
+<text x="1925.0" y="560.8" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+</g>
+<g>
+<rect x="1720.0" y="333.8" width="214" height="63.0" rx="6" fill="#ffffff" stroke="#059669" stroke-width="1.6"/>
+<path d="M 1720.0 339.8 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#d1fae5"/>
+<text x="1729.0" y="351.2" font-size="12.5" font-weight="700" fill="#059669">Topic</text>
+<text x="1729.0" y="370.8" font-size="10.6" fill="#0f172a" font-weight="700">id</text>
+<text x="1925.0" y="370.8" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="1729.0" y="385.2" font-size="10.6" fill="#64748b" font-weight="400">name</text>
+</g>
+<g>
+<rect x="600.0" y="648.5" width="214" height="135.5" rx="6" fill="#ffffff" stroke="#ca8a04" stroke-width="1.6"/>
+<path d="M 600.0 654.5 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#fef3c7"/>
+<text x="609.0" y="666.0" font-size="12.5" font-weight="700" fill="#ca8a04">Project</text>
+<text x="609.0" y="685.5" font-size="10.6" fill="#0f172a" font-weight="700">id</text>
+<text x="805.0" y="685.5" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="609.0" y="700.0" font-size="10.6" fill="#475569" font-weight="400">recruit</text>
+<text x="805.0" y="700.0" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="609.0" y="714.5" font-size="10.6" fill="#64748b" font-weight="400">name</text>
+<text x="609.0" y="729.0" font-size="10.6" fill="#64748b" font-weight="400">status</text>
+<text x="609.0" y="743.5" font-size="10.6" fill="#64748b" font-weight="400">startDate</text>
+<text x="609.0" y="758.0" font-size="10.6" fill="#64748b" font-weight="400">endDate</text>
+<text x="609.0" y="772.5" font-size="10.6" fill="#64748b" font-weight="400">endCheckedAt</text>
+<text x="609.0" y="787.0" font-size="9.8" fill="#94a3b8" font-style="italic">… 외 1개</text>
+</g>
+<g>
+<rect x="600.0" y="304.8" width="214" height="121.0" rx="6" fill="#ffffff" stroke="#ca8a04" stroke-width="1.6"/>
+<path d="M 600.0 310.8 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#fef3c7"/>
+<text x="609.0" y="322.2" font-size="12.5" font-weight="700" fill="#ca8a04">ProjectMember</text>
+<text x="609.0" y="341.8" font-size="10.6" fill="#0f172a" font-weight="700">id</text>
+<text x="805.0" y="341.8" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="609.0" y="356.2" font-size="10.6" fill="#475569" font-weight="400">project</text>
+<text x="805.0" y="356.2" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="609.0" y="370.8" font-size="10.6" fill="#475569" font-weight="400">member</text>
+<text x="805.0" y="370.8" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="609.0" y="385.2" font-size="10.6" fill="#64748b" font-weight="400">isLeader</text>
+<text x="609.0" y="399.8" font-size="10.6" fill="#64748b" font-weight="400">joinedAt</text>
+<text x="609.0" y="414.2" font-size="10.6" fill="#64748b" font-weight="400">leftAt</text>
+</g>
+<g>
+<rect x="600.0" y="129.2" width="214" height="121.0" rx="6" fill="#ffffff" stroke="#db2777" stroke-width="1.6"/>
+<path d="M 600.0 135.2 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#fce7f3"/>
+<text x="609.0" y="146.8" font-size="12.5" font-weight="700" fill="#db2777">DeviceToken</text>
+<text x="609.0" y="166.2" font-size="10.6" fill="#0f172a" font-weight="700">id</text>
+<text x="805.0" y="166.2" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="609.0" y="180.8" font-size="10.6" fill="#475569" font-weight="400">member</text>
+<text x="805.0" y="180.8" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="609.0" y="195.2" font-size="10.6" fill="#64748b" font-weight="400">fcmToken</text>
+<text x="609.0" y="209.8" font-size="10.6" fill="#64748b" font-weight="400">platform</text>
+<text x="609.0" y="224.2" font-size="10.6" fill="#64748b" font-weight="400">createdAt</text>
+<text x="609.0" y="238.8" font-size="10.6" fill="#64748b" font-weight="400">updatedAt</text>
+</g>
+<g>
+<rect x="880.0" y="297.5" width="214" height="135.5" rx="6" fill="#ffffff" stroke="#db2777" stroke-width="1.6"/>
+<path d="M 880.0 303.5 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#fce7f3"/>
+<text x="889.0" y="315.0" font-size="12.5" font-weight="700" fill="#db2777">NotificationHistory</text>
+<text x="889.0" y="334.5" font-size="10.6" fill="#0f172a" font-weight="700">id</text>
+<text x="1085.0" y="334.5" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="889.0" y="349.0" font-size="10.6" fill="#475569" font-weight="400">member</text>
+<text x="1085.0" y="349.0" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="889.0" y="363.5" font-size="10.6" fill="#64748b" font-weight="400">title</text>
+<text x="889.0" y="378.0" font-size="10.6" fill="#64748b" font-weight="400">content</text>
+<text x="889.0" y="392.5" font-size="10.6" fill="#64748b" font-weight="400">type</text>
+<text x="889.0" y="407.0" font-size="10.6" fill="#64748b" font-weight="400">referenceType</text>
+<text x="889.0" y="421.5" font-size="10.6" fill="#475569" font-weight="400">referenceId</text>
+<text x="1085.0" y="421.5" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="889.0" y="436.0" font-size="9.8" fill="#94a3b8" font-style="italic">… 외 3개</text>
+</g>
+<g>
+<rect x="1160.0" y="473.0" width="214" height="135.5" rx="6" fill="#ffffff" stroke="#db2777" stroke-width="1.6"/>
+<path d="M 1160.0 479.0 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#fce7f3"/>
+<text x="1169.0" y="490.5" font-size="12.5" font-weight="700" fill="#db2777">NotificationSetting</text>
+<text x="1169.0" y="510.0" font-size="10.6" fill="#0f172a" font-weight="700">memberId</text>
+<text x="1365.0" y="510.0" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="1169.0" y="524.5" font-size="10.6" fill="#475569" font-weight="400">member</text>
+<text x="1365.0" y="524.5" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="1169.0" y="539.0" font-size="10.6" fill="#64748b" font-weight="400">chatNoti</text>
+<text x="1169.0" y="553.5" font-size="10.6" fill="#64748b" font-weight="400">applicantNoti</text>
+<text x="1169.0" y="568.0" font-size="10.6" fill="#64748b" font-weight="400">commentNoti</text>
+<text x="1169.0" y="582.5" font-size="10.6" fill="#64748b" font-weight="400">scheduleNoti</text>
+<text x="1169.0" y="597.0" font-size="10.6" fill="#64748b" font-weight="400">matchNoti</text>
+<text x="1169.0" y="611.5" font-size="9.8" fill="#94a3b8" font-style="italic">… 외 3개</text>
+</g>
+<g>
+<rect x="880.0" y="480.2" width="214" height="121.0" rx="6" fill="#ffffff" stroke="#2563eb" stroke-width="1.6"/>
+<path d="M 880.0 486.2 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#dbeafe"/>
+<text x="889.0" y="497.8" font-size="12.5" font-weight="700" fill="#2563eb">Member</text>
+<text x="889.0" y="517.2" font-size="10.6" fill="#0f172a" font-weight="700">id</text>
+<text x="1085.0" y="517.2" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="889.0" y="531.8" font-size="10.6" fill="#64748b" font-weight="400">nickname</text>
+<text x="889.0" y="546.2" font-size="10.6" fill="#64748b" font-weight="400">email</text>
+<text x="889.0" y="560.8" font-size="10.6" fill="#64748b" font-weight="400">password</text>
+<text x="889.0" y="575.2" font-size="10.6" fill="#64748b" font-weight="400">exp</text>
+<text x="889.0" y="589.8" font-size="10.6" fill="#64748b" font-weight="400">lastLoginAt</text>
+</g>
+<g>
+<rect x="40.0" y="312.0" width="214" height="106.5" rx="6" fill="#ffffff" stroke="#2563eb" stroke-width="1.6"/>
+<path d="M 40.0 318.0 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#dbeafe"/>
+<text x="49.0" y="329.5" font-size="12.5" font-weight="700" fill="#2563eb">MemberUniv</text>
+<text x="49.0" y="349.0" font-size="10.6" fill="#0f172a" font-weight="700">memberId</text>
+<text x="245.0" y="349.0" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="49.0" y="363.5" font-size="10.6" fill="#475569" font-weight="400">member</text>
+<text x="245.0" y="363.5" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="49.0" y="378.0" font-size="10.6" fill="#475569" font-weight="400">univ</text>
+<text x="245.0" y="378.0" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="49.0" y="392.5" font-size="10.6" fill="#64748b" font-weight="400">major</text>
+<text x="49.0" y="407.0" font-size="10.6" fill="#64748b" font-weight="400">status</text>
+</g>
+<g>
+<rect x="880.0" y="143.8" width="214" height="92.0" rx="6" fill="#ffffff" stroke="#2563eb" stroke-width="1.6"/>
+<path d="M 880.0 149.8 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#dbeafe"/>
+<text x="889.0" y="161.2" font-size="12.5" font-weight="700" fill="#2563eb">SocialAccount</text>
+<text x="889.0" y="180.8" font-size="10.6" fill="#0f172a" font-weight="700">id</text>
+<text x="1085.0" y="180.8" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="889.0" y="195.2" font-size="10.6" fill="#475569" font-weight="400">member</text>
+<text x="1085.0" y="195.2" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="889.0" y="209.8" font-size="10.6" fill="#64748b" font-weight="400">provider</text>
+<text x="889.0" y="224.2" font-size="10.6" fill="#64748b" font-weight="400">providerId</text>
+</g>
+<g>
+<rect x="40.0" y="158.2" width="214" height="63.0" rx="6" fill="#ffffff" stroke="#2563eb" stroke-width="1.6"/>
+<path d="M 40.0 164.2 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#dbeafe"/>
+<text x="49.0" y="175.8" font-size="12.5" font-weight="700" fill="#2563eb">Univ</text>
+<text x="49.0" y="195.2" font-size="10.6" fill="#0f172a" font-weight="700">id</text>
+<text x="245.0" y="195.2" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="49.0" y="209.8" font-size="10.6" fill="#64748b" font-weight="400">name</text>
+</g>
+<g>
+<rect x="320.0" y="655.8" width="214" height="121.0" rx="6" fill="#ffffff" stroke="#ea580c" stroke-width="1.6"/>
+<path d="M 320.0 661.8 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#ffedd5"/>
+<text x="329.0" y="673.2" font-size="12.5" font-weight="700" fill="#ea580c">AIFeedback</text>
+<text x="329.0" y="692.8" font-size="10.6" fill="#0f172a" font-weight="700">id</text>
+<text x="525.0" y="692.8" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="329.0" y="707.2" font-size="10.6" fill="#475569" font-weight="400">project</text>
+<text x="525.0" y="707.2" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="329.0" y="721.8" font-size="10.6" fill="#475569" font-weight="400">member</text>
+<text x="525.0" y="721.8" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="329.0" y="736.2" font-size="10.6" fill="#64748b" font-weight="400">strength</text>
+<text x="329.0" y="750.8" font-size="10.6" fill="#64748b" font-weight="400">weakness</text>
+<text x="329.0" y="765.2" font-size="10.6" fill="#64748b" font-weight="400">createdAt</text>
+</g>
+<g>
+<rect x="40.0" y="860.2" width="214" height="63.0" rx="6" fill="#ffffff" stroke="#ea580c" stroke-width="1.6"/>
+<path d="M 40.0 866.2 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#ffedd5"/>
+<text x="49.0" y="877.8" font-size="12.5" font-weight="700" fill="#ea580c">AIFeedbackKeyword</text>
+<text x="49.0" y="897.2" font-size="10.6" fill="#0f172a" font-weight="700">keywordId</text>
+<text x="245.0" y="897.2" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="49.0" y="911.8" font-size="10.6" fill="#0f172a" font-weight="700">aiFeedbackId</text>
+<text x="245.0" y="911.8" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+</g>
+<g>
+<rect x="600.0" y="473.0" width="214" height="135.5" rx="6" fill="#ffffff" stroke="#ea580c" stroke-width="1.6"/>
+<path d="M 600.0 479.0 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#ffedd5"/>
+<text x="609.0" y="490.5" font-size="12.5" font-weight="700" fill="#ea580c">Feedback</text>
+<text x="609.0" y="510.0" font-size="10.6" fill="#0f172a" font-weight="700">id</text>
+<text x="805.0" y="510.0" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="609.0" y="524.5" font-size="10.6" fill="#475569" font-weight="400">project</text>
+<text x="805.0" y="524.5" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="609.0" y="539.0" font-size="10.6" fill="#475569" font-weight="400">reviewer</text>
+<text x="805.0" y="539.0" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="609.0" y="553.5" font-size="10.6" fill="#475569" font-weight="400">reviewee</text>
+<text x="805.0" y="553.5" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="609.0" y="568.0" font-size="10.6" fill="#64748b" font-weight="400">commitScore</text>
+<text x="609.0" y="582.5" font-size="10.6" fill="#64748b" font-weight="400">commScore</text>
+<text x="609.0" y="597.0" font-size="10.6" fill="#64748b" font-weight="400">deadlineScore</text>
+<text x="609.0" y="611.5" font-size="9.8" fill="#94a3b8" font-style="italic">… 외 4개</text>
+</g>
+<g>
+<rect x="40.0" y="1014.0" width="214" height="63.0" rx="6" fill="#ffffff" stroke="#ea580c" stroke-width="1.6"/>
+<path d="M 40.0 1020.0 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#ffedd5"/>
+<text x="49.0" y="1031.5" font-size="12.5" font-weight="700" fill="#ea580c">Keyword</text>
+<text x="49.0" y="1051.0" font-size="10.6" fill="#0f172a" font-weight="700">id</text>
+<text x="245.0" y="1051.0" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="49.0" y="1065.5" font-size="10.6" fill="#64748b" font-weight="400">name</text>
+</g>
+<g>
+<rect x="320.0" y="122.0" width="214" height="135.5" rx="6" fill="#ffffff" stroke="#7c3aed" stroke-width="1.6"/>
+<path d="M 320.0 128.0 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#ede9fe"/>
+<text x="329.0" y="139.5" font-size="12.5" font-weight="700" fill="#7c3aed">ChatMessage  (MongoDB)</text>
+<text x="329.0" y="159.0" font-size="10.6" fill="#0f172a" font-weight="700">id</text>
+<text x="525.0" y="159.0" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="329.0" y="173.5" font-size="10.6" fill="#475569" font-weight="400">chatRoomId</text>
+<text x="525.0" y="173.5" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="329.0" y="188.0" font-size="10.6" fill="#475569" font-weight="400">memberId</text>
+<text x="525.0" y="188.0" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="329.0" y="202.5" font-size="10.6" fill="#64748b" font-weight="400">type</text>
+<text x="329.0" y="217.0" font-size="10.6" fill="#64748b" font-weight="400">message</text>
+<text x="329.0" y="231.5" font-size="10.6" fill="#64748b" font-weight="400">imageUrl</text>
+<text x="329.0" y="246.0" font-size="10.6" fill="#64748b" font-weight="400">createdAt</text>
+</g>
+<g>
+<rect x="320.0" y="319.2" width="214" height="92.0" rx="6" fill="#ffffff" stroke="#7c3aed" stroke-width="1.6"/>
+<path d="M 320.0 325.2 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#ede9fe"/>
+<text x="329.0" y="336.8" font-size="12.5" font-weight="700" fill="#7c3aed">ChatRoom</text>
+<text x="329.0" y="356.2" font-size="10.6" fill="#0f172a" font-weight="700">id</text>
+<text x="525.0" y="356.2" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="329.0" y="370.8" font-size="10.6" fill="#64748b" font-weight="400">type</text>
+<text x="329.0" y="385.2" font-size="10.6" fill="#475569" font-weight="400">project</text>
+<text x="525.0" y="385.2" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="329.0" y="399.8" font-size="10.6" fill="#64748b" font-weight="400">createdAt</text>
+</g>
+<g>
+<rect x="320.0" y="473.0" width="214" height="135.5" rx="6" fill="#ffffff" stroke="#7c3aed" stroke-width="1.6"/>
+<path d="M 320.0 479.0 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#ede9fe"/>
+<text x="329.0" y="490.5" font-size="12.5" font-weight="700" fill="#7c3aed">ChatRoomMember</text>
+<text x="329.0" y="510.0" font-size="10.6" fill="#0f172a" font-weight="700">id</text>
+<text x="525.0" y="510.0" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="329.0" y="524.5" font-size="10.6" fill="#475569" font-weight="400">chatRoom</text>
+<text x="525.0" y="524.5" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="329.0" y="539.0" font-size="10.6" fill="#475569" font-weight="400">member</text>
+<text x="525.0" y="539.0" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="329.0" y="553.5" font-size="10.6" fill="#64748b" font-weight="400">lastReadMessageId</text>
+<text x="329.0" y="568.0" font-size="10.6" fill="#64748b" font-weight="400">lastReadAt</text>
+<text x="329.0" y="582.5" font-size="10.6" fill="#64748b" font-weight="400">joinedAt</text>
+<text x="329.0" y="597.0" font-size="10.6" fill="#64748b" font-weight="400">notiEnabled</text>
+</g>
+<g>
+<rect x="1720.0" y="663.0" width="214" height="106.5" rx="6" fill="#ffffff" stroke="#65a30d" stroke-width="1.6"/>
+<path d="M 1720.0 669.0 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#ecfccb"/>
+<text x="1729.0" y="680.5" font-size="12.5" font-weight="700" fill="#65a30d">Apply</text>
+<text x="1729.0" y="700.0" font-size="10.6" fill="#0f172a" font-weight="700">id</text>
+<text x="1925.0" y="700.0" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="1729.0" y="714.5" font-size="10.6" fill="#475569" font-weight="400">recruit</text>
+<text x="1925.0" y="714.5" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="1729.0" y="729.0" font-size="10.6" fill="#475569" font-weight="400">member</text>
+<text x="1925.0" y="729.0" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="1729.0" y="743.5" font-size="10.6" fill="#64748b" font-weight="400">message</text>
+<text x="1729.0" y="758.0" font-size="10.6" fill="#64748b" font-weight="400">status</text>
+</g>
+<g>
+<rect x="2000.0" y="853.0" width="214" height="77.5" rx="6" fill="#ffffff" stroke="#65a30d" stroke-width="1.6"/>
+<path d="M 2000.0 859.0 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#ecfccb"/>
+<text x="2009.0" y="870.5" font-size="12.5" font-weight="700" fill="#65a30d">ApplyKeyword</text>
+<text x="2009.0" y="890.0" font-size="10.6" fill="#0f172a" font-weight="700">id</text>
+<text x="2205.0" y="890.0" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="2009.0" y="904.5" font-size="10.6" fill="#475569" font-weight="400">category</text>
+<text x="2205.0" y="904.5" font-size="9" text-anchor="end" fill="#94a3b8" font-weight="700">FK</text>
+<text x="2009.0" y="919.0" font-size="10.6" fill="#64748b" font-weight="400">content</text>
+</g>
+<g>
+<rect x="2000.0" y="1014.0" width="214" height="63.0" rx="6" fill="#ffffff" stroke="#65a30d" stroke-width="1.6"/>
+<path d="M 2000.0 1020.0 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#ecfccb"/>
+<text x="2009.0" y="1031.5" font-size="12.5" font-weight="700" fill="#65a30d">ApplyKeywordCategory</text>
+<text x="2009.0" y="1051.0" font-size="10.6" fill="#0f172a" font-weight="700">id</text>
+<text x="2205.0" y="1051.0" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="2009.0" y="1065.5" font-size="10.6" fill="#64748b" font-weight="400">name</text>
+</g>
+<g>
+<rect x="2000.0" y="684.8" width="214" height="63.0" rx="6" fill="#ffffff" stroke="#65a30d" stroke-width="1.6"/>
+<path d="M 2000.0 690.8 a 6 6 0 0 1 6 -6 h 202 a 6 6 0 0 1 6 6 v 19 h -214 z" fill="#ecfccb"/>
+<text x="2009.0" y="702.2" font-size="12.5" font-weight="700" fill="#65a30d">ApplyKeywordMap</text>
+<text x="2009.0" y="721.8" font-size="10.6" fill="#0f172a" font-weight="700">applyId</text>
+<text x="2205.0" y="721.8" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+<text x="2009.0" y="736.2" font-size="10.6" fill="#0f172a" font-weight="700">keywordId</text>
+<text x="2205.0" y="736.2" font-size="9" text-anchor="end" fill="#0f172a" font-weight="700">PK</text>
+</g>
+<text x="40" y="1122" font-size="10.5" fill="#94a3b8">실선 = 객체 참조(FK) · 점선 = 식별자 참조(Long FK) · 화살표는 참조 방향 · 각 테이블은 주요 컬럼만 표시</text>
+</svg>
