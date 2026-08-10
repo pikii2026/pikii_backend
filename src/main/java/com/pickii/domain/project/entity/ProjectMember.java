@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
  * 상호평가 대상 인원(N)은 종료 시점 leftAt IS NULL 기준으로 확정한다.
  */
 @Entity
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"project_id", "member_id"}))
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ProjectMember {

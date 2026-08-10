@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
  * unreadCount = lastReadMessageId 이후에 생성된 메시지 수.
  */
 @Entity
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"chat_room_id", "member_id"}))
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ChatRoomMember {
