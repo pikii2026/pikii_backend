@@ -10,6 +10,7 @@ import java.time.OffsetDateTime;
 public record RecruitScrapSummaryResponse(
         Long recruitId,
         String title,
+        Long authorId,
         String authorNickname,
         boolean onCampus,
         RecruitStatus status,

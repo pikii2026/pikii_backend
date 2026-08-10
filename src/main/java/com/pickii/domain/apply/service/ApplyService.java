@@ -274,10 +274,14 @@ public class ApplyService {
             return;
         }
         projectRepository.findByRecruitId(recruit.getId()).ifPresent(project -> {
-            projectMemberRepository.save(new ProjectMember(project, acceptedMember, false));
+            if (!projectMemberRepository.existsByProjectIdAndMemberIdAndLeftAtIsNull(project.getId(), acceptedMember.getId())) {
+                projectMemberRepository.save(new ProjectMember(project, acceptedMember, false));
+            }
             ChatRoom groupChatRoom = chatRoomRepository.findByProjectId(project.getId())
                     .orElseThrow(() -> new IllegalStateException("GROUP 채팅방이 없는 프로젝트입니다."));
-            chatRoomMemberRepository.save(new ChatRoomMember(groupChatRoom, acceptedMember));
+            if (!chatRoomMemberRepository.existsByChatRoomIdAndMemberId(groupChatRoom.getId(), acceptedMember.getId())) {
+                chatRoomMemberRepository.save(new ChatRoomMember(groupChatRoom, acceptedMember));
+            }
         });
     }
 

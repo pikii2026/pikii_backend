@@ -1341,6 +1341,7 @@ GET /recruits
             {
                 "recruitId":1,
                 "title":"제일기획 공모전 팀원 모집",
+                "authorId":10,
                 "authorNickname":"픽키",
                 "maxMembers":4,
                 "availableSlots":2,
@@ -2363,6 +2364,7 @@ Bearer Access Token
             {
                 "recruitId":1,
                 "title":"제일기획 공모전 팀원 모집",
+                "authorId":10,
                 "authorNickname":"픽키",
                 "onCampus":true,
                 "status":"OPEN",
