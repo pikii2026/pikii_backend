@@ -32,4 +32,9 @@ public interface ProjectMemberRepository extends JpaRepository<ProjectMember, Lo
     @Modifying(clearAutomatically = true)
     @Query("UPDATE ProjectMember pm SET pm.member = NULL WHERE pm.member.id = :memberId")
     void detachMember(@Param("memberId") Long memberId);
+
+    /** Recruit에 연결된 프로젝트의 현재 팀장 조회 (6-8 팀장 위임 반영, 프로젝트가 아직 없으면 empty) */
+    @Query("SELECT pm FROM ProjectMember pm "
+            + "WHERE pm.project.recruit.id = :recruitId AND pm.isLeader = true AND pm.leftAt IS NULL")
+    Optional<ProjectMember> findLeaderByRecruitId(@Param("recruitId") Long recruitId);
 }

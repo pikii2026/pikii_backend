@@ -197,9 +197,7 @@ public class ApplyService {
         Recruit recruit = recruitRepository.findById(recruitId)
                 .filter(r -> !r.isDeleted())
                 .orElseThrow(() -> new BusinessException(ErrorCode.RECRUIT_NOT_FOUND));
-        if (recruit.getMember() == null || !recruit.getMember().getId().equals(memberId)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN);
-        }
+        requireRecruitManager(recruit, memberId);
         Page<Apply> applies = applyRepository.findByRecruitId(recruitId, pageable);
         Map<Long, List<ApplyKeywordCategoryResponse.KeywordItem>> keywordsByApplyId =
                 loadKeywordsByApplyId(applies.getContent().stream().map(Apply::getId).toList());
@@ -245,9 +243,7 @@ public class ApplyService {
         Apply apply = applyRepository.findById(applyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.APPLY_NOT_FOUND));
         Recruit recruit = apply.getRecruit();
-        if (recruit.getMember() == null || !recruit.getMember().getId().equals(memberId)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN);
-        }
+        requireRecruitManager(recruit, memberId);
         if (!apply.isWaiting()) {
             throw new BusinessException(ErrorCode.APPLY_NOT_WAITING, "이미 처리된 지원건은 상태를 변경할 수 없습니다.");
         }
@@ -285,6 +281,24 @@ public class ApplyService {
         });
     }
 
+    /**
+     * 공고 관리 권한(지원자 목록 조회/수락/거절)이 있는지 검증한다.
+     * 프로젝트가 만들어진 이후에는 6-8 팀장 위임이 반영되도록 현재 팀장을 우선하고,
+     * 프로젝트가 아직 없으면 공고 작성자를 기준으로 한다.
+     */
+    private void requireRecruitManager(Recruit recruit, Long memberId) {
+        Member manager = requireRecruitManagerOrNull(recruit);
+        if (manager == null || !manager.getId().equals(memberId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
+    }
+
+    private Member requireRecruitManagerOrNull(Recruit recruit) {
+        return projectMemberRepository.findLeaderByRecruitId(recruit.getId())
+                .map(ProjectMember::getMember)
+                .orElse(recruit.getMember());
+    }
+
     private void notifyApplicant(Member applicant, Recruit recruit, boolean accepted) {
         if (applicant == null) {
             return;
@@ -309,7 +323,7 @@ public class ApplyService {
     }
 
     private void notifyRecruitAuthor(Recruit recruit, Member applicant) {
-        Member author = recruit.getMember();
+        Member author = requireRecruitManagerOrNull(recruit);
         if (author == null) {
             return;
         }
