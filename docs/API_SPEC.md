@@ -2562,7 +2562,7 @@ Bearer Access Token
 | academicStatus | Enum   | O        | ENROLLED / LEAVE_OF_ABSENCE / GRADUATION_DEFERRED / GRADUATED | `MemberUniv.Status`  |
 | hope           | String | X        | 희망 진로 (100자 이하)                                              | `MemberResume.Hope`  |
 | strength       | String | X        | 장점 (300자 이하)                                                  | `MemberResume.Strength` |
-| topic          | Array  | X        | 관심 주제 ID 목록                                                   | `DetailTopic`        |
+| topic          | Array  | X        | 관심 주제 ID 목록 (**최대 3개**)                                        | `DetailTopic`        |
 | skillTool      | Array  | X        | 기술 스택 + 숙련도(1~3)                                              | `MemberTechStack`    |
 | license        | Array  | X        | 자격증 + 취득일자                                                    | `MemberLicense`      |
 | experience     | Array  | X        | 수상 및 경험                                                       | `DetailExperience`   |

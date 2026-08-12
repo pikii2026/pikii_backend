@@ -31,6 +31,7 @@ public record ResumeRequest(
 
         String aboutMe,
 
+        @Size(max = 3, message = "관심 주제는 최대 3개까지 선택할 수 있습니다.")
         List<Long> topic,
 
         @Valid
