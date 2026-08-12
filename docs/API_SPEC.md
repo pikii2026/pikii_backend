@@ -1343,6 +1343,7 @@ GET /recruits
                 "title":"제일기획 공모전 팀원 모집",
                 "authorId":10,
                 "authorNickname":"픽키",
+                "authorEXP":120,
                 "maxMembers":4,
                 "availableSlots":2,
                 "status":"OPEN",
@@ -1360,6 +1361,8 @@ GET /recruits
     "timestamp":"2026-07-06T13:30:00+09:00"
 }
 ```
+
+> `authorEXP`는 작성자의 프로필 아이콘(레벨) 표시에 사용한다.
 
 ---
 
@@ -2366,6 +2369,7 @@ Bearer Access Token
                 "title":"제일기획 공모전 팀원 모집",
                 "authorId":10,
                 "authorNickname":"픽키",
+                "authorEXP":120,
                 "onCampus":true,
                 "status":"OPEN",
                 "maxMembers":4,
@@ -2384,6 +2388,8 @@ Bearer Access Token
     "timestamp":"2026-07-06T13:30:00+09:00"
 }
 ```
+
+> `authorEXP`는 작성자의 프로필 아이콘(레벨) 표시에 사용한다.
 
 ---
 
@@ -2881,6 +2887,7 @@ Bearer Access Token
                 "applyId":7,
                 "memberId":12,
                 "nickname":"pickii",
+                "applicantEXP":80,
                 "message":"열심히 하겠습니다!",
                 "keywords":[
                     { "keywordId":5, "content":"마감기한 잘 지켜요" },
@@ -2909,6 +2916,7 @@ Bearer Access Token
 | applyId   | Long               | 지원 ID                                |
 | memberId  | Long               | 지원자 회원 ID                            |
 | nickname  | String             | 지원자 닉네임                              |
+| applicantEXP | Integer         | 지원자 경험치 (프로필 아이콘 레벨 표시에 사용)          |
 | message   | String             | 지원 메시지                              |
 | keywords  | List<KeywordItem>  | 지원자가 선택한 지원 키워드 (텍스트 포함, 5-7과 동일 형태) |
 | status    | Enum               | 지원 상태 (WAITING / ACCEPTED / REJECTED) |
@@ -5781,7 +5789,8 @@ Bearer Access Token
         "members":[
             {
                 "memberId":10,
-                "nickname":"픽키"
+                "nickname":"픽키",
+                "exp":120
             }
         ],
         "projectId":1,
@@ -5795,6 +5804,7 @@ Bearer Access Token
 ```
 
 > `projectId`/`startDate`/`endDate`/`status`/`isLeader`는 GROUP 채팅방일 때만 채워진다. DIRECT 채팅방 응답에는 해당 필드가 없다(null 필드 제외 정책).
+> `members[].exp`는 해당 팀원의 프로필 아이콘(레벨) 표시에 사용한다.
 
 ---
 
@@ -5855,6 +5865,7 @@ Bearer Access Token
                 "messageId":"60b9a8f1c8d2a34b5c6d7e8f",
                 "senderId":10,
                 "senderNickname":"픽키",
+                "senderEXP":120,
                 "type":"TEXT",
                 "message":"안녕하세요",
                 "imageUrl":null,
@@ -5864,6 +5875,7 @@ Bearer Access Token
                 "messageId":"60b9a8f1c8d2a34b5c6d7e90",
                 "senderId":10,
                 "senderNickname":"픽키",
+                "senderEXP":120,
                 "type":"IMAGE",
                 "message":null,
                 "imageUrl":"https://cdn.pickii.com/chat/2026/07/uuid.png",
@@ -5876,6 +5888,8 @@ Bearer Access Token
     "timestamp":"2026-07-06T13:30:00+09:00"
 }
 ```
+
+> `senderEXP`는 발신자의 프로필 아이콘(레벨) 표시에 사용한다. 시스템 메시지는 `senderId`/`senderNickname`이 없어(null 필드 제외 정책) 발신자 자체가 표시되지 않으므로, 이때 `senderEXP`는 0으로 내려가도 무시하면 된다.
 
 ---
 

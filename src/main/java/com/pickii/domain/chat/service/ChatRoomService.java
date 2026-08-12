@@ -100,7 +100,7 @@ public class ChatRoomService {
         requireMember(chatRoomId, memberId);
 
         List<ChatRoomMemberSummary> members = chatRoomMemberRepository.findAllByChatRoomId(chatRoomId).stream()
-                .map(m -> new ChatRoomMemberSummary(m.getMember().getId(), m.getMember().getNickname()))
+                .map(m -> new ChatRoomMemberSummary(m.getMember().getId(), m.getMember().getNickname(), m.getMember().getExp()))
                 .toList();
         String title = resolveTitle(room, memberId);
 
@@ -134,25 +134,26 @@ public class ChatRoomService {
                 .map(ChatMessage::getMemberId)
                 .filter(java.util.Objects::nonNull)
                 .collect(Collectors.toSet());
-        Map<Long, String> nicknames = memberRepository.findAllById(senderIds).stream()
-                .collect(Collectors.toMap(Member::getId, Member::getNickname));
+        Map<Long, Member> senders = memberRepository.findAllById(senderIds).stream()
+                .collect(Collectors.toMap(Member::getId, member -> member));
 
         List<ChatMessageResponse> content = messages.stream()
-                .map(m -> toMessageResponse(m, nicknames))
+                .map(m -> toMessageResponse(m, senders))
                 .toList();
         String nextCursor = messages.isEmpty() ? null : messages.get(messages.size() - 1).getId();
 
         return new ChatMessagePageResponse(content, nextCursor, page.hasNext());
     }
 
-    private ChatMessageResponse toMessageResponse(ChatMessage message, Map<Long, String> nicknames) {
-        String nickname = message.getMemberId() == null
-                ? "알 수 없음"
-                : nicknames.getOrDefault(message.getMemberId(), "알 수 없음");
+    private ChatMessageResponse toMessageResponse(ChatMessage message, Map<Long, Member> senders) {
+        Member sender = message.getMemberId() == null ? null : senders.get(message.getMemberId());
+        String nickname = sender == null ? "알 수 없음" : sender.getNickname();
+        int exp = sender == null ? 0 : sender.getExp();
         return new ChatMessageResponse(
                 message.getId(),
                 message.getMemberId(),
                 nickname,
+                exp,
                 message.getType(),
                 message.getMessage(),
                 message.getImageUrl(),

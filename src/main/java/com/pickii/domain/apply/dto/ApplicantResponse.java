@@ -12,6 +12,7 @@ public record ApplicantResponse(
         Long applyId,
         Long memberId,
         String nickname,
+        int applicantEXP,
         String message,
         List<ApplyKeywordCategoryResponse.KeywordItem> keywords,
         ApplyStatus status,
