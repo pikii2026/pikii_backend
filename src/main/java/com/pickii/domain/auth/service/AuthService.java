@@ -39,6 +39,7 @@ import com.pickii.domain.member.repository.MemberRepository;
 import com.pickii.domain.member.repository.MemberUnivRepository;
 import com.pickii.domain.member.repository.SocialAccountRepository;
 import com.pickii.domain.notification.entity.NotificationSetting;
+import com.pickii.domain.notification.repository.DeviceTokenRepository;
 import com.pickii.domain.notification.repository.NotificationHistoryRepository;
 import com.pickii.domain.notification.repository.NotificationSettingRepository;
 import com.pickii.domain.project.repository.ProjectMemberRepository;
@@ -115,6 +116,7 @@ public class AuthService {
     private final PartyScheduleAttendanceRepository partyScheduleAttendanceRepository;
     private final ChatRoomMemberRepository chatRoomMemberRepository;
     private final NotificationHistoryRepository notificationHistoryRepository;
+    private final DeviceTokenRepository deviceTokenRepository;
 
     private final StringRedisTemplate redisTemplate;
     private final ObjectMapper objectMapper;
@@ -299,6 +301,7 @@ public class AuthService {
 
         chatRoomMemberRepository.deleteAllByMemberId(memberId);
         notificationHistoryRepository.deleteAllByMemberId(memberId);
+        deviceTokenRepository.deleteAllByMemberId(memberId);
     }
 
     /**

@@ -15,4 +15,6 @@ public interface DeviceTokenRepository extends JpaRepository<DeviceToken, Long> 
     void deleteByFcmTokenAndMemberId(String fcmToken, Long memberId);
 
     void deleteByFcmToken(String fcmToken);
+
+    void deleteAllByMemberId(Long memberId);
 }
