@@ -17,6 +17,16 @@ spring:
   # Redis 캐시로 자동 선택하므로 명시적으로 simple로 고정해야 한다.)
   cache:
     type: simple
+  data:
+    # Redis는 StringRedisTemplate으로만 사용하고 Repository는 쓰지 않는다(Redis_Policy.md).
+    # 켜두면 부팅 때 모든 Repository를 훑으며 "내 것이 아니다" 로그만 45줄 남긴다.
+    redis:
+      repositories:
+        enabled: false
+
+  # JWT 인증만 사용하므로 Spring Security 기본 인메모리 계정(및 임시 비밀번호 로그)이 필요 없다
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
 
 server:
   port: 8083
@@ -61,3 +71,9 @@ gemini:
 # 시스템 푸시(FCM) 연동 - 서비스 계정 키 JSON 원문. 미설정 시 푸시 발송은 비활성화된다(서버 부팅에는 영향 없음)
 fcm:
   credentials-json: ${FCM_CREDENTIALS_JSON:}
+
+logging:
+  level:
+    # Spring Data 모듈이 여러 개(JPA/MongoDB)라 부팅 때 각 모듈이 모든 Repository를 훑으며
+    # "이건 내 것이 아니다" INFO 로그를 남긴다. 실제 문제가 아니므로 WARN 이상만 남긴다.
+    org.springframework.data.repository.config: WARN
