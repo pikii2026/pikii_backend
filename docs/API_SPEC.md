@@ -5030,7 +5030,10 @@ Bearer Access Token (프로젝트장만)
 3. MeetingPoll 생성 (`Deadline = 현재 + deadlineHours`)
 4. 탐색 기간 × 탐색 시간대를 **30분 단위**로 나누어 슬롯 생성
 5. 참가 명단(`memberIds`)을 MeetingPollMember로 등록. 미지정 시 팀원 전원 (`Responded = false`)
-6. 그룹 채팅방 공지 + 팀원 전원 알림 발송
+6. **참가 팀원 각각의 개인 캘린더(MemberSchedule)를 조율 기간 내에서 전개하여, 겹치는 슬롯은 해당 팀원의 응답을 `Available=false, AutoFilled=true`로 미리 생성** (7-11/7-13 참고. 제출로 취급하지 않으므로 `Responded`는 그대로 false)
+7. 그룹 채팅방 공지 + 팀원 전원 알림 발송
+
+> 개설 직후부터 슬롯별 `availableCount`/`unansweredCount`에 팀원들의 캘린더 충돌이 반영된다. 팀원이 직접 응답 화면을 열거나 제출하지 않아도, 다른 팀원은 "이 시간엔 OO님이 이미 일정이 있다"는 것을 바로 확인할 수 있다.
 
 ## Error
 
@@ -5100,7 +5103,7 @@ Bearer Access Token
 | Name                | Type    | Description                                    |
 |:------------------- |:------- |:---------------------------------------------- |
 | myAvailable         | Boolean | 내 응답. **기본값 true(가능)**, 캘린더에 일정이 있으면 false로 프리필 |
-| prefilledByCalendar | Boolean | 내 개인 캘린더 일정 때문에 불가로 미리 체크된 슬롯인지                |
+| prefilledByCalendar | Boolean | 내 개인 캘린더 일정 때문에 불가로 미리 체크된 슬롯인지 (7-10 개설 시 자동 생성됐거나, 아직 응답 row가 없어 지금 캘린더 기준으로 즉석 계산된 경우 모두 포함) |
 | availableCount      | Integer | 가능이라고 응답한 인원 수                                  |
 | unansweredCount     | Integer | **아직 응답하지 않은 인원 수**                            |
 
@@ -5108,8 +5111,8 @@ Bearer Access Token
 
 1. 프로젝트 팀원 여부 확인
 2. 슬롯 목록 조회
-3. **내 개인 캘린더(MemberSchedule)를 조율 기간 내에서 전개**하여 겹치는 슬롯을 `myAvailable = false`로 프리필
-4. 슬롯별 가능 인원 / 미응답 인원 집계
+3. **7-10 개설 시 이미 캘린더로 자동 생성된 응답을 우선 사용**하고, 아직 응답 row가 없는 슬롯은 **내 개인 캘린더(MemberSchedule)를 조율 기간 내에서 전개**하여 겹치는지 즉석에서 다시 확인해 `myAvailable = false`로 프리필 (개설 이후 캘린더에 새로 등록한 일정도 반영되도록)
+4. 슬롯별 가능 인원 / 미응답 인원 집계 (캘린더로 자동 생성된 응답도 포함)
 5. When2meet 방식으로 전체 슬롯을 격자로 노출 (후보를 자르지 않음). 확정 단계에서만 가능 인원 순으로 추천 정렬
 
 > 캘린더는 **초기값**일 뿐이다. 팀원이 화면에서 직접 수정한 값이 최종 응답이 된다.

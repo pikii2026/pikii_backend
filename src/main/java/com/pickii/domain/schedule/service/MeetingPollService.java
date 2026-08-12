@@ -129,6 +129,7 @@ public class MeetingPollService {
         }
         participants.forEach(pm -> {
             meetingPollMemberRepository.save(new MeetingPollMember(poll.getId(), pm.getMember().getId()));
+            prefillCalendarConflicts(poll, slots, pm.getMember().getId());
             notify(pm.getMember(), project, "회의 조율이 시작되었습니다.", "'" + poll.getTitle() + "' 회의 시간 조율에 응답해주세요.");
         });
         announceToGroupChat(projectId, "'" + poll.getTitle() + "' 회의 시간 조율이 시작되었습니다. 응답해주세요.");
@@ -141,6 +142,22 @@ public class MeetingPollService {
                 0,
                 slots.size()
         );
+    }
+
+    /**
+     * 7-10 조율 개설 시, 참가자의 개인 캘린더(MemberSchedule)와 겹치는 슬롯을 미리 '불가'로 채워 넣는다.
+     * 응답 제출(MeetingPollMember.Responded)로 취급하지 않으며, 팀원이 7-12에서 언제든 덮어쓸 수 있다.
+     */
+    private void prefillCalendarConflicts(MeetingPoll poll, List<MeetingPollSlot> slots, Long memberId) {
+        List<MemberSchedule> schedules = memberScheduleRepository
+                .findAllByMemberIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(
+                        memberId, poll.getRangeEnd(), poll.getRangeStart());
+        Map<LocalDate, List<MemberSchedule>> busySchedulesByDate = buildBusyScheduleMap(schedules, poll.getRangeStart(), poll.getRangeEnd());
+        for (MeetingPollSlot slot : slots) {
+            if (overlapsBusySchedule(slot, busySchedulesByDate)) {
+                meetingPollAvailabilityRepository.save(MeetingPollAvailability.autoFilledUnavailable(slot.getId(), memberId));
+            }
+        }
     }
 
     /** 7-11 응답 화면 조회 (슬롯 + 캘린더 프리필) */
@@ -191,8 +208,9 @@ public class MeetingPollService {
                 .findFirst()
                 .orElse(null);
 
-        boolean prefilledByCalendar = myAvailability == null && overlapsBusySchedule(slot, busySchedulesByDate);
-        boolean myAvailable = myAvailability != null ? myAvailability.isAvailable() : !prefilledByCalendar;
+        boolean liveCalendarConflict = myAvailability == null && overlapsBusySchedule(slot, busySchedulesByDate);
+        boolean prefilledByCalendar = (myAvailability != null && myAvailability.isAutoFilled()) || liveCalendarConflict;
+        boolean myAvailable = myAvailability != null ? myAvailability.isAvailable() : !liveCalendarConflict;
         long availableCount = slotAvailabilities.stream().filter(MeetingPollAvailability::isAvailable).count();
         long unansweredCount = totalMembers - slotAvailabilities.size();
 
