@@ -11,6 +11,8 @@ import com.pickii.domain.notification.event.NotificationCreatedEvent;
 import com.pickii.domain.notification.repository.NotificationHistoryRepository;
 import com.pickii.domain.notification.repository.NotificationSettingRepository;
 import com.pickii.domain.project.entity.Project;
+import com.pickii.domain.project.entity.ProjectMember;
+import com.pickii.domain.project.repository.ProjectMemberRepository;
 import com.pickii.domain.project.repository.ProjectRepository;
 import com.pickii.domain.recruit.dto.AiDraftRequest;
 import com.pickii.domain.recruit.dto.AiDraftResponse;
@@ -89,6 +91,7 @@ public class RecruitService {
     private final RecruitScrapRepository recruitScrapRepository;
     private final CommentRepository commentRepository;
     private final ProjectRepository projectRepository;
+    private final ProjectMemberRepository projectMemberRepository;
     private final GeminiClient geminiClient;
     private final ObjectMapper objectMapper;
     private final NotificationSettingRepository notificationSettingRepository;
@@ -176,9 +179,7 @@ public class RecruitService {
         Recruit recruit = recruitRepository.findById(recruitId)
                 .filter(r -> !r.isDeleted())
                 .orElseThrow(() -> new BusinessException(ErrorCode.RECRUIT_NOT_FOUND));
-        if (recruit.getMember() == null || !recruit.getMember().getId().equals(memberId)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN);
-        }
+        requireRecruitManager(recruit, memberId);
 
         Set<Long> categoryIds = new LinkedHashSet<>(request.categoryIds());
         Set<Long> topicIds = request.topicIds() == null ? Set.of() : new LinkedHashSet<>(request.topicIds());
@@ -226,9 +227,9 @@ public class RecruitService {
         recruitScrapRepository.deleteByMemberIdAndRecruitId(memberId, recruitId);
     }
 
-    /** 4-5 작성한 공고 조회 */
+    /** 4-5 작성한 공고 조회 (프로젝트 형성 후에는 6-8 팀장 위임이 반영된 현재 팀장 기준) */
     public PageResponse<RecruitSummaryResponse> getMyRecruits(Long memberId, Pageable pageable) {
-        Page<Recruit> page = recruitRepository.findByMemberIdAndDeletedAtIsNull(memberId, pageable);
+        Page<Recruit> page = recruitRepository.findManagedByMemberId(memberId, pageable);
         return PageResponse.from(page, this::toSummary);
     }
 
@@ -289,15 +290,27 @@ public class RecruitService {
         }
     }
 
+    /**
+     * 공고 관리 권한(수정/마감/추가모집/삭제)이 있는지 검증한다.
+     * 프로젝트가 만들어진 이후에는 6-8 팀장 위임이 반영되도록 현재 팀장을 우선하고,
+     * 프로젝트가 아직 없으면 공고 작성자를 기준으로 한다.
+     */
+    private void requireRecruitManager(Recruit recruit, Long memberId) {
+        Member manager = projectMemberRepository.findLeaderByRecruitId(recruit.getId())
+                .map(ProjectMember::getMember)
+                .orElse(recruit.getMember());
+        if (manager == null || !manager.getId().equals(memberId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
+    }
+
     /** 3-4 공고 마감 */
     @Transactional
     public void closeRecruit(Long memberId, Long recruitId) {
         Recruit recruit = recruitRepository.findById(recruitId)
                 .filter(r -> !r.isDeleted())
                 .orElseThrow(() -> new BusinessException(ErrorCode.RECRUIT_NOT_FOUND));
-        if (recruit.getMember() == null || !recruit.getMember().getId().equals(memberId)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN);
-        }
+        requireRecruitManager(recruit, memberId);
         if (recruit.getStatus() == RecruitStatus.CLOSED) {
             throw new BusinessException(ErrorCode.ALREADY_CLOSED);
         }
@@ -310,9 +323,7 @@ public class RecruitService {
         Recruit recruit = recruitRepository.findById(recruitId)
                 .filter(r -> !r.isDeleted())
                 .orElseThrow(() -> new BusinessException(ErrorCode.RECRUIT_NOT_FOUND));
-        if (recruit.getMember() == null || !recruit.getMember().getId().equals(memberId)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN);
-        }
+        requireRecruitManager(recruit, memberId);
         if (recruit.getStatus() == RecruitStatus.ADDITIONAL) {
             throw new BusinessException(ErrorCode.ALREADY_ADDITIONAL);
         }
@@ -332,9 +343,7 @@ public class RecruitService {
         Recruit recruit = recruitRepository.findById(recruitId)
                 .filter(r -> !r.isDeleted())
                 .orElseThrow(() -> new BusinessException(ErrorCode.RECRUIT_NOT_FOUND));
-        if (recruit.getMember() == null || !recruit.getMember().getId().equals(memberId)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN);
-        }
+        requireRecruitManager(recruit, memberId);
         recruit.softDelete();
     }
 
