@@ -118,15 +118,16 @@ public class MeetingPollService {
                 .build();
         meetingPollRepository.save(poll);
 
-        List<MeetingPollSlot> slots = generateSlots(poll);
-        meetingPollSlotRepository.saveAll(slots);
-
         List<ProjectMember> participants = projectMemberRepository.findAllByProjectIdAndLeftAtIsNull(projectId);
         if (request.memberIds() != null) {
             participants = participants.stream()
                     .filter(pm -> request.memberIds().contains(pm.getMember().getId()))
                     .toList();
         }
+
+        List<MeetingPollSlot> slots = excludeSlotsConflictingWithAnyParticipant(generateSlots(poll), poll, participants);
+        meetingPollSlotRepository.saveAll(slots);
+
         participants.forEach(pm -> {
             meetingPollMemberRepository.save(new MeetingPollMember(poll.getId(), pm.getMember().getId()));
             notify(pm.getMember(), project, "회의 조율이 시작되었습니다.", "'" + poll.getTitle() + "' 회의 시간 조율에 응답해주세요.");
@@ -353,6 +354,26 @@ public class MeetingPollService {
             }
         }
         return slots;
+    }
+
+    /**
+     * 참가자 중 한 명이라도 개인 캘린더(MemberSchedule) 일정과 겹치는 슬롯은 후보에서 제외한다.
+     * (7-10 개설 시점 기준. 개설 이후 등록한 캘린더 일정은 반영되지 않는다.)
+     */
+    private List<MeetingPollSlot> excludeSlotsConflictingWithAnyParticipant(
+            List<MeetingPollSlot> candidateSlots, MeetingPoll poll, List<ProjectMember> participants) {
+        List<Map<LocalDate, List<MemberSchedule>>> busyMapsByParticipant = participants.stream()
+                .map(pm -> {
+                    List<MemberSchedule> schedules = memberScheduleRepository
+                            .findAllByMemberIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(
+                                    pm.getMember().getId(), poll.getRangeEnd(), poll.getRangeStart());
+                    return buildBusyScheduleMap(schedules, poll.getRangeStart(), poll.getRangeEnd());
+                })
+                .toList();
+
+        return candidateSlots.stream()
+                .filter(slot -> busyMapsByParticipant.stream().noneMatch(busyMap -> overlapsBusySchedule(slot, busyMap)))
+                .toList();
     }
 
     /** 개인 일정(단발/반복)을 조율 기간 내에서 날짜별로 전개하여 맵으로 구성한다. */
