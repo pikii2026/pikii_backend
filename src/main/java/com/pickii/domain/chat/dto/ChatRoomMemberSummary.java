@@ -5,6 +5,7 @@ package com.pickii.domain.chat.dto;
  */
 public record ChatRoomMemberSummary(
         Long memberId,
-        String nickname
+        String nickname,
+        int exp
 ) {
 }

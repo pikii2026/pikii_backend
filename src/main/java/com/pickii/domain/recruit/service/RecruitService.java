@@ -262,11 +262,13 @@ public class RecruitService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.RECRUIT_NOT_FOUND));
         Long authorId = recruit.getMember() == null ? null : recruit.getMember().getId();
         String authorNickname = recruit.getMember() == null ? "알 수 없음" : recruit.getMember().getNickname();
+        int authorExp = recruit.getMember() == null ? 0 : recruit.getMember().getExp();
         return new RecruitScrapSummaryResponse(
                 recruit.getId(),
                 recruit.getTitle(),
                 authorId,
                 authorNickname,
+                authorExp,
                 recruit.isOnCampus(),
                 recruit.getStatus(),
                 recruit.getTargetCount(),
@@ -568,11 +570,13 @@ public class RecruitService {
     private RecruitSummaryResponse toSummary(Recruit recruit) {
         Long authorId = recruit.getMember() == null ? null : recruit.getMember().getId();
         String authorNickname = recruit.getMember() == null ? "알 수 없음" : recruit.getMember().getNickname();
+        int authorExp = recruit.getMember() == null ? 0 : recruit.getMember().getExp();
         return new RecruitSummaryResponse(
                 recruit.getId(),
                 recruit.getTitle(),
                 authorId,
                 authorNickname,
+                authorExp,
                 recruit.getTargetCount(),
                 recruit.getAvailableSlots(),
                 recruit.getStatus(),

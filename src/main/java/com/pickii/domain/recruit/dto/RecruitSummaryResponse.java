@@ -12,6 +12,7 @@ public record RecruitSummaryResponse(
         String title,
         Long authorId,
         String authorNickname,
+        int authorEXP,
         int maxMembers,
         int availableSlots,
         RecruitStatus status,

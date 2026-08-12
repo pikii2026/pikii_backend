@@ -210,6 +210,7 @@ public class ApplyService {
                 apply.getId(),
                 applicant == null ? null : applicant.getId(),
                 applicant == null ? "알 수 없음" : applicant.getNickname(),
+                applicant == null ? 0 : applicant.getExp(),
                 apply.getMessage(),
                 keywordsByApplyId.getOrDefault(apply.getId(), List.of()),
                 apply.getStatus(),

@@ -11,6 +11,7 @@ public record ChatMessageResponse(
         String messageId,
         Long senderId,
         String senderNickname,
+        int senderEXP,
         ChatMessageType type,
         String message,
         String imageUrl,

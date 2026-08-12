@@ -12,6 +12,7 @@ public record RecruitScrapSummaryResponse(
         String title,
         Long authorId,
         String authorNickname,
+        int authorEXP,
         boolean onCampus,
         RecruitStatus status,
         int maxMembers,
