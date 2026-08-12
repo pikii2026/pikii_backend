@@ -47,6 +47,11 @@ app:
   mail:
     provider: ${MAIL_PROVIDER:brevo}
 
+  # 컨테이너 파일시스템은 재배포 시 초기화되므로 이미지는 오브젝트 스토리지(Railway Buckets)에 저장한다.
+  # 접속 정보는 Bucket 서비스를 연결하면 AWS_* 환경변수로 자동 주입된다.
+  storage:
+    provider: ${STORAGE_PROVIDER:s3}
+
 server:
   # Railway가 주입하는 PORT로 바인딩해야 트래픽이 연결된다
   port: ${PORT:8080}

@@ -40,6 +40,17 @@ app:
     from: ${MAIL_FROM:${MAIL_USERNAME:}}
     brevo-api-key: ${BREVO_API_KEY:}
 
+  # 업로드 이미지 저장소: local(기본, 파일시스템) | s3(Railway Buckets 등 S3 호환)
+  # 배포 환경의 컨테이너 파일시스템은 재배포 시 초기화되므로 반드시 s3를 사용한다.
+  storage:
+    provider: local
+    local-path: uploads
+    bucket: ${AWS_S3_BUCKET_NAME:}
+    endpoint: ${AWS_ENDPOINT_URL:}
+    region: ${AWS_DEFAULT_REGION:auto}
+    access-key: ${AWS_ACCESS_KEY_ID:}
+    secret-key: ${AWS_SECRET_ACCESS_KEY:}
+
 # AI 연동 (공고초안/지원메시지/자기소개/상호평가요약) - Gemini (무료 티어)
 # gemini-2.5-flash/-lite, gemini-2.0-flash는 이 API 키(신규 발급)에서 각각 404(신규 사용자 미제공)/429(무료 쿼터 0)로 막혀 있어 사용 불가 확인됨(2026-08-07).
 # ListModels로 확인한 사용 가능 모델 중 gemini-3-flash-preview만 정상 응답.

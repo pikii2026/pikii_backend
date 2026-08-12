@@ -151,9 +151,19 @@ API에서 발생하는 Error는 해당 문서를 기준으로 관리한다.
 
 채팅 이미지는 DB에 저장하지 않는다.
 
-- Object Storage(예: AWS S3)에 파일 저장
+- Object Storage에 파일 저장 (배포 환경은 Railway Buckets — S3 호환)
 - MongoDB에는 접근 URL만 저장
 - 업로드는 REST API, 전송은 WebSocket
+
+저장소는 `ImageStorage` 인터페이스로 추상화되어 있고 `app.storage.provider`로 구현체를 고른다.
+
+| 환경 | provider | 저장 위치 |
+|:--- |:--- |:--- |
+| 로컬 | `local` (기본) | `uploads/` 디렉터리 |
+| 배포 | `s3` | Railway Buckets (`AWS_*` 환경변수 자동 주입) |
+
+배포 환경의 컨테이너 파일시스템은 **재배포 시 초기화**되므로 로컬 저장을 쓸 수 없다.
+버킷은 비공개라 공개 URL이 없어, 업로드 응답은 서버가 프록시하는 경로(`/chat-images/{년}/{월}/{파일명}`)를 반환한다.
 
 ---
 
